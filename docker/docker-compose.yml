@@ -1,0 +1,15 @@
+services:
+  factu-front-web:
+    image: factu-front-web
+    container_name: factu-front-web
+    restart: always
+    ports:
+      - 8080:80
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    networks:
+      - factulink-red
+networks:
+    factulink-red:
+      name: factulink-red
