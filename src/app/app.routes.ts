@@ -8,14 +8,14 @@ export const routes: Routes = [
   },
   {
     path: '',
-    loadComponent: () => import('./layout').then(m => m.DefaultLayoutComponent),
+    loadChildren: () => import('./layout').then(m => m.DefaultLayoutComponent),
     data: {
       title: 'Home'
     }
   },
   {
     path: 'login',
-    loadComponent: () => import('./login/login.component').then(m => m.LoginComponent),
+    loadChildren: () => import('./login/login.component').then(m => m.LoginComponent),
     data: {
       title: 'Login Page'
     }
