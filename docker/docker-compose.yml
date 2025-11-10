@@ -4,7 +4,7 @@ services:
     container_name: factu-front-web
     restart: always
     ports:
-      - 8080:80
+      - 8081:80
     build:
       context: ./
       dockerfile: Dockerfile
