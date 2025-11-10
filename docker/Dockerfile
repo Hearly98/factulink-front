@@ -1,2 +1,2 @@
 FROM nginx:latest
-COPY ./ /usr/share/nginx/html
+COPY ./factu-front/browser /usr/share/nginx/html
