@@ -1,2 +1,2 @@
 FROM nginx:latest
-COPY --from=build /app/dist/factu-front/browser /usr/share/nginx/html
+COPY ./dist/factu-front/browser /usr/share/nginx/html
