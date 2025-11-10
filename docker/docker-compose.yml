@@ -12,4 +12,4 @@ services:
       - factulink-red
 networks:
     factulink-red:
-      name: factulink-red
+      external: true
