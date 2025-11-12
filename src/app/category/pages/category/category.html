@@ -14,15 +14,19 @@
   <c-col>
     <c-card>
       <c-card-body>
-        <c-row class="g-3 align-items-end">
+        <c-row class="g-3 align-items-end" [formGroup]="form">
             <c-col sm="12" md="6" lg="4">
                 <label for="">Nombre</label>
-                <input type="text" class="form-control">
+                <input formControlName="cat_nom" type="text" class="form-control">
             </c-col>
             <c-col>
-                <button cButton color="primary">
+                <button cButton color="primary" (click)="onSearch()" class="me-2">
                     <svg cIcon name="cilSearch"></svg>
                     Buscar
+                </button>
+                <button cButton color="danger" (click)="onClean()"> 
+                  <svg cIcon name="cilTrash"></svg>
+                  Limpiar
                 </button>
             </c-col>
           <c-col sm="12" md="12" lg="12">
@@ -37,10 +41,10 @@
                     @for (category of categories; track $index) {
                     <tr>
                         <td>
-                            <button class="me-2" cButton color="info">
+                            <button size="sm" class="me-2" cButton color="info">
                                 <svg cIcon name="cilPencil"></svg>
                             </button>
-                            <button cButton color="danger">
+                            <button size="sm" cButton color="danger">
                                 <svg cIcon name="cilTrash"></svg>
                             </button>
                         </td>

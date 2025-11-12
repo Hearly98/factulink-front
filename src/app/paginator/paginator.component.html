@@ -1,0 +1,21 @@
+<c-row class="mt-2">
+  <c-col sm="6">
+    <ngb-pagination
+      class=""
+      [(page)]="page"
+      [pageSize]="pageSize"
+      [collectionSize]="total"
+      [rotate]="true"
+      [maxSize]="5"
+      [boundaryLinks]="true"
+      (pageChange)="onPageChange($event)"
+    ></ngb-pagination>
+  </c-col>
+  <c-col sm="6" class="text-end">
+    <span class="ml-2">
+      {{
+        "Total: " + this.total 
+      }}
+    </span>
+  </c-col>
+</c-row>
