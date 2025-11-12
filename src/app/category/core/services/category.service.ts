@@ -19,6 +19,10 @@ export class CategoryService extends BaseService {
     return this.getRequest('');
   }
 
+  getById(id: number): Observable<ResponseDto<CategoryModel>>{
+    return this.getRequest<ResponseDto<CategoryModel>>(`/show/${id}`)
+  }
+
   search(body: QueryParamsModel): Observable<ResponseDto<QueryResultsModel<CategoryModel>>> {
     return this.postRequest<QueryParamsModel, ResponseDto<QueryResultsModel<CategoryModel>>>(
       `/search`,

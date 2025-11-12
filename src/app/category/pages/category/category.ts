@@ -1,7 +1,7 @@
 import { Component, Inject, inject, ViewContainerRef } from '@angular/core';
 import { ButtonDirective, CardBodyComponent, CardComponent, ColComponent, RowComponent, TableDirective, ThemeDirective } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
-import { CategoryService } from '../../core/services/category';
+import { CategoryService } from '../../core/services/category.service';
 import { CategoryModel } from '../../core/models/category.model';
 import { TypedFormGroup } from '../../../shared/types/types-form';
 import { CategoryForm } from '../../core/types/cat-form';
