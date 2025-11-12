@@ -1,1 +1,8 @@
 @use "@coreui/coreui/scss/coreui";
+
+.wrapper {
+    width: 100%;
+    padding-inline: var(--cui-sidebar-occupy-start, 0) var(--cui-sidebar-occupy-end, 0);
+    will-change: auto;
+    transition: padding .15s;
+}

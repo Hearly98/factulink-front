@@ -97,12 +97,16 @@ import {
   cilUserUnfollow,
   cilCash,
   cilCart,
+  cilPlus,
+  cilSearch,
 } from '@coreui/icons';
 
 import { signet } from './signet';
 import { logo } from './logo';
 
 export const iconSubset = {
+  cilSearch,
+  cilPlus,
   cilCart,
   cilCash,
   cibCcAmex,

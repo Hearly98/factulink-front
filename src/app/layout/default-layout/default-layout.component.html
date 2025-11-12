@@ -1,4 +1,3 @@
-<!--sidebar-->
 <c-sidebar
   #sidebar1="cSidebar"
   class="d-print-none sidebar sidebar-fixed border-end"
@@ -13,30 +12,37 @@
     </c-sidebar-brand>
   </c-sidebar-header>
 
-    <c-sidebar-nav [navItems]="navItems" dropdownMode="close" compact />
+  <c-sidebar-nav [navItems]="navItems" dropdownMode="close" compact />
 
   @if (!sidebar1.narrow) {
-    <c-sidebar-footer cSidebarToggle="sidebar1" class="border-top d-none d-lg-flex" toggle="unfoldable" style="cursor: pointer;">
+    <c-sidebar-footer
+      cSidebarToggle="sidebar1"
+      class="border-top d-none d-lg-flex"
+      toggle="unfoldable"
+      style="cursor: pointer;"
+    >
       <button cSidebarToggler aria-label="Toggle sidebar fold"></button>
     </c-sidebar-footer>
   }
 </c-sidebar>
 
-<!--main-->
+<!-- Main wrapper -->
 <div class="wrapper d-flex flex-column min-vh-100">
-  <!--app-header-->
+  <!-- Header -->
   <app-default-header
     [cShadowOnScroll]="'sm'"
     class="mb-4 d-print-none header header-sticky p-0 shadow-sm"
     position="sticky"
     sidebarId="sidebar1"
   />
-  <!--app-body-->
+
+  <!-- Body -->
   <div class="body flex-grow-1">
     <c-container breakpoint="lg" class="h-auto px-4">
       <router-outlet />
     </c-container>
   </div>
-  <!--app footer-->
+
+  <!-- Footer -->
   <app-default-footer />
 </div>

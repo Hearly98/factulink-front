@@ -1,0 +1,57 @@
+<c-row>
+  <c-col>
+    <h4>{{ title }}</h4>
+  </c-col>
+  <c-col class="text-end">
+    <button cButton color="primary">
+      <svg cIcon name="cilPlus"></svg>
+      Nuevo Registro
+    </button>
+  </c-col>
+</c-row>
+
+<c-row class="mt-4">
+  <c-col>
+    <c-card>
+      <c-card-body>
+        <c-row class="g-3 align-items-end">
+            <c-col sm="12" md="6" lg="4">
+                <label for="">Nombre</label>
+                <input type="text" class="form-control">
+            </c-col>
+            <c-col>
+                <button cButton color="primary">
+                    <svg cIcon name="cilSearch"></svg>
+                    Buscar
+                </button>
+            </c-col>
+          <c-col sm="12" md="12" lg="12">
+            <table cTable color="light" striped="true">
+                <thead>
+                    <tr>
+                        <th>Acciones</th>
+                        <th>Nombre</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (category of categories; track $index) {
+                    <tr>
+                        <td>
+                            <button class="me-2" cButton color="info">
+                                <svg cIcon name="cilPencil"></svg>
+                            </button>
+                            <button cButton color="danger">
+                                <svg cIcon name="cilTrash"></svg>
+                            </button>
+                        </td>
+                        <td>{{ category.cat_nom }}</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </c-col>
+        </c-row>
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row>
