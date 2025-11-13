@@ -35,6 +35,13 @@ export const routes: Routes = [
           title: 'Producto',
         },
       },
+      {
+        path: 'sucursales',
+        loadComponent: () => import('./sucursal/pages/sucursal/sucursal').then((m) => m.Sucursal),
+        data: {
+          title: 'Sucursal',
+        },
+      },
     ],
   },
   {

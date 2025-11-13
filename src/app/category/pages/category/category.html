@@ -15,45 +15,57 @@
     <c-card>
       <c-card-body>
         <c-row class="g-3 align-items-end" [formGroup]="form">
-            <c-col sm="12" md="6" lg="4">
-                <label for="">Nombre</label>
-                <input formControlName="cat_nom" type="text" class="form-control">
-            </c-col>
-            <c-col>
-                <button cButton color="primary" (click)="onSearch()" class="me-2">
-                    <svg cIcon name="cilSearch"></svg>
-                    Buscar
-                </button>
-                <button cButton color="danger" (click)="onClean()"> 
-                  <svg cIcon name="cilTrash"></svg>
-                  Limpiar
-                </button>
-            </c-col>
+          <c-col sm="12" md="6" lg="4">
+            <label for="">Nombre</label>
+            <input formControlName="cat_nom" type="text" class="form-control" />
+          </c-col>
+          <c-col>
+            <button cButton color="primary" (click)="onSearch()" class="me-2">
+              <svg cIcon name="cilSearch"></svg>
+              Buscar
+            </button>
+            <button cButton color="danger" (click)="onClean()">
+              <svg cIcon name="cilTrash"></svg>
+              Limpiar
+            </button>
+          </c-col>
           <c-col sm="12" md="12" lg="12">
             <table cTable color="light" striped="true">
-                <thead>
-                    <tr>
-                        <th>Acciones</th>
-                        <th>Nombre</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (category of categories; track $index) {
-                    <tr>
-                        <td>
-                            <button (click)="openModal(category.cat_id)" size="sm" class="me-2" cButton color="info">
-                                <svg cIcon name="cilPencil"></svg>
-                            </button>
-                            <button size="sm" cButton color="danger">
-                                <svg cIcon name="cilTrash"></svg>
-                            </button>
-                        </td>
-                        <td>{{ category.cat_nom }}</td>
-                    </tr>
-                    }
-                </tbody>
+              <thead>
+                <tr>
+                  <th>Acciones</th>
+                  <th>Nombre</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (category of categories; track $index) {
+                <tr>
+                  <td>
+                    <button
+                      (click)="openModal(category.cat_id)"
+                      size="sm"
+                      class="me-2"
+                      cButton
+                      color="info"
+                    >
+                      <svg cIcon name="cilPencil"></svg>
+                    </button>
+                    <button size="sm" cButton color="danger">
+                      <svg cIcon name="cilTrash"></svg>
+                    </button>
+                  </td>
+                  <td>{{ category.cat_nom }}</td>
+                </tr>
+                }
+              </tbody>
             </table>
-        </c-col>
+            <app-paginator
+              [(page)]="page.page"
+              [pageSize]="page.pageSize"
+              [total]="total"
+              (pageChange)="onPageChange($event)"
+            ></app-paginator>
+          </c-col>
         </c-row>
       </c-card-body>
     </c-card>

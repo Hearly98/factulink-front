@@ -12,6 +12,7 @@ import { BaseSearchComponent } from '../../../shared/base/search-base.component'
 import { MODULES } from '../../../core/config/permissions/modules';
 import { PageParamsModel } from '../../../shared/models/query/page-params.model';
 import { CategoryNewEditModal } from "../../components/category-new-edit-modal/category-new-edit-modal";
+import { PaginatorComponent } from "../../../paginator/paginator.component";
 
 @Component({
   selector: 'app-category',
@@ -24,7 +25,8 @@ import { CategoryNewEditModal } from "../../components/category-new-edit-modal/c
     ButtonDirective,
     TableDirective,
     ReactiveFormsModule,
-    CategoryNewEditModal
+    CategoryNewEditModal,
+    PaginatorComponent
 ],
   templateUrl: './category.html',
   styleUrl: './category.scss',
