@@ -28,6 +28,13 @@ export const routes: Routes = [
           title: 'Categoria',
         },
       },
+      {
+        path: 'productos',
+        loadComponent: () => import('./products/pages/products/products').then((m) => m.Products),
+        data: {
+          title: 'Producto',
+        },
+      },
     ],
   },
   {
