@@ -98,6 +98,7 @@ import {
   cilCash,
   cilCart,
   cilPlus,
+  cilX,
   cilSearch,
 } from '@coreui/icons';
 
@@ -105,6 +106,7 @@ import { signet } from './signet';
 import { logo } from './logo';
 
 export const iconSubset = {
+  cilX,
   cilSearch,
   cilPlus,
   cilCart,

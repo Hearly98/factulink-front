@@ -1,4 +1,4 @@
-import { Component, Inject, inject, ViewContainerRef } from '@angular/core';
+import { Component, Inject, inject, ViewChild, ViewContainerRef } from '@angular/core';
 import { ButtonDirective, CardBodyComponent, CardComponent, ColComponent, RowComponent, TableDirective, ThemeDirective } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { CategoryService } from '../../core/services/category.service';
@@ -11,6 +11,7 @@ import { FilterForm } from '../../core/types/filter-form';
 import { BaseSearchComponent } from '../../../shared/base/search-base.component';
 import { MODULES } from '../../../core/config/permissions/modules';
 import { PageParamsModel } from '../../../shared/models/query/page-params.model';
+import { CategoryNewEditModal } from "../../components/category-new-edit-modal/category-new-edit-modal";
 
 @Component({
   selector: 'app-category',
@@ -22,12 +23,14 @@ import { PageParamsModel } from '../../../shared/models/query/page-params.model'
     IconDirective,
     ButtonDirective,
     TableDirective,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    CategoryNewEditModal
 ],
   templateUrl: './category.html',
   styleUrl: './category.scss',
 })
 export class Category extends BaseSearchComponent{
+  @ViewChild('categoryNewEditModal') categoryNewEditModal!: CategoryNewEditModal;
   public form!: TypedFormGroup<FilterForm>;
   #formBuilder = inject(FormBuilder);
   public title = 'Categorias';
@@ -81,5 +84,13 @@ export class Category extends BaseSearchComponent{
 
   onClean(){
     this.form.reset();
+  }
+
+  openModal(id?: number){
+    if(this.categoryNewEditModal){
+      this.categoryNewEditModal.openModal(id, ()=>{
+        this.onSearch()
+      })
+    }
   }
 }

@@ -3,7 +3,7 @@
     <h4>{{ title }}</h4>
   </c-col>
   <c-col class="text-end">
-    <button cButton color="primary">
+    <button cButton color="primary" (click)="openModal()">
       <svg cIcon name="cilPlus"></svg>
       Nuevo Registro
     </button>
@@ -41,7 +41,7 @@
                     @for (category of categories; track $index) {
                     <tr>
                         <td>
-                            <button size="sm" class="me-2" cButton color="info">
+                            <button (click)="openModal(category.cat_id)" size="sm" class="me-2" cButton color="info">
                                 <svg cIcon name="cilPencil"></svg>
                             </button>
                             <button size="sm" cButton color="danger">
@@ -59,3 +59,4 @@
     </c-card>
   </c-col>
 </c-row>
+<app-category-new-edit-modal #categoryNewEditModal></app-category-new-edit-modal>

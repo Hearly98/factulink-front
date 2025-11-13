@@ -20,7 +20,7 @@ export class CategoryService extends BaseService {
   }
 
   getById(id: number): Observable<ResponseDto<CategoryModel>>{
-    return this.getRequest<ResponseDto<CategoryModel>>(`/show/${id}`)
+    return this.getRequest<ResponseDto<CategoryModel>>(`/${id}`)
   }
 
   search(body: QueryParamsModel): Observable<ResponseDto<QueryResultsModel<CategoryModel>>> {
