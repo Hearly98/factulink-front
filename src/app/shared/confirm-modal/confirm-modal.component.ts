@@ -9,12 +9,13 @@ import {
     SimpleChange,
     SimpleChanges,
 } from "@angular/core";
-import { ModalBodyComponent, ModalComponent, ModalFooterComponent, ModalHeaderComponent, ButtonCloseDirective, TextColorDirective, ModalTitleDirective } from "@coreui/angular";
+import { ModalBodyComponent, ModalComponent, ModalFooterComponent, ModalHeaderComponent, TextColorDirective, ModalTitleDirective } from "@coreui/angular";
+import { IconDirective } from "@coreui/icons-angular";
 
 @Component({
     selector: "app-confirm-modal",
     standalone: true,
-    imports: [ModalBodyComponent, ModalComponent, ModalFooterComponent, ModalHeaderComponent, ButtonCloseDirective, TextColorDirective, ModalTitleDirective],
+    imports: [ModalBodyComponent, ModalComponent, ModalFooterComponent, ModalHeaderComponent, TextColorDirective, ModalTitleDirective, IconDirective],
     templateUrl: "./confirm-modal.component.html",
     styleUrls: ["./confirm-modal.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,

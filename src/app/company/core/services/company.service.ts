@@ -5,15 +5,14 @@ import { Observable } from 'rxjs';
 import { ResponseDto } from '../../../shared/models/api/response.dto';
 import { QueryParamsModel } from '../../../shared/models/query/query-params.model';
 import { QueryResultsModel } from '../../../shared/models/query/query-results.model';
-import { CompanyModel } from '../models/company.model';
 import { GetCompanyModel } from '../models/get-company.model';
-
+import { environment } from '../../../../environments/environment';
 @Injectable({
   providedIn: 'root',
 })
 export class CompanyService extends BaseService {
   constructor(http: HttpClient) {
-    super(http, 'http://localhost:8000/api/v1/companias');
+    super(http, `${environment.apiUrl}/companias`);
   }
 
   getAll(): Observable<ResponseDto<GetCompanyModel[]>> {

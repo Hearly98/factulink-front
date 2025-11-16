@@ -6,13 +6,13 @@ import { ResponseDto } from '../../../shared/models/api/response.dto';
 import { QueryParamsModel } from '../../../shared/models/query/query-params.model';
 import { QueryResultsModel } from '../../../shared/models/query/query-results.model';
 import { Observable } from 'rxjs';
-
+import { environment } from '../../../../environments/environment';
 @Injectable({
   providedIn: 'root',
 })
 export class OrganizationService extends BaseService {
   constructor(http: HttpClient) {
-    super(http, 'http://localhost:8000/api/v1/empresas');
+    super(http, `${environment.apiUrl}/empresas`);
   }
   getAll(): Observable<ResponseDto<GetOrganizationModel[]>> {
     return this.getRequest<ResponseDto<GetOrganizationModel[]>>('');

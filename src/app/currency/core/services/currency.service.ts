@@ -9,11 +9,11 @@ import { QueryResultsModel } from '../../../shared/models/query/query-results.mo
 import { GetCurrencyModel } from '../models/get-currency.model';
 import { CreateCurrencyModel } from '../models/create-currency.model';
 import { UpdateCurrencyModel } from '../models/update-currency.model';
-
+import { environment } from '../../../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class CurrencyService extends BaseService {
   constructor(http: HttpClient) {
-    super(http, 'http://localhost:8000/api/v1/monedas');
+    super(http, `${environment.apiUrl}/monedas`);
   }
 
   getAll(): Observable<ResponseDto<GetCurrencyModel[]>> {
@@ -25,15 +25,15 @@ export class CurrencyService extends BaseService {
   }
 
   create(body: CreateCurrencyModel): Observable<ResponseDto<GetCurrencyModel>> {
-    return this.postRequest<CreateCurrencyModel, ResponseDto<GetCurrencyModel>>("/", body)
+    return this.postRequest<CreateCurrencyModel, ResponseDto<GetCurrencyModel>>('/', body);
   }
 
   update(body: UpdateCurrencyModel): Observable<ResponseDto<GetCurrencyModel>> {
-    return this.putRequest<UpdateCurrencyModel, ResponseDto<GetCurrencyModel>>("/", body)
+    return this.putRequest<UpdateCurrencyModel, ResponseDto<GetCurrencyModel>>('/', body);
   }
 
   delete(id: number): Observable<ResponseDto<GetCurrencyModel>> {
-    return this.deleteRequest(`/${id}`)
+    return this.deleteRequest(`/${id}`);
   }
 
   search(body: QueryParamsModel): Observable<ResponseDto<QueryResultsModel<GetCurrencyModel>>> {

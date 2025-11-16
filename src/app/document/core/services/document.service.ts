@@ -6,13 +6,13 @@ import { ResponseDto } from '../../../shared/models/api/response.dto';
 import { QueryParamsModel } from '../../../shared/models/query/query-params.model';
 import { QueryResultsModel } from '../../../shared/models/query/query-results.model';
 import { DocumentModel } from '../models/document.model';
-
+import { environment } from '../../../../environments/environment';
 @Injectable({
   providedIn: 'root',
 })
 export class DocumentService extends BaseService {
   constructor(http: HttpClient) {
-    super(http, 'http://localhost:8000/api/v1/documentos');
+    super(http, `${environment.apiUrl}/documentos`);
   }
 
   getAll(): Observable<ResponseDto<DocumentModel[]>> {

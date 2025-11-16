@@ -7,13 +7,13 @@ import { ResponseDto } from '../../../shared/models/api/response.dto';
 import { QueryParamsModel } from '../../../shared/models/query/query-params.model';
 import { QueryResultsModel } from '../../../shared/models/query/query-results.model';
 import { CreateProductModel, GetProductModel, UpdateProductModel } from '../models';
-
+import { environment } from '../../../../environments/environment';
 @Injectable({
   providedIn: 'root',
 })
 export class ProductService extends BaseService {
   constructor(http: HttpClient) {
-    super(http, 'http://localhost:8000/api/v1/productos');
+    super(http, `${environment.apiUrl}/productos`);
   }
 
   getAll(): Observable<ResponseDto<GetProductModel[]>> {
@@ -21,19 +21,19 @@ export class ProductService extends BaseService {
   }
 
   create(body: CreateProductModel): Observable<ResponseDto<GetProductModel>> {
-    return this.postRequest<CreateProductModel, ResponseDto<GetProductModel>>("/", body)
+    return this.postRequest<CreateProductModel, ResponseDto<GetProductModel>>('/', body);
   }
 
   update(body: UpdateProductModel): Observable<ResponseDto<GetProductModel>> {
-    return this.putRequest<UpdateProductModel, ResponseDto<GetProductModel>>("/", body)
+    return this.putRequest<UpdateProductModel, ResponseDto<GetProductModel>>('/', body);
   }
 
   getById(id: number): Observable<ResponseDto<GetProductModel>> {
-    return this.getRequest<ResponseDto<GetProductModel>>(`/${id}`)
+    return this.getRequest<ResponseDto<GetProductModel>>(`/${id}`);
   }
 
   delete(id: number): Observable<ResponseDto<GetProductModel>> {
-    return this.deleteRequest(`/${id}`)
+    return this.deleteRequest(`/${id}`);
   }
 
   search(body: QueryParamsModel): Observable<ResponseDto<QueryResultsModel<GetProductModel>>> {
@@ -43,4 +43,3 @@ export class ProductService extends BaseService {
     );
   }
 }
-

@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
+import { BaseService } from '../../../shared/services/base.service';
 import { environment } from '../../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { BaseService } from '../../../shared/services/base.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class SupplierService extends BaseService {
+export class CustomerService extends BaseService {
   constructor(http: HttpClient) {
-    super(http, `${environment.apiUrl}/proveedores`);
+    super(http, `${environment.apiUrl}/clientes`);
   }
 }
