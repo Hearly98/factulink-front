@@ -1,7 +1,0 @@
-@use "tokens/hex/_tokens-hex" as *;
-@import "mixins/card";
-@import "mixins/button";
-@import "mixins/modal";
-c-card {
-  @include card-base;
-}

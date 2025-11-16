@@ -1,0 +1,20 @@
+@if(show()){
+<c-modal backdrop="static" [visible]="show()" alignment="center">
+    <c-modal-header>
+        <svg cIcon [name]="iconName()" class="me-2" [cTextColor]="color"></svg>
+        <h5 cModalTitle>{{ title }}</h5>
+    </c-modal-header>
+    <c-modal-body>
+        <p [innerHTML]="message"></p>
+    </c-modal-body>
+    <c-modal-footer>
+        <button type="button" class="btn btn-cancel" (click)="hide()">
+            {{ cancelText }}
+        </button>
+        <button type="button" class="btn btn-confirm" (click)="doConfirm()">
+            {{ confirmText }}
+        </button>
+
+    </c-modal-footer>
+</c-modal>
+}

@@ -1,10 +1,12 @@
-@use "@coreui/coreui/scss/coreui";
-@use "./scss/core-theme";
-@use "./scss/index.scss";
+/* You can add global styles to this file, and also import other style files */
 
-.wrapper {
-    width: 100%;
-    padding-inline: var(--cui-sidebar-occupy-start, 0) var(--cui-sidebar-occupy-end, 0);
-    will-change: auto;
-    transition: padding .15s;
-}
+// Import styles with default layout.
+@use "@coreui/coreui/scss/coreui" as * with (
+  $enable-deprecation-messages: false
+);
+
+// Import Chart.js custom tooltips styles
+@use "@coreui/chartjs/scss/coreui-chartjs";
+
+// Custom styles for this theme
+@use "./scss/core-theme";
