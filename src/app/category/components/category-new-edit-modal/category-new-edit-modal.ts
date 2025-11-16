@@ -16,6 +16,10 @@ import { TypedFormGroup } from '../../../shared/types/types-form';
 import { CategoryForm } from '../../core/types/cat-form';
 import { BaseComponent } from '../../../shared/base/base.component';
 import { MODULES } from '../../../core/config/permissions/modules';
+import { CreateCategoryModel, UpdateCategoryModel } from '../../core/models';
+import { GlobalNotification } from '../../../shared/alerts/global-notification/global-notification';
+import { SucursalService } from '../../../sucursal/core/services/sucursal.service';
+import { GetSucursalModel } from '../../../sucursal/core/models';
 
 @Component({
   selector: 'app-category-new-edit-modal',
@@ -37,6 +41,9 @@ export class CategoryNewEditModal extends BaseComponent implements OnInit {
   form!: TypedFormGroup<CategoryForm>;
   visible = false;
   structure = categoryStructure;
+  sucursales: GetSucursalModel[] = []
+  #sucursalService = inject(SucursalService);
+  #globalNotification = inject(GlobalNotification);
   #categoryService = inject(CategoryService);
   #formBuilder = inject(FormBuilder);
   title = 'Crear Categoria';
@@ -48,6 +55,7 @@ export class CategoryNewEditModal extends BaseComponent implements OnInit {
 
   ngOnInit(): void {
     this.createForm();
+    this.sucursalSelectCombo();
   }
 
   createForm() {
@@ -57,6 +65,7 @@ export class CategoryNewEditModal extends BaseComponent implements OnInit {
   openModal(idCategory?: number, callback: any = null) {
     this.createForm();
     this.visible = true;
+    this.callback = callback
     if (idCategory) {
       this.loadData(idCategory);
     }
@@ -72,7 +81,60 @@ export class CategoryNewEditModal extends BaseComponent implements OnInit {
     });
   }
 
+  sucursalSelectCombo() {
+    this.fetchData(this.#sucursalService.getAll(), this.sucursales);
+  }
+
   onClose() {
     this.visible = false;
+  }
+
+  onSubmit() {
+    if (this.form.valid) {
+      if (this.form.value.cat_id) {
+        this.update();
+      } else {
+        this.create();
+      }
+    } else {
+      this.form.markAllAsTouched();
+    }
+  }
+
+  create() {
+    const { cat_id, ...body } = this.form.value;
+    const subscription = this.#categoryService.create(body as CreateCategoryModel).subscribe({
+      next: (response) => {
+        if (response.isValid) {
+          this.#globalNotification.openAlert(response);
+          this.callback(response.data);
+          this.onClose();
+        } else {
+          this.#globalNotification.openAlert(response);
+        }
+      },
+      error: (error) => {
+        this.#globalNotification.openAlert(error.message);
+      },
+    });
+    this.subscriptions.push(subscription)
+  }
+
+  update() {
+    const subscription = this.#categoryService.update(this.form.value as UpdateCategoryModel).subscribe({
+      next: (response) => {
+        if (response.isValid) {
+          this.#globalNotification.openAlert(response);
+          this.callback(response.data);
+          this.onClose();
+        } else {
+          this.#globalNotification.openAlert(response);
+        }
+      },
+      error: (error) => {
+        this.#globalNotification.openAlert(error.message);
+      },
+    });
+    this.subscriptions.push(subscription)
   }
 }

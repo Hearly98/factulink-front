@@ -9,6 +9,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
+  "schematics": "./schematics/collection.json",
   "prettier": {
     "printWidth": 100,
     "singleQuote": true,
@@ -40,11 +41,13 @@
     "@coreui/utils": "^2.0.2",
     "@ng-bootstrap/ng-bootstrap": "^19.0.1",
     "@popperjs/core": "~2.11.8",
+    "@storybook/addon-docs": "^10.0.7",
     "bootstrap": "^5.3.8",
     "chart.js": "^4.5.0",
     "lodash-es": "^4.17.21",
     "ngx-scrollbar": "^18.0.0",
     "object-path": "^0.11.8",
+    "page": "^1.11.6",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
@@ -53,6 +56,8 @@
     "@angular/build": "^20.3.3",
     "@angular/cli": "^20.3.3",
     "@angular/compiler-cli": "^20.3.0",
+    "@compodoc/compodoc": "^1.1.32",
+    "@storybook/angular": "^10.0.7",
     "@types/jasmine": "~5.1.0",
     "@types/object-path": "^0.11.4",
     "jasmine-core": "~5.9.0",

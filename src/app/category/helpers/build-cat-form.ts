@@ -6,6 +6,7 @@ export const buildCategoryForm = (): {
 } =>
 {
   return {
+    cat_id: new FormControl(null),
     cat_nom: new FormControl(null),
     est: new FormControl(true),
     suc_id: new FormControl(null)

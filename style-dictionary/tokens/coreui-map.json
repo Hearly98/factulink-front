@@ -1,0 +1,38 @@
+{
+    "coreui": {
+      "theme": {
+        "primary": { "value": "{color.primary.value}" },
+        "success": { "value": "{color.success.value}" },
+        "info": { "value": "{color.info.value}" },
+        "warning": { "value": "{color.warning.value}" },
+        "danger": { "value": "{color.danger.value}" },
+        "light": { "value": "{color.gray.100.value}" },
+        "dark": { "value": "{color.gray.900.value}" }
+      },
+      "text": {
+        "body": { "value": "{color.gray.900.value}" },
+        "muted": { "value": "{color.gray.600.value}" },
+        "inverse": { "value": "{color.white.value}" }
+      },
+      "background": {
+        "body": { "value": "{color.white.value}" },
+        "muted": { "value": "{color.gray.100.value}" }
+      },
+      "border": {
+        "color": { "value": "{color.gray.200.value}" },
+        "radius": { "value": "{border.radius.md.value}" }
+      },
+      "shadow": {
+        "sm": { "value": "{shadow.sm.value}" },
+        "md": { "value": "{shadow.md.value}" },
+        "lg": { "value": "{shadow.lg.value}" }
+      },
+      "card": {
+        "padding": {
+          "y": { "value": "{card.padding.y.value}" },
+          "x": { "value": "{card.padding.x.value}" }
+        }
+      }
+    }
+  }
+  

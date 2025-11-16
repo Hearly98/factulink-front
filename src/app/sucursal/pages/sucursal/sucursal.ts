@@ -6,11 +6,9 @@ import {
   ColComponent,
   RowComponent,
   TableDirective,
-  ThemeDirective,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { SucursalService } from '../../core/services/sucursal.service';
-import { SucursalModel } from '../../core/models/sucursal.model';
 import { TypedFormGroup } from '../../../shared/types/types-form';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { buildFilterForm, filterSort, mapParams } from '../../helpers';

@@ -1,0 +1,8 @@
+{
+    "card": {
+      "padding": {
+        "y": { "value": "0.75rem" },
+        "x": { "value": "1rem" }
+      }
+    }
+  }

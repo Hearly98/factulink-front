@@ -1,0 +1,10 @@
+{
+  "$schema": "http://json.schemastore.org/angular-schematics",
+  "schematics": {
+    "page": {
+      "description": "Generate a page",
+      "factory": "./page/index#pageGenerator",
+      "schema": "./page/schema.json"
+    }
+  }
+}

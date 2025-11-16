@@ -29,6 +29,34 @@ export const routes: Routes = [
         },
       },
       {
+        path: 'empresas',
+        loadComponent: () => import('./organization/pages/organization.page').then((m) => m.OrganizationPage),
+        data: {
+          title: 'Empresa',
+        },
+      },
+      {
+        path: 'companias',
+        loadComponent: () => import('./company/pages/company/company.page').then((m) => m.CompanyPage),
+        data: {
+          title: 'Compania',
+        },
+      },
+      {
+        path: 'documentos',
+        loadComponent: () => import('./document/pages/document.page').then((m) => m.DocumentPage),
+        data: {
+          title: 'Documento',
+        },
+      },
+      {
+        path: 'monedas',
+        loadComponent: () => import('./currency/pages/currency.page').then((m) => m.CurrencyPage),
+        data: {
+          title: 'Moneda',
+        },
+      },
+      {
         path: 'productos',
         loadComponent: () => import('./products/pages/products/products').then((m) => m.Products),
         data: {

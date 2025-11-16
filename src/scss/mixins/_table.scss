@@ -1,0 +1,35 @@
+@import "../tokens/hex/_tokens-hex";
+@import "../tokens/rgb/_tokens-rgb";
+
+@mixin table-modern {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0.2rem 0.5rem;
+
+  thead {
+    th {
+      padding: $space-md;
+      font-weight: $font-weight-bold;
+      text-align: center;
+      color: white;
+      border-radius: $border-radius-lg;
+    }
+  }
+
+  tbody {
+    tr {
+      td {
+        padding: 0.5rem 0.5rem;
+        font-size: $font-size-sm;
+        text-align: center;
+        border-bottom-width: 1px;
+        border-bottom-style: solid;
+        border-radius: $border-radius-lg;
+        box-shadow: inset 0 0 0 9999px var(--cui-table-accent-bg, transparent);
+        background-color: rgba(96, 96, 96, 0.25);
+        color: var(--cui-table-color, $color-foreground);
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+    }
+  }
+}

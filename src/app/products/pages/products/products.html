@@ -1,1 +1,102 @@
-<p>products works!</p>
+<c-row>
+  <c-col>
+    <h4>{{ title }}</h4>
+  </c-col>
+  <c-col class="text-end">
+    <button cButton color="primary" (click)="openModal()">
+      <svg cIcon name="cilPlus"></svg>
+      Nuevo Registro
+    </button>
+  </c-col>
+</c-row>
+
+<c-row class="mt-4">
+  <c-col>
+    <c-card>
+      <c-card-body>
+        <c-row class="g-3 align-items-end" [formGroup]="form">
+          <c-col sm="12" md="6" lg="4">
+            <label for="">Nombre</label>
+            <input formControlName="prod_nom" type="text" class="form-control" />
+          </c-col>
+          <c-col sm="12" md="6" lg="4">
+            <label for="">Categoría</label>
+            <select formControlName="cat_id" class="form-control form-select">
+              <option [ngValue]="null">Todas</option>
+              @for(categoria of categorias; track $index){
+                <option [ngValue]="categoria.cat_id">{{categoria.cat_nom}}</option>
+              }
+            </select>
+          </c-col>
+          <c-col sm="12" md="6" lg="4">
+            <label for="">Sucursal</label>
+            <select formControlName="suc_id" class="form-control form-select">
+              <option [ngValue]="null">Todas</option>
+              @for(sucursal of sucursales; track $index){
+                <option [ngValue]="sucursal.suc_id">{{sucursal.suc_nom}}</option>
+              }
+            </select>
+          </c-col>
+          <c-col>
+            <button cButton color="primary" (click)="onSearch()" class="me-2">
+              <svg cIcon name="cilSearch"></svg>
+              Buscar
+            </button>
+            <button cButton color="danger" (click)="onClean()">
+              <svg cIcon name="cilTrash"></svg>
+              Limpiar
+            </button>
+          </c-col>
+          <c-col sm="12" md="12" lg="12">
+            <table cTable color="light" striped="true">
+              <thead>
+                <tr>
+                  <th>Acciones</th>
+                  <th>Nombre</th>
+                  <th>Descripción</th>
+                  <th>Categoría</th>
+                  <th>Precio Compra</th>
+                  <th>Precio Venta</th>
+                  <th>Stock</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (product of products; track $index) {
+                <tr>
+                  <td>
+                    <button
+                      (click)="openModal(product.prod_id)"
+                      size="sm"
+                      class="me-2"
+                      cButton
+                      color="info"
+                    >
+                      <svg cIcon name="cilPencil"></svg>
+                    </button>
+                    <button size="sm" cButton color="danger">
+                      <svg cIcon name="cilTrash"></svg>
+                    </button>
+                  </td>
+                  <td>{{ product.prod_nom }}</td>
+                  <td>{{ product.prod_descrip }}</td>
+                  <td>{{ product.cat_id }}</td>
+                  <td>{{ product.prod_pcompra }}</td>
+                  <td>{{ product.prod_pventa }}</td>
+                  <td>{{ product.prod_stock }}</td>
+                </tr>
+                }
+              </tbody>
+            </table>
+            <app-paginator
+              [(page)]="page.page"
+              [pageSize]="page.pageSize"
+              [total]="total"
+              (pageChange)="onPageChange($event)"
+            ></app-paginator>
+          </c-col>
+        </c-row>
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row>
+<app-product-new-edit-modal #productNewEditModal></app-product-new-edit-modal>

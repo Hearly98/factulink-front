@@ -1,1 +1,7 @@
-<p>state-selectcombo works!</p>
+<form [formGroup]="form">
+  <select class="form-control form-select" [formControlName]="formControlName" name="" id="">
+    @for(item of items; track item.value){
+    <option [ngValue]="item.value">{{ item.label }}</option>
+    }
+  </select>
+</form>

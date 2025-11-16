@@ -1,0 +1,6 @@
+{
+  "name": "schematics",
+  "version": "1.0.0",
+  "private": true,
+  "schematics": "./collection.json"
+}

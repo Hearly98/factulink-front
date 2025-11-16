@@ -1,0 +1,10 @@
+// temp fix .chartjs-tooltip-body-item
+.chartjs-tooltip-header-item > th {
+  color: #fff;
+}
+.chartjs-tooltip-body-item > td {
+  padding-bottom: 0 !important;
+  padding-top: 0 !important;
+  font-size: smaller;
+  color: #fff;
+}

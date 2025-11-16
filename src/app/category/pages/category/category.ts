@@ -13,6 +13,7 @@ import { MODULES } from '../../../core/config/permissions/modules';
 import { PageParamsModel } from '../../../shared/models/query/page-params.model';
 import { CategoryNewEditModal } from "../../components/category-new-edit-modal/category-new-edit-modal";
 import { PaginatorComponent } from "../../../paginator/paginator.component";
+import { GetCategoryModel } from '../../core/models';
 
 @Component({
   selector: 'app-category',
@@ -27,17 +28,17 @@ import { PaginatorComponent } from "../../../paginator/paginator.component";
     ReactiveFormsModule,
     CategoryNewEditModal,
     PaginatorComponent
-],
+  ],
   templateUrl: './category.html',
   styleUrl: './category.scss',
 })
-export class Category extends BaseSearchComponent{
+export class Category extends BaseSearchComponent {
   @ViewChild('categoryNewEditModal') categoryNewEditModal!: CategoryNewEditModal;
   public form!: TypedFormGroup<FilterForm>;
   #formBuilder = inject(FormBuilder);
   public title = 'Categorias';
   #categoryService = inject(CategoryService);
-  public categories: CategoryModel[] = [];
+  public categories: GetCategoryModel[] = [];
 
   constructor(
     @Inject(ViewContainerRef) viewContainerRef: ViewContainerRef
@@ -50,7 +51,7 @@ export class Category extends BaseSearchComponent{
     this.onSearch();
   }
 
-  createForm(){
+  createForm() {
     this.form = this.#formBuilder.group(buildFilterForm())
   }
 
@@ -65,32 +66,32 @@ export class Category extends BaseSearchComponent{
     this.updatePage(pageParams);
     const params = this.getPageParams();
     const subscription = this.#categoryService.search(params).subscribe({
-      next: (response)=>{
-        if(response.isValid){
+      next: (response) => {
+        if (response.isValid) {
           this.total = response.data.total;
           this.categories = response.data.items;
-        }else{
+        } else {
           console.error(response);
         }
       },
-      error: (response)=>{
+      error: (response) => {
         console.error(response.messages);
       }
     });
     this.subscriptions.push(subscription)
   }
 
-   onPageChange(page: number): void {
+  onPageChange(page: number): void {
     this.onSearch(this.filter, page);
   }
 
-  onClean(){
+  onClean() {
     this.form.reset();
   }
 
-  openModal(id?: number){
-    if(this.categoryNewEditModal){
-      this.categoryNewEditModal.openModal(id, ()=>{
+  openModal(id?: number) {
+    if (this.categoryNewEditModal) {
+      this.categoryNewEditModal.openModal(id, () => {
         this.onSearch()
       })
     }

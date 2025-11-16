@@ -1,0 +1,52 @@
+@import "../tokens/hex/_tokens-hex";
+
+// Base
+$font-family-base: $font-family-base !default;
+$font-size-base: $font-size-base !default;
+$font-weight-base: $font-weight-regular !default;
+$line-height-base: $font-line-height-base !default;
+
+$font-size-xs: $font-size-xs;
+$font-size-sm: $font-size-sm;
+$font-size-base: $font-size-base;
+$font-size-lg: $font-size-lg;
+$font-size-xl: $font-size-xl;
+$font-size-2xl: $font-size-2xl;
+$font-size-3xl: $font-size-3xl;
+$font-size-4xl: $font-size-4xl;
+$font-size-5xl: $font-size-5xl;
+$font-size-6xl: $font-size-6xl;
+$font-size-7xl: $font-size-7xl;
+$font-size-8xl: $font-size-8xl;
+$font-size-9xl: $font-size-9xl;
+
+// Headings
+h1 { font-size: $font-size-5xl; line-height: $font-line-height-5xl; font-weight: 700; margin: 0; }
+h2 { font-size: $font-size-4xl; line-height: $font-line-height-4xl; font-weight: 700; margin: 0; }
+h3 { font-size: $font-size-3xl; line-height: $font-line-height-3xl; font-weight: 600; margin: 0; }
+h4 { font-size: $font-size-2xl; line-height: $font-line-height-2xl; font-weight: 600; margin: 0; }
+h5 { font-size: $font-size-xl;  line-height: $font-line-height-xl;  font-weight: 500; margin: 0; }
+h6 { font-size: $font-size-lg;  line-height: $font-line-height-lg;  font-weight: 500; margin: 0; }
+
+// Texto base y auxiliar
+p, span, li {
+    font-size: $font-size-base;
+    line-height: $font-line-height-base;
+  }
+  
+  small {
+    font-size: $font-size-sm;
+    line-height: $font-line-height-sm;
+  }
+  
+  .text-xs  { font-size: $font-size-xs; line-height: $font-line-height-xs; }
+  .text-sm  { font-size: $font-size-sm; line-height: $font-line-height-sm; }
+  .text-lg  { font-size: $font-size-lg; line-height: $font-line-height-lg; }
+  .text-xl  { font-size: $font-size-xl; line-height: $font-line-height-xl; }
+  .text-2xl { font-size: $font-size-2xl; line-height: $font-line-height-2xl; }
+  .text-3xl { font-size: $font-size-3xl; line-height: $font-line-height-3xl; }
+  .text-4xl { font-size: $font-size-4xl; line-height: $font-line-height-4xl; }
+  .text-5xl { font-size: $font-size-5xl; line-height: $font-line-height-5xl; }
+// Weights
+$headings-font-weight: $font-weight-bold;
+$body-font-weight: $font-weight-regular;

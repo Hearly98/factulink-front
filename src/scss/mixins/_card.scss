@@ -1,0 +1,27 @@
+@use "../tokens/hex/_tokens-hex" as *;
+
+@mixin card-base {
+  background-color: $color-card;              
+  border: 1px solid $color-border;            
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-sm;
+
+  .card-header {
+    font-weight: $font-weight-bold;
+    font-size: $font-size-base;
+    color: $color-card-foreground;           
+    border-bottom: none;  
+    background-color: transparent;
+  }
+
+  .card-body {
+    padding: $space-md;
+    font-size: $font-size-sm;
+  }
+
+  .card-footer {
+    border-top: none;
+    background-color: transparent;
+    border-bottom: none;
+  }
+}

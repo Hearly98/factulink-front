@@ -1,0 +1,50 @@
+<c-modal alignment="center" [visible]="visible" backdrop="static" size="lg">
+  <c-modal-body class="modal-body">
+    <c-row class="mb-2">
+      <c-col [sm]="6" class="space-between">
+        <h5>{{ title }}</h5>
+      </c-col>
+      <c-col class="text-end">
+        <button cButton color="secondary" class="me-2" (click)="onClose()">
+          <svg cIcon name="cilX"></svg>
+          Cancelar
+        </button>
+        <button cButton color="success" (click)="onSubmit()">
+          <svg cIcon name="cilSave"></svg>
+          Guardar
+        </button>
+      </c-col>
+    </c-row>
+    <c-card>
+      <c-card-body [formGroup]="form">
+        <c-row>
+          @for(item of structure; track $index){
+          <c-col [md]="item.col">
+            <label for="" class="form-label">{{ item.label }}</label>
+            @switch (item.type) { 
+              @case ('select') {
+                <select class="form-control form-select" name="" id="" [formControlName]="item.formControlName">
+                  <option [ngValue]="null">Seleccione</option>
+                  @for(dataItem of getDataSource(item); track $index){
+                    <option [ngValue]="getIdField(item, dataItem)">{{getDisplayField(item, dataItem)}}</option>
+                  }
+                </select>
+              }
+              @case ('number') {
+                <input class="form-control" type="number" name="" id="" [formControlName]="item.formControlName" />
+              }
+              @case ('date') {
+                <input class="form-control" type="date" name="" id="" [formControlName]="item.formControlName" />
+              }
+              @default {
+                <input class="form-control" type="text" name="" id="" [formControlName]="item.formControlName" />
+              } 
+            }
+          </c-col>
+          }
+        </c-row>
+      </c-card-body>
+    </c-card>
+  </c-modal-body>
+</c-modal>
+

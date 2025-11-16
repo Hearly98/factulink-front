@@ -1,0 +1,11 @@
+@use "tokens/hex/_tokens-hex" as *;
+@use "tokens/rgb/_tokens-rgb" as *;
+
+:root {
+  // 🧩 Fondo y tarjetas
+  --cui-body-bg: #{$color-background};
+  --cui-border-color: #{$color-border};
+  --cui-card-bg: #{$color-card};
+  --cui-card-foreground: #{$color-card-foreground};
+
+}

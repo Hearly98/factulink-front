@@ -15,28 +15,63 @@ export const navItems: INavData[] = [
     iconComponent: { name: 'cil-star' },
     children: [
       {
-        name: 'Proveedores',
+        name: 'Proveedor',
         url: '/proveedores',
         icon: 'nav-icon-bullet',
       },
       {
-        name: 'Clientes',
+        name: 'Cliente',
         url: '/clientes',
         icon: 'nav-icon-bullet',
       },
       {
-        name: 'Productos',
+        name: 'Producto',
         url: '/productos',
         icon: 'nav-icon-bullet',
       },
       {
-        name: 'Categorias',
+        name: 'Categoria',
         url: '/categorias',
         icon: 'nav-icon-bullet',
       },
       {
-        name: 'Sucursales',
+        name: 'Sucursal',
         url: '/sucursales',
+        icon: 'nav-icon-bullet',
+      },
+      {
+        name: 'Moneda',
+        url: '/monedas',
+        icon: 'nav-icon-bullet',
+      },
+      {
+        name: 'Documento',
+        url: '/documentos',
+        icon: 'nav-icon-bullet',
+      },
+      {
+        name: 'Empresa',
+        url: '/empresas',
+        icon: 'nav-icon-bullet',
+      },
+      {
+        name: 'Compania',
+        url: '/companias',
+        icon: 'nav-icon-bullet',
+      },
+      {
+        name: 'Unidad de Medida',
+        url: '/unidad-medida',
+        icon: 'nav-icon-bullet',
+      },
+      {
+        name: 'Usuario',
+        url: '/usuario',
+        icon: 'nav-icon-bullet',
+      },
+      {
+        name: 'Rol',
+        url: '/rol',
         icon: 'nav-icon-bullet',
       },
     ],

@@ -1,0 +1,6 @@
+@use "../tokens/hex/_tokens-hex" as *;
+
+.modal {
+    --cui-modal-bg: #{$color-background};
+    background-color: #3333334d;
+}

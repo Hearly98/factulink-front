@@ -1,0 +1,36 @@
+{
+    "color": {
+      "primary": { "value": "#1d65a8", "type": "color" },
+      "primary-dark": { "value": "#265182", "type": "color" },
+      "secondary": { "value": "#6b7785", "type": "color" },
+      
+      "info": { "value": "#6793a1", "type": "color" },
+      "success": { "value": "#229741", "type": "color" },
+      "success-dark": { "value": "#9db458", "type": "color" },
+      "warning": { "value": "#f9b115", "type": "color" },
+      "danger": { "value": "#e55353", "type": "color" },
+      
+      "gray": {
+        "100": { "value": "#f6f7f8", "type": "color" },
+        "200": { "value": "#e5e9ec", "type": "color" },
+        "300": { "value": "#d4dce0", "type": "color" },
+        "400": { "value": "#c3cdd4", "type": "color" },
+        "500": { "value": "#8a96a0", "type": "color" },
+        "600": { "value": "#63707b", "type": "color" },
+        "700": { "value": "#4b5662", "type": "color" },
+        "800": { "value": "#343332", "type": "color" }, 
+        "900": { "value": "#1a1a1a", "type": "color" } 
+      },
+      
+      "white": { "value": "#ffffff", "type": "color" },
+      "black": { "value": "#000000", "type": "color" },
+      "light": { "value": "{color.gray.100.value}", "type": "color" },
+      "dark": { "value": "{color.gray.800.value}", "type": "color" },
+      
+      "background": { "value": "{color.gray.100.value}", "type": "color" }, 
+      "foreground": { "value": "{color.gray.900.value}", "type": "color" }, 
+      "border": { "value": "{color.gray.300.value}", "type": "color" },
+      "card": { "value": "{color.white.value}", "type": "color" },
+      "card-foreground": { "value": "{color.gray.900.value}", "type": "color" }
+    }
+}

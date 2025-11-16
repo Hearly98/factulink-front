@@ -1,11 +1,111 @@
-import { Component } from '@angular/core';
+import { Component, Inject, inject, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { ButtonDirective, CardBodyComponent, CardComponent, ColComponent, RowComponent, TableDirective } from '@coreui/angular';
+import { IconDirective } from '@coreui/icons-angular';
+import { ProductService } from '../../core/services/product.service';
+import { TypedFormGroup } from '../../../shared/types/types-form';
+import { ProductForm } from '../../core/types/product-form';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { buildFilterForm, filterSort, mapParams } from '../../helpers';
+import { FilterForm } from '../../core/types/filter-form';
+import { BaseSearchComponent } from '../../../shared/base/search-base.component';
+import { MODULES } from '../../../core/config/permissions/modules';
+import { PageParamsModel } from '../../../shared/models/query/page-params.model';
+import { ProductNewEditModal } from "../../components/product-new-edit-modal/product-new-edit-modal";
+import { PaginatorComponent } from "../../../paginator/paginator.component";
+import { GetProductModel } from '../../core/models';
+import { CategoryService } from '../../../category/core/services/category.service';
+import { GetCategoryModel } from '../../../category/core/models';
+import { SucursalService } from '../../../sucursal/core/services/sucursal.service';
+import { GetSucursalModel } from '../../../sucursal/core/models';
 
 @Component({
   selector: 'app-products',
-  imports: [],
+  imports: [
+    RowComponent,
+    ColComponent,
+    CardComponent,
+    CardBodyComponent,
+    IconDirective,
+    ButtonDirective,
+    TableDirective,
+    ReactiveFormsModule,
+    ProductNewEditModal,
+    PaginatorComponent
+  ],
   templateUrl: './products.html',
   styleUrl: './products.scss',
 })
-export class Products {
+export class Products extends BaseSearchComponent implements OnInit {
+  @ViewChild('productNewEditModal') productNewEditModal!: ProductNewEditModal;
+  public form!: TypedFormGroup<FilterForm>;
+  #formBuilder = inject(FormBuilder);
+  public title = 'Productos';
+  #productService = inject(ProductService);
+  #categoryService = inject(CategoryService);
+  #sucursalService = inject(SucursalService);
+  public products: GetProductModel[] = [];
+  public categorias: GetCategoryModel[] = [];
+  public sucursales: GetSucursalModel[] = [];
 
+  constructor(
+    @Inject(ViewContainerRef) viewContainerRef: ViewContainerRef
+  ) {
+    super(MODULES.PRODUCT, viewContainerRef);
+  }
+
+  ngOnInit(): void {
+    this.createForm();
+    this.loadSelectCombos();
+    this.onSearch();
+  }
+
+  createForm() {
+    this.form = this.#formBuilder.group(buildFilterForm())
+  }
+
+  loadSelectCombos() {
+    this.fetchData(this.#categoryService.getAll(), this.categorias);
+    this.fetchData(this.#sucursalService.getAll(), this.sucursales);
+  }
+
+  onSearch(filter = null, page = 1) {
+    const sort = filterSort(this.form.value);
+    const filterToUse = filter || mapParams(this.form.value);
+    const pageSize = 10;
+    const pageParams = new PageParamsModel(page, pageSize);
+    this.updateFilter(filterToUse);
+    this.updateSort(sort);
+    this.updatePage(pageParams);
+    const params = this.getPageParams();
+    const subscription = this.#productService.search(params).subscribe({
+      next: (response) => {
+        if (response.isValid) {
+          this.total = response.data.total;
+          this.products = response.data.items;
+        } else {
+          console.error(response);
+        }
+      },
+      error: (response) => {
+        console.error(response.messages);
+      }
+    });
+    this.subscriptions.push(subscription)
+  }
+
+  onPageChange(page: number): void {
+    this.onSearch(this.filter, page);
+  }
+
+  onClean() {
+    this.form.reset();
+  }
+
+  openModal(id?: number) {
+    if (this.productNewEditModal) {
+      this.productNewEditModal.openModal(id, () => {
+        this.onSearch()
+      })
+    }
+  }
 }
