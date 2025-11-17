@@ -70,6 +70,13 @@ export const routes: Routes = [
           title: 'Sucursal',
         },
       },
+      {
+        path: 'unidad-medida',
+        loadComponent: () => import('./unit-of-measure/pages/view/unit-of-measure.component').then((m) => m.UnitOfMeasurePage),
+        data: {
+          title: 'Unidad de Medida',
+        },
+      }
     ],
   },
   {
