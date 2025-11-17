@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BaseService } from '../../../shared/services/base.service';
 import { HttpClient } from '@angular/common/http';
-import { GetOrganizationModel } from '../models/get-organization.model';
 import { ResponseDto } from '../../../shared/models/api/response.dto';
 import { QueryParamsModel } from '../../../shared/models/query/query-params.model';
 import { QueryResultsModel } from '../../../shared/models/query/query-results.model';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { CreateOrganizationModel, UpdateOrganizationModel, GetOrganizationModel } from '../models';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -20,6 +21,18 @@ export class OrganizationService extends BaseService {
 
   getById(id: number): Observable<ResponseDto<GetOrganizationModel>> {
     return this.getRequest<ResponseDto<GetOrganizationModel>>(`/${id}`);
+  }
+
+  create(body: CreateOrganizationModel): Observable<ResponseDto<GetOrganizationModel>> {
+    return this.postRequest<CreateOrganizationModel, ResponseDto<GetOrganizationModel>>('/', body);
+  }
+
+  update(body: UpdateOrganizationModel): Observable<ResponseDto<GetOrganizationModel>> {
+    return this.putRequest<UpdateOrganizationModel, ResponseDto<GetOrganizationModel>>('/', body);
+  }
+
+  delete(id: number): Observable<ResponseDto<GetOrganizationModel>> {
+    return this.deleteRequest(`/${id}`);
   }
 
   search(body: QueryParamsModel): Observable<ResponseDto<QueryResultsModel<GetOrganizationModel>>> {

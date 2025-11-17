@@ -1,10 +1,8 @@
 import { Component, Inject, inject, ViewChild, ViewContainerRef } from '@angular/core';
-import { ButtonDirective, CardBodyComponent, CardComponent, ColComponent, RowComponent, TableDirective, ThemeDirective } from '@coreui/angular';
+import { ButtonDirective, CardBodyComponent, CardComponent, ColComponent, RowComponent, TableDirective } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { CategoryService } from '../../core/services/category.service';
-import { CategoryModel } from '../../core/models/category.model';
 import { TypedFormGroup } from '../../../shared/types/types-form';
-import { CategoryForm } from '../../core/types/cat-form';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { buildFilterForm, filterSort, mapParams } from '../../helpers';
 import { FilterForm } from '../../core/types/filter-form';
@@ -87,6 +85,7 @@ export class Category extends BaseSearchComponent {
 
   onClean() {
     this.form.reset();
+    this.onSearch();
   }
 
   openModal(id?: number) {

@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Inject,
-  inject,
-  ViewContainerRef,
-} from '@angular/core';
+import { Component, Inject, inject, ViewContainerRef } from '@angular/core';
 import { BaseComponent } from '../../shared/base/base.component';
 import { TypedFormGroup } from '../../shared/types/types-form';
 import { CurrencyForm } from '../core/types';
@@ -42,21 +36,11 @@ import { UpdateCurrencyModel } from '../core/models/update-currency.model';
     ReactiveFormsModule,
   ],
   template: `
-    <c-modal alignment="center" [visible]="visible" backdrop="static" size="lg">
+    <c-modal alignment="center" [visible]="visible" backdrop="static">
       <c-modal-body class="modal-body">
         <c-row class="mb-2">
           <c-col [sm]="6" class="space-between">
             <h5>{{ title }}</h5>
-          </c-col>
-          <c-col class="text-end">
-            <button cButton color="secondary" class="me-2" (click)="onClose()">
-              <svg cIcon name="cilX"></svg>
-              Cancelar
-            </button>
-            <button cButton color="success" (click)="onSubmit()">
-              <svg cIcon name="cilSave"></svg>
-              Guardar
-            </button>
           </c-col>
         </c-row>
         <c-card>
@@ -74,7 +58,7 @@ import { UpdateCurrencyModel } from '../core/models/update-currency.model';
                 >
                   <option [ngValue]="null">Seleccione</option>
                   @for(item of sucursales; track $index){
-                  <option [ngValue]="item.suc_id">{{item.suc_nom}}</option>
+                  <option [ngValue]="item.suc_id">{{ item.suc_nom }}</option>
                   }
                 </select>
                 }@default {
@@ -91,6 +75,18 @@ import { UpdateCurrencyModel } from '../core/models/update-currency.model';
             </c-row>
           </c-card-body>
         </c-card>
+        <c-row class="mt-2">
+          <c-col class="text-end">
+            <button cButton color="secondary" class="me-2" (click)="onClose()">
+              <svg cIcon name="cilX"></svg>
+              Cancelar
+            </button>
+            <button cButton color="success" (click)="onSubmit()">
+              <svg cIcon name="cilSave"></svg>
+              Guardar
+            </button>
+          </c-col>
+        </c-row>
       </c-modal-body>
     </c-modal>
   `,
@@ -109,7 +105,7 @@ export class CurrencyNewEditModalComponent extends BaseComponent {
   #sucursalService = inject(SucursalService);
   #globalNotification = inject(GlobalNotification);
   #formBuilder = inject(FormBuilder);
-  title = 'Crear Categoria';
+  title = 'Crear Moneda';
   callback: any;
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
@@ -180,24 +176,26 @@ export class CurrencyNewEditModalComponent extends BaseComponent {
         this.#globalNotification.openAlert(error.message);
       },
     });
-    this.subscriptions.push(subscription)
+    this.subscriptions.push(subscription);
   }
 
   update() {
-    const subscription = this.#currencyService.update(this.form.value as UpdateCurrencyModel).subscribe({
-      next: (response) => {
-        if (response.isValid) {
-          this.#globalNotification.openAlert(response);
-          this.callback(response.data);
-          this.onClose();
-        } else {
-          this.#globalNotification.openAlert(response);
-        }
-      },
-      error: (error) => {
-        this.#globalNotification.openAlert(error.message);
-      },
-    });
-    this.subscriptions.push(subscription)
+    const subscription = this.#currencyService
+      .update(this.form.value as UpdateCurrencyModel)
+      .subscribe({
+        next: (response) => {
+          if (response.isValid) {
+            this.#globalNotification.openAlert(response);
+            this.callback(response.data);
+            this.onClose();
+          } else {
+            this.#globalNotification.openAlert(response);
+          }
+        },
+        error: (error) => {
+          this.#globalNotification.openAlert(error.message);
+        },
+      });
+    this.subscriptions.push(subscription);
   }
 }

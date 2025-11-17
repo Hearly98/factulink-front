@@ -1,28 +1,21 @@
 import {
-  ChangeDetectorRef,
   Component,
-  ElementRef,
   forwardRef,
   Input,
-  Renderer2,
   OnDestroy,
-} from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { ToastComponent, ToasterService } from "@coreui/angular";
-import { IconDirective } from "@coreui/icons-angular";
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ToastComponent } from '@coreui/angular';
+import { IconDirective } from '@coreui/icons-angular';
 
 @Component({
-  selector: "app-toast",
+  selector: 'app-toast',
   standalone: true,
   imports: [CommonModule, IconDirective],
   template: `
     <div class="toast-content" *ngIf="!isHiding">
       <div class="toast-icon">
-        <svg cIcon
-          [name]="getIcon()"
-          [ngClass]="'icon-' + color"
-        >
-</svg>
+        <svg cIcon [name]="getIcon()" [ngClass]="'icon-' + color"></svg>
       </div>
 
       <div class="toast-body-content">
@@ -166,9 +159,9 @@ import { IconDirective } from "@coreui/icons-angular";
 })
 export class AppToastComponent extends ToastComponent implements OnDestroy {
   @Input() closeButton = true;
-  @Input() title = "";
-  @Input() message = "";
-  @Input() selectColor: "success" | "info" | "warning" | "danger" = "info";
+  @Input() title = '';
+  @Input() message = '';
+  @Input() selectColor: 'success' | 'info' | 'warning' | 'danger' = 'info';
 
   isHiding = false;
   private cleanupTimeout: any;
@@ -179,7 +172,7 @@ export class AppToastComponent extends ToastComponent implements OnDestroy {
 
     this.renderer.setStyle(
       this.hostElement.nativeElement,
-      "border-left",
+      'border-left',
       `4px solid ${this.getBorderColor()}`
     );
 
@@ -209,29 +202,29 @@ export class AppToastComponent extends ToastComponent implements OnDestroy {
 
   getBorderColor(): string {
     switch (this.selectColor) {
-      case "success":
-        return "#00a24f";
-      case "warning":
-        return "#ffc900";
-      case "danger":
-        return "#ef4444";
-      case "info":
+      case 'success':
+        return '#00a24f';
+      case 'warning':
+        return '#ffc900';
+      case 'danger':
+        return '#ef4444';
+      case 'info':
       default:
-        return "#00319b";
+        return '#00319b';
     }
   }
 
   getIcon() {
     switch (this.selectColor) {
-      case "success":
-        return "cilCheckCircle";
-      case "warning":
-        return "cilWarning";
-      case "danger":
-        return "cilX";
-      case "info":
+      case 'success':
+        return 'cilCheckCircle';
+      case 'warning':
+        return 'cilWarning';
+      case 'danger':
+        return 'cilX';
+      case 'info':
       default:
-        return "cilInfo";
+        return 'cilInfo';
     }
   }
 
@@ -253,7 +246,7 @@ export class AppToastComponent extends ToastComponent implements OnDestroy {
     }
 
     this.isHiding = true;
-    this.renderer.addClass(this.hostElement.nativeElement, "hiding");
+    this.renderer.addClass(this.hostElement.nativeElement, 'hiding');
     this.changeDetectorRef.detectChanges();
 
     this.cleanupTimeout = setTimeout(() => {

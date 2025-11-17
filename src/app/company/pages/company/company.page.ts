@@ -1,5 +1,12 @@
 import { Component, Inject, OnInit, ViewChild, ViewContainerRef, inject } from '@angular/core';
-import { RowComponent, ColComponent, CardComponent, CardBodyComponent, ButtonDirective, TableDirective } from '@coreui/angular';
+import {
+  RowComponent,
+  ColComponent,
+  CardComponent,
+  CardBodyComponent,
+  ButtonDirective,
+  TableDirective,
+} from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { BaseSearchComponent } from '../../../shared/base/search-base.component';
@@ -67,13 +74,22 @@ import { GetCompanyModel } from '../../core/models/get-company.model';
                     <tr>
                       <th>Acciones</th>
                       <th>Nombre</th>
+                      <th>Dueño</th>
+                      <th>Teléfono</th>
+                      <th>Email</th>
                     </tr>
                   </thead>
                   <tbody>
                     @for (item of companies; track $index) {
                     <tr>
                       <td>
-                        <button (click)="openModal(item.com_id)" size="sm" class="me-2" cButton color="info">
+                        <button
+                          (click)="openModal(item.com_id)"
+                          size="sm"
+                          class="me-2"
+                          cButton
+                          color="info"
+                        >
                           <svg cIcon name="cilPencil"></svg>
                         </button>
                         <button size="sm" cButton color="danger">
@@ -81,6 +97,9 @@ import { GetCompanyModel } from '../../core/models/get-company.model';
                         </button>
                       </td>
                       <td>{{ item.com_nom }}</td>
+                      <td>{{ item.com_duenio }}</td>
+                      <td>{{ item.com_telf }}</td>
+                      <td>{{ item.com_email }}</td>
                     </tr>
                     }
                   </tbody>
@@ -154,6 +173,7 @@ export class CompanyPage extends BaseSearchComponent implements OnInit {
 
   onClean() {
     this.form.reset();
+    this.onSearch();
   }
 
   openModal(id?: number) {

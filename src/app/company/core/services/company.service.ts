@@ -5,8 +5,8 @@ import { Observable } from 'rxjs';
 import { ResponseDto } from '../../../shared/models/api/response.dto';
 import { QueryParamsModel } from '../../../shared/models/query/query-params.model';
 import { QueryResultsModel } from '../../../shared/models/query/query-results.model';
-import { GetCompanyModel } from '../models/get-company.model';
 import { environment } from '../../../../environments/environment';
+import { CreateCompanyModel, UpdateCompanyModel, GetCompanyModel } from '../models';
 @Injectable({
   providedIn: 'root',
 })
@@ -21,6 +21,18 @@ export class CompanyService extends BaseService {
 
   getById(id: number): Observable<ResponseDto<GetCompanyModel>> {
     return this.getRequest<ResponseDto<GetCompanyModel>>(`/${id}`);
+  }
+
+  create(body: CreateCompanyModel): Observable<ResponseDto<GetCompanyModel>> {
+    return this.postRequest<CreateCompanyModel, ResponseDto<GetCompanyModel>>('/', body);
+  }
+
+  update(body: UpdateCompanyModel): Observable<ResponseDto<GetCompanyModel>> {
+    return this.putRequest<UpdateCompanyModel, ResponseDto<GetCompanyModel>>('/', body);
+  }
+
+  delete(id: number): Observable<ResponseDto<GetCompanyModel>> {
+    return this.deleteRequest(`/${id}`);
   }
 
   search(body: QueryParamsModel): Observable<ResponseDto<QueryResultsModel<GetCompanyModel>>> {

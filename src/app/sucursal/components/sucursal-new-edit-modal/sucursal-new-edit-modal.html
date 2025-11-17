@@ -1,18 +1,8 @@
-<c-modal alignment="center" [visible]="visible" backdrop="static" size="lg">
+<c-modal alignment="center" [visible]="visible" backdrop="static">
   <c-modal-body class="modal-body">
     <c-row class="mb-2">
       <c-col [sm]="6" class="space-between">
         <h5>{{ title }}</h5>
-      </c-col>
-      <c-col class="text-end">
-        <button cButton color="secondary" class="me-2"(click)="onClose()">
-          <svg cIcon name="cilX"></svg>
-          Cancelar
-        </button>
-        <button cButton color="success">
-          <svg cIcon name="cilSave"></svg>
-          Guardar
-        </button>
       </c-col>
     </c-row>
     <c-card>
@@ -22,16 +12,39 @@
           <c-col [md]="item.col">
             <label for="" class="form-label">{{ item.label }}</label>
             @switch (item.type) { @case ('select') {
-            <select class="form-control form-select" name="" id="" [formControlName]="item.formControlName">
+            <select
+              class="form-control form-select"
+              name=""
+              id=""
+              [formControlName]="item.formControlName"
+            >
               <option value="null">Seleccione</option>
             </select>
             }@default {
-            <input class="form-control" type="text" name="" id="" [formControlName]="item.formControlName" />
+            <input
+              class="form-control"
+              type="text"
+              name=""
+              id=""
+              [formControlName]="item.formControlName"
+            />
             } }
           </c-col>
           }
         </c-row>
       </c-card-body>
     </c-card>
+    <c-row class="mt-4">
+      <c-col class="text-end">
+        <button cButton color="secondary" class="me-2" (click)="onClose()">
+          <svg cIcon name="cilX"></svg>
+          Cancelar
+        </button>
+        <button cButton color="success" (click)="onSubmit()">
+          <svg cIcon name="cilSave"></svg>
+          Guardar
+        </button>
+      </c-col>
+    </c-row>
   </c-modal-body>
 </c-modal>

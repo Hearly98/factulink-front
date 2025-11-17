@@ -5,8 +5,8 @@ import { Observable } from 'rxjs';
 import { ResponseDto } from '../../../shared/models/api/response.dto';
 import { QueryParamsModel } from '../../../shared/models/query/query-params.model';
 import { QueryResultsModel } from '../../../shared/models/query/query-results.model';
-import { GetSucursalModel } from '../models';
 import { environment } from '../../../../environments/environment';
+import { CreateSucursalModel, GetSucursalModel, UpdateSucursalModel } from '../models';
 
 @Injectable({
   providedIn: 'root',
@@ -22,6 +22,17 @@ export class SucursalService extends BaseService {
 
   getById(id: number): Observable<ResponseDto<GetSucursalModel>> {
     return this.getRequest<ResponseDto<GetSucursalModel>>(`/${id}`);
+  }
+
+  create(body: CreateSucursalModel): Observable<ResponseDto<GetSucursalModel>> {
+    return this.postRequest<CreateSucursalModel, ResponseDto<GetSucursalModel>>(`/`, body);
+  }
+
+  update(body: UpdateSucursalModel): Observable<ResponseDto<GetSucursalModel>> {
+    return this.putRequest<UpdateSucursalModel, ResponseDto<GetSucursalModel>>(
+      `/`,
+      body
+    );
   }
 
   search(body: QueryParamsModel): Observable<ResponseDto<QueryResultsModel<GetSucursalModel>>> {

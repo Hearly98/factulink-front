@@ -18,7 +18,7 @@ import { PageParamsModel } from '../../../shared/models/query/page-params.model'
 import { SucursalNewEditModal } from '../../components/sucursal-new-edit-modal/sucursal-new-edit-modal';
 import { FilterForm } from '../../core/types';
 import { GetSucursalModel } from '../../core/models';
-import { PaginatorComponent } from "../../../paginator/paginator.component";
+import { PaginatorComponent } from '../../../paginator/paginator.component';
 
 @Component({
   selector: 'app-category',
@@ -32,8 +32,8 @@ import { PaginatorComponent } from "../../../paginator/paginator.component";
     TableDirective,
     ReactiveFormsModule,
     SucursalNewEditModal,
-    PaginatorComponent
-],
+    PaginatorComponent,
+  ],
   templateUrl: './sucursal.html',
   styleUrl: './sucursal.scss',
 })
@@ -89,6 +89,7 @@ export class Sucursal extends BaseSearchComponent {
 
   onClean() {
     this.form.reset();
+    this.onSearch();
   }
 
   openModal(id?: number) {

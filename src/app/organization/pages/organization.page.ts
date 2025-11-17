@@ -1,5 +1,12 @@
 import { Component, Inject, OnInit, ViewChild, ViewContainerRef, inject } from '@angular/core';
-import { RowComponent, ColComponent, CardComponent, CardBodyComponent, ButtonDirective, TableDirective } from '@coreui/angular';
+import {
+  RowComponent,
+  ColComponent,
+  CardComponent,
+  CardBodyComponent,
+  ButtonDirective,
+  TableDirective,
+} from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { BaseSearchComponent } from '../../shared/base/search-base.component';
@@ -42,70 +49,80 @@ import { GetOrganizationModel } from '../core/models/get-organization.model';
       </c-col>
     </c-row>
 
-    <c-row class="mt-4">
-      <c-col>
-        <c-card>
-          <c-card-body>
-            <c-row class="g-3 align-items-end" [formGroup]="form">
-              <c-col sm="12" md="6" lg="4">
-                <label for="">Nombre</label>
-                <input formControlName="emp_nom" type="text" class="form-control" />
-              </c-col>
-              <c-col>
-                <button cButton color="primary" (click)="onSearch()" class="me-2">
-                  <svg cIcon name="cilSearch"></svg>
-                  Buscar
-                </button>
-                <button cButton color="danger" (click)="onClean()">
-                  <svg cIcon name="cilTrash"></svg>
-                  Limpiar
-                </button>
-              </c-col>
-              <c-col sm="12" md="12" lg="12">
-                <table cTable color="light" striped="true">
-                  <thead>
-                    <tr>
-                      <th>Acciones</th>
-                      <th>Nombre</th>
-                      <th>RUC</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (item of organizations; track $index) {
-                    <tr>
-                      <td>
-                        <button (click)="openModal(item.com_id)" size="sm" class="me-2" cButton color="info">
-                          <svg cIcon name="cilPencil"></svg>
-                        </button>
-                        <button size="sm" cButton color="danger">
-                          <svg cIcon name="cilTrash"></svg>
-                        </button>
-                      </td>
-                      <td>{{ item.emp_nom }}</td>
-                      <td>{{ item.emp_ruc }}</td>
-                    </tr>
-                    }
-                  </tbody>
-                </table>
-                <app-paginator
-                  [(page)]="page.page"
-                  [pageSize]="page.pageSize"
-                  [total]="total"
-                  (pageChange)="onPageChange($event)"
-                ></app-paginator>
-              </c-col>
-            </c-row>
-          </c-card-body>
-        </c-card>
-      </c-col>
-    </c-row>
+    <c-card class="mt-3">
+      <c-card-body>
+        <c-row class="g-3 align-items-end" [formGroup]="form">
+          <c-col sm="12" md="6" lg="4">
+            <label for="">Nombre</label>
+            <input formControlName="emp_nom" type="text" class="form-control" />
+          </c-col>
+          <c-col>
+            <button cButton color="primary" (click)="onSearch()" class="me-2">
+              <svg cIcon name="cilSearch"></svg>
+              Buscar
+            </button>
+            <button cButton color="danger" (click)="onClean()">
+              <svg cIcon name="cilTrash"></svg>
+              Limpiar
+            </button>
+          </c-col>
+        </c-row>
+      </c-card-body>
+    </c-card>
+
+    <c-card class="mt-3">
+      <c-card-body>
+        <c-row>
+          <c-col sm="12" md="12" lg="12">
+            <table cTable striped="true">
+              <thead>
+                <tr>
+                  <th>Acciones</th>
+                  <th>Nombre</th>
+                  <th>RUC</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of organizations; track $index) {
+                <tr>
+                  <td>
+                    <button
+                      (click)="openModal(item.emp_id)"
+                      size="sm"
+                      class="me-2"
+                      cButton
+                      color="info"
+                    >
+                      <svg cIcon name="cilPencil"></svg>
+                    </button>
+                    <button size="sm" cButton color="danger">
+                      <svg cIcon name="cilTrash"></svg>
+                    </button>
+                  </td>
+                  <td>{{ item.emp_nom }}</td>
+                  <td>{{ item.emp_ruc }}</td>
+                </tr>
+                }
+              </tbody>
+            </table>
+            <app-paginator
+              [(page)]="page.page"
+              [pageSize]="page.pageSize"
+              [total]="total"
+              (pageChange)="onPageChange($event)"
+            ></app-paginator>
+          </c-col>
+        </c-row>
+      </c-card-body>
+    </c-card>
 
     <app-organization-new-edit-modal #organizationNewEditModal></app-organization-new-edit-modal>
   `,
   styles: ``,
 })
 export class OrganizationPage extends BaseSearchComponent implements OnInit {
-  @ViewChild('organizationNewEditModal') organizationNewEditModal!: OrganizationNewEditModalComponent;
+  @ViewChild('organizationNewEditModal')
+  organizationNewEditModal!: OrganizationNewEditModalComponent;
   public form!: TypedFormGroup<FilterForm>;
   public title = 'Empresas';
   public organizations: GetOrganizationModel[] = [];
@@ -156,6 +173,7 @@ export class OrganizationPage extends BaseSearchComponent implements OnInit {
 
   onClean() {
     this.form.reset();
+    this.onSearch();
   }
 
   openModal(id?: number) {

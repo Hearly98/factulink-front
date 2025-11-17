@@ -23,9 +23,9 @@ import { GetSucursalModel } from '../../../sucursal/core/models';
 import { CategoryService } from '../../../category/core/services/category.service';
 import { GetCategoryModel } from '../../../category/core/models';
 import { CurrencyService } from '../../../currency/core/services/currency.service';
-import { UnidadService } from '../../../unidad/core/services/unidad.service';
-import { GetUnidadModel } from '../../../unidad/core/models';
 import { GetCurrencyModel } from '../../../currency/core/models/get-currency.model';
+import { UnitOfMeasureService } from '../../../unit-of-measure/core/services/unit-of-measure.service';
+import { GetUnitOfMeasureModel } from '../../../unit-of-measure/core/models';
 
 @Component({
   selector: 'app-product-new-edit-modal',
@@ -47,14 +47,14 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
   form!: TypedFormGroup<ProductForm>;
   visible = false;
   structure = productStructure;
-  sucursales: GetSucursalModel[] = []
-  categorias: GetCategoryModel[] = []
-  monedas: GetCurrencyModel[] = []
-  unidades: GetUnidadModel[] = []
+  sucursales: GetSucursalModel[] = [];
+  categorias: GetCategoryModel[] = [];
+  monedas: GetCurrencyModel[] = [];
+  unidades: GetUnitOfMeasureModel[] = [];
   #sucursalService = inject(SucursalService);
   #categoryService = inject(CategoryService);
   #currencyService = inject(CurrencyService);
-  #unidadService = inject(UnidadService);
+  #unidadService = inject(UnitOfMeasureService);
   #globalNotification = inject(GlobalNotification);
   #productService = inject(ProductService);
   #formBuilder = inject(FormBuilder);
@@ -77,7 +77,7 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
   openModal(idProduct?: number, callback: any = null) {
     this.createForm();
     this.visible = true;
-    this.callback = callback
+    this.callback = callback;
     if (idProduct) {
       this.title = 'Editar Producto';
       this.loadData(idProduct);
@@ -135,25 +135,27 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
         this.#globalNotification.openAlert(error.message);
       },
     });
-    this.subscriptions.push(subscription)
+    this.subscriptions.push(subscription);
   }
 
   update() {
-    const subscription = this.#productService.update(this.form.value as UpdateProductModel).subscribe({
-      next: (response) => {
-        if (response.isValid) {
-          this.#globalNotification.openAlert(response);
-          this.callback(response.data);
-          this.onClose();
-        } else {
-          this.#globalNotification.openAlert(response);
-        }
-      },
-      error: (error) => {
-        this.#globalNotification.openAlert(error.message);
-      },
-    });
-    this.subscriptions.push(subscription)
+    const subscription = this.#productService
+      .update(this.form.value as UpdateProductModel)
+      .subscribe({
+        next: (response) => {
+          if (response.isValid) {
+            this.#globalNotification.openAlert(response);
+            this.callback(response.data);
+            this.onClose();
+          } else {
+            this.#globalNotification.openAlert(response);
+          }
+        },
+        error: (error) => {
+          this.#globalNotification.openAlert(error.message);
+        },
+      });
+    this.subscriptions.push(subscription);
   }
 
   getDataSource(item: any): any[] {
@@ -201,4 +203,3 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
     }
   }
 }
-

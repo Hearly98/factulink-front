@@ -15,7 +15,6 @@ import { TypedFormGroup } from '../../shared/types/types-form';
 import { FilterForm } from '../core/types/filter-form';
 import { buildFilterForm, filterSort, mapParams } from '../helpers';
 import { CurrencyService } from '../core/services/currency.service';
-import { CurrencyModel } from '../core/models/currency.model';
 import { PageParamsModel } from '../../shared/models/query/page-params.model';
 import { PaginatorComponent } from '../../paginator/paginator.component';
 import { CurrencyNewEditModalComponent } from '../components/currency-new-edit-modal.component';
@@ -49,67 +48,70 @@ import { GetCurrencyModel } from '../core/models/get-currency.model';
       </c-col>
     </c-row>
 
-    <c-row class="mt-4">
-      <c-col>
-        <c-card>
-          <c-card-body>
-            <c-row class="g-3 align-items-end" [formGroup]="form">
-              <c-col sm="12" md="6" lg="4">
-                <label for="">Nombre</label>
-                <input formControlName="mon_nom" type="text" class="form-control" />
-              </c-col>
-              <c-col>
-                <button cButton color="primary" (click)="onSearch()" class="me-2">
-                  <svg cIcon name="cilSearch"></svg>
-                  Buscar
-                </button>
-                <button cButton color="danger" (click)="onClean()">
-                  <svg cIcon name="cilTrash"></svg>
-                  Limpiar
-                </button>
-              </c-col>
-              <c-col sm="12" md="12" lg="12">
-                <table cTable color="light" striped="true">
-                  <thead>
-                    <tr>
-                      <th>Acciones</th>
-                      <th>Nombre</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (item of currencies; track $index) {
-                    <tr>
-                      <td>
-                        <button
-                          (click)="openModal(item.mon_id)"
-                          size="sm"
-                          class="me-2"
-                          cButton
-                          color="info"
-                        >
-                          <svg cIcon name="cilPencil"></svg>
-                        </button>
-                        <button size="sm" cButton color="danger">
-                          <svg cIcon name="cilTrash"></svg>
-                        </button>
-                      </td>
-                      <td>{{ item.mon_nom }}</td>
-                    </tr>
-                    }
-                  </tbody>
-                </table>
-                <app-paginator
-                  [(page)]="page.page"
-                  [pageSize]="page.pageSize"
-                  [total]="total"
-                  (pageChange)="onPageChange($event)"
-                ></app-paginator>
-              </c-col>
-            </c-row>
-          </c-card-body>
-        </c-card>
-      </c-col>
-    </c-row>
+    <c-card class="mt-3">
+      <c-card-body>
+        <c-row class="g-3 align-items-end" [formGroup]="form">
+          <c-col sm="12" md="6" lg="4">
+            <label for="">Nombre</label>
+            <input formControlName="mon_nom" type="text" class="form-control" />
+          </c-col>
+          <c-col>
+            <button cButton color="primary" (click)="onSearch()" class="me-2">
+              <svg cIcon name="cilSearch"></svg>
+              Buscar
+            </button>
+            <button cButton color="danger" (click)="onClean()">
+              <svg cIcon name="cilTrash"></svg>
+              Limpiar
+            </button>
+          </c-col>
+        </c-row>
+      </c-card-body>
+    </c-card>
+
+    <c-card class="mt-3">
+      <c-card-body>
+        <c-row>
+          <c-col sm="12" md="12" lg="12">
+            <table cTable striped="true">
+              <thead>
+                <tr>
+                  <th>Acciones</th>
+                  <th>Nombre</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of currencies; track $index) {
+                <tr>
+                  <td>
+                    <button
+                      (click)="openModal(item.mon_id)"
+                      size="sm"
+                      class="me-2"
+                      cButton
+                      color="info"
+                    >
+                      <svg cIcon name="cilPencil"></svg>
+                    </button>
+                    <button size="sm" cButton color="danger">
+                      <svg cIcon name="cilTrash"></svg>
+                    </button>
+                  </td>
+                  <td>{{ item.mon_nom }}</td>
+                </tr>
+                }
+              </tbody>
+            </table>
+            <app-paginator
+              [(page)]="page.page"
+              [pageSize]="page.pageSize"
+              [total]="total"
+              (pageChange)="onPageChange($event)"
+            ></app-paginator>
+          </c-col>
+        </c-row>
+      </c-card-body>
+    </c-card>
 
     <app-currency-new-edit-modal #currencyNewEditModal></app-currency-new-edit-modal>
   `,
@@ -166,7 +168,11 @@ export class CurrencyPage extends BaseSearchComponent implements OnInit {
   }
 
   onClean() {
-    this.form.reset();
+    this.form.reset({
+      suc_id: 1,
+      order: 'desc',
+    });
+    this.onSearch();
   }
 
   openModal(id?: number) {

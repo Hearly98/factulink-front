@@ -1,7 +1,7 @@
-@use "tokens/hex/_tokens-hex" as *;
-@use "tokens/rgb/_tokens-rgb" as *;
-@use "@coreui/coreui/scss/mixins/transition" as *;
-@use "@coreui/coreui/scss/mixins/color-mode" as *;
+@use 'tokens/hex/_tokens-hex' as *;
+@use 'tokens/rgb/_tokens-rgb' as *;
+@use '@coreui/coreui/scss/mixins/transition' as *;
+@use '@coreui/coreui/scss/mixins/color-mode' as *;
 
 :root {
   // 🧩 Fondo y tarjetas
@@ -18,7 +18,7 @@ body {
   width: 100%;
   padding-inline: var(--cui-sidebar-occupy-start, 0) var(--cui-sidebar-occupy-end, 0);
   will-change: auto;
-  @include transition(padding .15s);
+  @include transition(padding 0.15s);
 }
 
 .header > .container-fluid,
@@ -70,4 +70,9 @@ body {
   .footer {
     --cui-footer-bg: var(--cui-body-bg);
   }
+}
+
+// 🧩 Modal
+.modal-content {
+  background-color: var(--cui-tertiary-bg);
 }
