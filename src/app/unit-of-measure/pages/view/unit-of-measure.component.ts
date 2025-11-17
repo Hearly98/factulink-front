@@ -106,7 +106,7 @@ import { PaginatorComponent } from 'src/app/paginator/paginator.component';
                         </button>
                       </td>
                       <td>{{ unit.und_nom }}</td>
-                      <td>{{ unit.suc_id }}</td>
+                      <td>{{ unit.sucursal?.suc_nom }}</td>
                     </tr>
                     }}@else{
                     <tr>
@@ -193,6 +193,7 @@ export class UnitOfMeasurePage extends BaseSearchComponent {
 
   onClean() {
     this.form.reset();
+    this.onSearch();
   }
 
   openModal(id?: number) {
