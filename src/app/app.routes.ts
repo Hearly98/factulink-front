@@ -30,14 +30,16 @@ export const routes: Routes = [
       },
       {
         path: 'empresas',
-        loadComponent: () => import('./organization/pages/organization.page').then((m) => m.OrganizationPage),
+        loadComponent: () =>
+          import('./organization/pages/organization.page').then((m) => m.OrganizationPage),
         data: {
           title: 'Empresa',
         },
       },
       {
         path: 'companias',
-        loadComponent: () => import('./company/pages/company/company.page').then((m) => m.CompanyPage),
+        loadComponent: () =>
+          import('./company/pages/company/company.page').then((m) => m.CompanyPage),
         data: {
           title: 'Compania',
         },
@@ -72,11 +74,28 @@ export const routes: Routes = [
       },
       {
         path: 'unidad-medida',
-        loadComponent: () => import('./unit-of-measure/pages/view/unit-of-measure.component').then((m) => m.UnitOfMeasurePage),
+        loadComponent: () =>
+          import('./unit-of-measure/pages/view/unit-of-measure.component').then(
+            (m) => m.UnitOfMeasurePage
+          ),
         data: {
           title: 'Unidad de Medida',
         },
-      }
+      },
+      {
+        path: 'usuario',
+        loadComponent: () => import('./user/pages/user/user.page').then((m) => m.UserPage),
+        data: {
+          title: 'Usuario',
+        },
+      },
+      {
+        path: 'rol',
+        loadComponent: () => import('./rol/pages/rol/rol').then((m) => m.Rol),
+        data: {
+          title: 'Rol',
+        },
+      },
     ],
   },
   {
