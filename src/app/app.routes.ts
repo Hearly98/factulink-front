@@ -96,6 +96,13 @@ export const routes: Routes = [
           title: 'Rol',
         },
       },
+      {
+        path: 'clientes',
+        loadComponent: () => import('./customer/pages/customer.page').then((m) => m.CustomerPage),
+        data: {
+          title: 'Cliente',
+        },
+      },
     ],
   },
   {
