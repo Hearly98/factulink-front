@@ -97,6 +97,13 @@ export const routes: Routes = [
         },
       },
       {
+        path: 'proveedores',
+        loadComponent: () => import('./supplier/pages/supplier.page').then((m) => m.SupplierPage),
+        data: {
+          title: 'Proveedor',
+        },
+      },
+      {
         path: 'clientes',
         loadComponent: () => import('./customer/pages/customer.page').then((m) => m.CustomerPage),
         data: {

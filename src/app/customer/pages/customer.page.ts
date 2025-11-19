@@ -116,7 +116,7 @@ import { GetCustomerModel } from '../core/models';
 export class CustomerPage extends BaseSearchComponent {
   public form!: TypedFormGroup<FilterForm>;
   #formBuilder = inject(FormBuilder);
-  public title = 'Categorias';
+  public title = 'Clientes';
   #customerService = inject(CustomerService);
   public customers: GetCustomerModel[] = [];
 
