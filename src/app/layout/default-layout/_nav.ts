@@ -20,6 +20,11 @@ export const navItems: INavData[] = [
         icon: 'nav-icon-bullet',
       },
       {
+        name: 'Tipo Documento',
+        url: '/tipo-documento',
+        icon: 'nav-icon-bullet',
+      },
+      {
         name: 'Cliente',
         url: '/clientes',
         icon: 'nav-icon-bullet',

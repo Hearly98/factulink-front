@@ -37,6 +37,16 @@ export const routes: Routes = [
         },
       },
       {
+        path: 'tipo-documento',
+        loadComponent: () =>
+          import('./document-type/pages/document-type/document-type.component').then(
+            (m) => m.DocumentTypeComponent
+          ),
+        data: {
+          title: 'Tipo Documentos',
+        },
+      },
+      {
         path: 'companias',
         loadComponent: () =>
           import('./company/pages/company/company.page').then((m) => m.CompanyPage),
