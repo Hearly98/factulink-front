@@ -49,7 +49,7 @@ import { buildFilterForm, filterSort, mapParams } from '../helpers';
         <c-row class="g-3 align-items-end" [formGroup]="form">
           <c-col sm="12" md="6" lg="4">
             <label for="">Nombre</label>
-            <input formControlName="prov_ snom" type="text" class="form-control" />
+            <input formControlName="prov_nom" type="text" class="form-control" />
           </c-col>
           <c-col>
             <button cButton color="primary" (click)="onSearch()" class="me-2">

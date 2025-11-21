@@ -1,5 +1,12 @@
 import { Component, Inject, inject, ViewChild, ViewContainerRef } from '@angular/core';
-import { ButtonDirective, CardBodyComponent, CardComponent, ColComponent, RowComponent, TableDirective } from '@coreui/angular';
+import {
+  ButtonDirective,
+  CardBodyComponent,
+  CardComponent,
+  ColComponent,
+  RowComponent,
+  TableDirective,
+} from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { CategoryService } from '../../core/services/category.service';
 import { TypedFormGroup } from '../../../shared/types/types-form';
@@ -9,9 +16,11 @@ import { FilterForm } from '../../core/types/filter-form';
 import { BaseSearchComponent } from '../../../shared/base/search-base.component';
 import { MODULES } from '../../../core/config/permissions/modules';
 import { PageParamsModel } from '../../../shared/models/query/page-params.model';
-import { CategoryNewEditModal } from "../../components/category-new-edit-modal/category-new-edit-modal";
-import { PaginatorComponent } from "../../../paginator/paginator.component";
+import { CategoryNewEditModal } from '../../components/category-new-edit-modal/category-new-edit-modal';
+import { PaginatorComponent } from '../../../paginator/paginator.component';
 import { GetCategoryModel } from '../../core/models';
+import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
+import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 
 @Component({
   selector: 'app-category',
@@ -25,7 +34,7 @@ import { GetCategoryModel } from '../../core/models';
     TableDirective,
     ReactiveFormsModule,
     CategoryNewEditModal,
-    PaginatorComponent
+    PaginatorComponent,
   ],
   templateUrl: './category.html',
   styleUrl: './category.scss',
@@ -33,14 +42,14 @@ import { GetCategoryModel } from '../../core/models';
 export class Category extends BaseSearchComponent {
   @ViewChild('categoryNewEditModal') categoryNewEditModal!: CategoryNewEditModal;
   public form!: TypedFormGroup<FilterForm>;
+  #confirmService = inject(ConfirmService);
   #formBuilder = inject(FormBuilder);
   public title = 'Categorias';
   #categoryService = inject(CategoryService);
+  #globalNotification = inject(GlobalNotification);
   public categories: GetCategoryModel[] = [];
 
-  constructor(
-    @Inject(ViewContainerRef) viewContainerRef: ViewContainerRef
-  ) {
+  constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.ADMINISTRATION, viewContainerRef);
   }
 
@@ -50,9 +59,8 @@ export class Category extends BaseSearchComponent {
   }
 
   createForm() {
-    this.form = this.#formBuilder.group(buildFilterForm())
+    this.form = this.#formBuilder.group(buildFilterForm());
   }
-
 
   onSearch(filter = null, page = 1) {
     const sort = filterSort(this.form.value);
@@ -69,14 +77,14 @@ export class Category extends BaseSearchComponent {
           this.total = response.data.total;
           this.categories = response.data.items;
         } else {
-          console.error(response);
+          this.#globalNotification.openAlert(response);
         }
       },
       error: (response) => {
-        console.error(response.messages);
-      }
+        this.#globalNotification.openToastAlert('Error al buscar', response, 'danger');
+      },
     });
-    this.subscriptions.push(subscription)
+    this.subscriptions.push(subscription);
   }
 
   onPageChange(page: number): void {
@@ -91,8 +99,36 @@ export class Category extends BaseSearchComponent {
   openModal(id?: number) {
     if (this.categoryNewEditModal) {
       this.categoryNewEditModal.openModal(id, () => {
-        this.onSearch()
-      })
+        this.onSearch();
+      });
     }
+  }
+
+  onDelete(id: number) {
+    this.#confirmService
+      .open({
+        title: 'Eliminar',
+        message: '¿Estás seguro de eliminar este registro?',
+        color: 'danger',
+        confirmText: 'Si, eliminar',
+        cancelText: 'Cancelar',
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.#categoryService.delete(id).subscribe({
+            next: (response) => {
+              if (response.isValid) {
+                this.#globalNotification.openAlert(response);
+                this.onSearch();
+              } else {
+                this.#globalNotification.openAlert(response);
+              }
+            },
+            error: (response) => {
+              this.#globalNotification.openToastAlert('Error al eliminar', response, 'danger');
+            },
+          });
+        }
+      });
   }
 }

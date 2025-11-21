@@ -1,7 +1,7 @@
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { DocumentTypeForm } from '../core/types/document-type-form';
 
-export const buildCategoryForm = (): {
+export const buildDocumentTypeForm = (): {
   [K in keyof DocumentTypeForm]: FormControl<DocumentTypeForm[K]>;
 } => {
   return {

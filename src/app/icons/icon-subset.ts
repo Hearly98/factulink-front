@@ -72,6 +72,7 @@ import {
   cilPaperclip,
   cilPaperPlane,
   cilPen,
+  cilWarning,
   cilPencil,
   cilPeople,
   cilPrint,
@@ -109,6 +110,7 @@ export const iconSubset = {
   cilX,
   cilSearch,
   cilPlus,
+  cilWarning,
   cilCart,
   cilCash,
   cibCcAmex,
@@ -208,7 +210,7 @@ export const iconSubset = {
   cilUserFollow,
   cilUserUnfollow,
   logo,
-  signet
+  signet,
 };
 
 export enum IconSubset {
@@ -309,6 +311,5 @@ export enum IconSubset {
   cilUserFollow = 'cilUserFollow',
   cilUserUnfollow = 'cilUserUnfollow',
   logo = 'logo',
-  signet = 'signet'
+  signet = 'signet',
 }
-

@@ -15,11 +15,11 @@
     <c-row class="g-3 align-items-end" [formGroup]="form">
       <c-col sm="12" md="6" lg="4">
         <label for="">Nombre</label>
-        <input formControlName="prov_nom" type="text" class="form-control" />
+        <input formControlName="rol_nom" type="text" class="form-control" />
       </c-col>
       <c-col sm="12" md="6" lg="4">
-        <label for="">Empresa</label>
-        <select formControlName="emp_id" class="form-control form-select">
+        <label for="">Sucursal</label>
+        <select formControlName="suc_id" class="form-control form-select">
           <option [ngValue]="null">Seleccione</option>
           @for(sucursal of sucursales; track $index){
           <option [ngValue]="sucursal.suc_id">

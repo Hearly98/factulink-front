@@ -33,7 +33,6 @@
 
 <c-card class="mt-3">
   <c-card-body>
-
     <c-row>
       <c-col sm="12" md="12" lg="12">
         <table cTable striped="true">
@@ -47,10 +46,16 @@
             @for (category of categories; track $index) {
             <tr>
               <td>
-                <button (click)="openModal(category.cat_id)" size="sm" class="me-2" cButton color="info">
+                <button
+                  (click)="openModal(category.cat_id)"
+                  size="sm"
+                  class="me-2"
+                  cButton
+                  color="info"
+                >
                   <svg cIcon name="cilPencil"></svg>
                 </button>
-                <button size="sm" cButton color="danger">
+                <button (click)="onDelete(category.cat_id)" size="sm" cButton color="danger">
                   <svg cIcon name="cilTrash"></svg>
                 </button>
               </td>
@@ -59,8 +64,12 @@
             }
           </tbody>
         </table>
-        <app-paginator [(page)]="page.page" [pageSize]="page.pageSize" [total]="total"
-          (pageChange)="onPageChange($event)"></app-paginator>
+        <app-paginator
+          [(page)]="page.page"
+          [pageSize]="page.pageSize"
+          [total]="total"
+          (pageChange)="onPageChange($event)"
+        ></app-paginator>
       </c-col>
     </c-row>
   </c-card-body>

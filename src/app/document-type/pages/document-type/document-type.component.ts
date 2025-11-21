@@ -81,7 +81,11 @@ import { DocumentTypeService } from '../../core/services/document-type.service';
                 </tr>
               </thead>
               <tbody>
-                @for (type of documentTypes; track $index) {
+                @if(documentTypes.length === 0){
+                <tr>
+                  <td colspan="2">No hay datos</td>
+                </tr>
+                }@else{ @for (type of documentTypes; track $index) {
                 <tr>
                   <td>
                     <button
@@ -99,7 +103,7 @@ import { DocumentTypeService } from '../../core/services/document-type.service';
                   </td>
                   <td>{{ type.tip_nom }}</td>
                 </tr>
-                }
+                } }
               </tbody>
             </table>
             <app-paginator
@@ -112,6 +116,7 @@ import { DocumentTypeService } from '../../core/services/document-type.service';
         </c-row>
       </c-card-body>
     </c-card>
+    <app-document-type-new-edit-modal #documentTypeNewEditModal></app-document-type-new-edit-modal>
   `,
   styles: ``,
 })
@@ -171,5 +176,11 @@ export class DocumentTypeComponent extends BaseSearchComponent {
     this.onSearch();
   }
 
-  openModal(id?: number) {}
+  openModal(id?: number) {
+    if (this.documentTypeNewEditModal) {
+      this.documentTypeNewEditModal.openModal(id, () => {
+        this.onSearch();
+      });
+    }
+  }
 }

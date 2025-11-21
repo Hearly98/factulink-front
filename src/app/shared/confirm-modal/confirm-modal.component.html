@@ -1,20 +1,29 @@
 @if(show()){
 <c-modal backdrop="static" [visible]="show()" alignment="center">
-    <c-modal-header>
+  <c-modal-body>
+    <c-row class="mb-2 text-start align-items-center">
+      <c-col md="1">
         <svg cIcon [name]="iconName()" class="me-2" [cTextColor]="color"></svg>
+      </c-col>
+      <c-col md="11">
         <h5 cModalTitle>{{ title }}</h5>
-    </c-modal-header>
-    <c-modal-body>
-        <p [innerHTML]="message"></p>
-    </c-modal-body>
-    <c-modal-footer>
-        <button type="button" class="btn btn-cancel" (click)="hide()">
-            {{ cancelText }}
-        </button>
-        <button type="button" class="btn btn-confirm" (click)="doConfirm()">
-            {{ confirmText }}
-        </button>
-
-    </c-modal-footer>
+      </c-col>
+    </c-row>
+    <c-row class="align-items-center">
+      <c-col>
+        <p class="fs-5 m-0" [innerHTML]="message"></p>
+      </c-col>
+    </c-row>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="hide()">
+      <svg cIcon name="cilX"></svg>
+      {{ cancelText }}
+    </button>
+    <button cButton color="primary" (click)="doConfirm()">
+      <svg cIcon name="cilCheck"></svg>
+      {{ confirmText }}
+    </button>
+  </c-modal-footer>
 </c-modal>
 }

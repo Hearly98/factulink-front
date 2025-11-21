@@ -13,7 +13,7 @@ import { QueryResultsModel } from '@shared/models/query/query-results.model';
 })
 export class DocumentTypeService extends BaseService {
   constructor(http: HttpClient) {
-    super(http, `${environment.apiUrl}/tipo-documentos`);
+    super(http, `${environment.apiUrl}/tipo_documentos`);
   }
 
   getAll(): Observable<ResponseDto<GetDocumentTypeModel[]>> {
