@@ -101,6 +101,7 @@ import {
   cilPlus,
   cilX,
   cilSearch,
+  cilInfo,
 } from '@coreui/icons';
 
 import { signet } from './signet';
@@ -108,6 +109,7 @@ import { logo } from './logo';
 
 export const iconSubset = {
   cilX,
+  cilInfo,
   cilSearch,
   cilPlus,
   cilWarning,

@@ -7,6 +7,9 @@ import { QueryParamsModel } from '../../../shared/models/query/query-params.mode
 import { QueryResultsModel } from '../../../shared/models/query/query-results.model';
 import { DocumentModel } from '../models/document.model';
 import { environment } from '../../../../environments/environment';
+import { CreateDocumentModel } from '../models/create-document.model';
+import { UpdateDocumentModel } from '../models/update-document.model';
+import { GetDocumentModel } from '../models/get-document.model';
 @Injectable({
   providedIn: 'root',
 })
@@ -15,16 +18,28 @@ export class DocumentService extends BaseService {
     super(http, `${environment.apiUrl}/documentos`);
   }
 
-  getAll(): Observable<ResponseDto<DocumentModel[]>> {
-    return this.getRequest<ResponseDto<DocumentModel[]>>('');
+  getAll(): Observable<ResponseDto<GetDocumentModel[]>> {
+    return this.getRequest<ResponseDto<GetDocumentModel[]>>('');
   }
 
-  getById(id: number): Observable<ResponseDto<DocumentModel>> {
-    return this.getRequest<ResponseDto<DocumentModel>>(`/${id}`);
+  getById(id: number): Observable<ResponseDto<GetDocumentModel>> {
+    return this.getRequest<ResponseDto<GetDocumentModel>>(`/${id}`);
   }
 
-  search(body: QueryParamsModel): Observable<ResponseDto<QueryResultsModel<DocumentModel>>> {
-    return this.postRequest<QueryParamsModel, ResponseDto<QueryResultsModel<DocumentModel>>>(
+  delete(id: number): Observable<ResponseDto<GetDocumentModel>> {
+    return this.deleteRequest<ResponseDto<GetDocumentModel>>(`/${id}`);
+  }
+
+  create(body: CreateDocumentModel): Observable<ResponseDto<GetDocumentModel>> {
+    return this.postRequest<CreateDocumentModel, ResponseDto<GetDocumentModel>>(`/`, body);
+  }
+
+  update(body: UpdateDocumentModel): Observable<ResponseDto<GetDocumentModel>> {
+    return this.putRequest<UpdateDocumentModel, ResponseDto<GetDocumentModel>>('/', body);
+  }
+
+  search(body: QueryParamsModel): Observable<ResponseDto<QueryResultsModel<GetDocumentModel>>> {
+    return this.postRequest<QueryParamsModel, ResponseDto<QueryResultsModel<GetDocumentModel>>>(
       `/search`,
       body
     );

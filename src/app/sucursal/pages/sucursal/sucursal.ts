@@ -19,6 +19,8 @@ import { SucursalNewEditModal } from '../../components/sucursal-new-edit-modal/s
 import { FilterForm } from '../../core/types';
 import { GetSucursalModel } from '../../core/models';
 import { PaginatorComponent } from '../../../paginator/paginator.component';
+import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
+import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 
 @Component({
   selector: 'app-category',
@@ -44,7 +46,8 @@ export class Sucursal extends BaseSearchComponent {
   public title = 'Sucursales';
   #sucursalService = inject(SucursalService);
   public sucursals: GetSucursalModel[] = [];
-
+  #confirmService = inject(ConfirmService);
+  #globalNotification = inject(GlobalNotification);
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.SUCURSAL, viewContainerRef);
   }
@@ -98,5 +101,33 @@ export class Sucursal extends BaseSearchComponent {
         this.onSearch();
       });
     }
+  }
+
+  onDelete(id: number) {
+    this.#confirmService
+      .open({
+        title: 'Eliminar',
+        message: '¿Estás seguro de eliminar este registro?',
+        color: 'danger',
+        confirmText: 'Si, eliminar',
+        cancelText: 'Cancelar',
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.#sucursalService.delete(id).subscribe({
+            next: (response) => {
+              if (response.isValid) {
+                this.#globalNotification.openAlert(response);
+                this.onSearch();
+              } else {
+                this.#globalNotification.openAlert(response);
+              }
+            },
+            error: (response) => {
+              this.#globalNotification.openToastAlert('Error al eliminar', response, 'danger');
+            },
+          });
+        }
+      });
   }
 }

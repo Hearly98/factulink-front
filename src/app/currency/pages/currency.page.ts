@@ -19,6 +19,8 @@ import { PageParamsModel } from '../../shared/models/query/page-params.model';
 import { PaginatorComponent } from '../../paginator/paginator.component';
 import { CurrencyNewEditModalComponent } from '../components/currency-new-edit-modal.component';
 import { GetCurrencyModel } from '../core/models/get-currency.model';
+import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
+import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 
 @Component({
   selector: 'app-currency',
@@ -93,7 +95,7 @@ import { GetCurrencyModel } from '../core/models/get-currency.model';
                     >
                       <svg cIcon name="cilPencil"></svg>
                     </button>
-                    <button size="sm" cButton color="danger">
+                    <button (click)="onDelete(item.mon_id)" size="sm" cButton color="danger">
                       <svg cIcon name="cilTrash"></svg>
                     </button>
                   </td>
@@ -124,7 +126,8 @@ export class CurrencyPage extends BaseSearchComponent implements OnInit {
   public currencies: GetCurrencyModel[] = [];
   #formBuilder = inject(FormBuilder);
   #service = inject(CurrencyService);
-
+  #confirmService = inject(ConfirmService);
+  #globalNotification = inject(GlobalNotification);
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.COMPANY, viewContainerRef);
   }
@@ -181,5 +184,33 @@ export class CurrencyPage extends BaseSearchComponent implements OnInit {
         this.onSearch();
       });
     }
+  }
+
+  onDelete(id: number) {
+    this.#confirmService
+      .open({
+        title: 'Eliminar',
+        message: '¿Estás seguro de eliminar este registro?',
+        color: 'danger',
+        confirmText: 'Si, eliminar',
+        cancelText: 'Cancelar',
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.#service.delete(id).subscribe({
+            next: (response) => {
+              if (response.isValid) {
+                this.#globalNotification.openAlert(response);
+                this.onSearch();
+              } else {
+                this.#globalNotification.openAlert(response);
+              }
+            },
+            error: (response) => {
+              this.#globalNotification.openToastAlert('Error al eliminar', response, 'danger');
+            },
+          });
+        }
+      });
   }
 }

@@ -28,11 +28,12 @@ export class SucursalService extends BaseService {
     return this.postRequest<CreateSucursalModel, ResponseDto<GetSucursalModel>>(`/`, body);
   }
 
+  delete(id: number): Observable<ResponseDto<GetSucursalModel>> {
+    return this.deleteRequest<ResponseDto<GetSucursalModel>>(`/${id}`);
+  }
+
   update(body: UpdateSucursalModel): Observable<ResponseDto<GetSucursalModel>> {
-    return this.putRequest<UpdateSucursalModel, ResponseDto<GetSucursalModel>>(
-      `/`,
-      body
-    );
+    return this.putRequest<UpdateSucursalModel, ResponseDto<GetSucursalModel>>(`/`, body);
   }
 
   search(body: QueryParamsModel): Observable<ResponseDto<QueryResultsModel<GetSucursalModel>>> {

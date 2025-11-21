@@ -1,5 +1,12 @@
 import { Component, Inject, OnInit, ViewChild, ViewContainerRef, inject } from '@angular/core';
-import { RowComponent, ColComponent, CardComponent, CardBodyComponent, ButtonDirective, TableDirective } from '@coreui/angular';
+import {
+  RowComponent,
+  ColComponent,
+  CardComponent,
+  CardBodyComponent,
+  ButtonDirective,
+  TableDirective,
+} from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { BaseSearchComponent } from '../../shared/base/search-base.component';
@@ -13,6 +20,8 @@ import { PageParamsModel } from '../../shared/models/query/page-params.model';
 import { PaginatorComponent } from '../../paginator/paginator.component';
 import { DocumentNewEditModalComponent } from '../components/document-new-edit-modal.component';
 import { GetDocumentModel } from '../core/models/get-document.model';
+import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
+import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
 
 @Component({
   selector: 'app-document',
@@ -51,10 +60,6 @@ import { GetDocumentModel } from '../core/models/get-document.model';
                 <label for="">Nombre</label>
                 <input formControlName="doc_nom" type="text" class="form-control" />
               </c-col>
-              <c-col sm="12" md="6" lg="4">
-                <label for="">Tipo</label>
-                <input formControlName="doc_tipo" type="text" class="form-control" />
-              </c-col>
               <c-col>
                 <button cButton color="primary" (click)="onSearch()" class="me-2">
                   <svg cIcon name="cilSearch"></svg>
@@ -70,25 +75,36 @@ import { GetDocumentModel } from '../core/models/get-document.model';
                   <thead>
                     <tr>
                       <th>Acciones</th>
+                      <th>Código</th>
                       <th>Nombre</th>
-                      <th>Tipo</th>
                     </tr>
                   </thead>
                   <tbody>
+                    @if(documents.length == 0){
+                    <tr>
+                      <td colspan="3" class="text-start">No hay datos</td>
+                    </tr>
+                    } @else {
                     @for (item of documents; track $index) {
                     <tr>
                       <td>
-                        <button (click)="openModal(item.doc_id)" size="sm" class="me-2" cButton color="info">
+                        <button
+                          (click)="openModal(item.doc_id)"
+                          size="sm"
+                          class="me-2"
+                          cButton
+                          color="info"
+                        >
                           <svg cIcon name="cilPencil"></svg>
                         </button>
-                        <button size="sm" cButton color="danger">
+                        <button (click)="onDelete(item.doc_id)" size="sm" cButton color="danger">
                           <svg cIcon name="cilTrash"></svg>
                         </button>
                       </td>
+                      <td>{{ item.doc_cod }}</td>
                       <td>{{ item.doc_nom }}</td>
-                      <td>{{ item.doc_tipo }}</td>
                     </tr>
-                    }
+                    } }
                   </tbody>
                 </table>
                 <app-paginator
@@ -115,7 +131,8 @@ export class DocumentPage extends BaseSearchComponent implements OnInit {
   public documents: GetDocumentModel[] = [];
   #formBuilder = inject(FormBuilder);
   #service = inject(DocumentService);
-
+  #confirmService = inject(ConfirmService);
+  #globalNotification = inject(GlobalNotification);
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.COMPANY, viewContainerRef);
   }
@@ -168,5 +185,33 @@ export class DocumentPage extends BaseSearchComponent implements OnInit {
         this.onSearch();
       });
     }
+  }
+
+  onDelete(id: number) {
+    this.#confirmService
+      .open({
+        title: 'Eliminar',
+        message: '¿Estás seguro de eliminar este registro?',
+        color: 'danger',
+        confirmText: 'Si, eliminar',
+        cancelText: 'Cancelar',
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.#service.delete(id).subscribe({
+            next: (response) => {
+              if (response.isValid) {
+                this.#globalNotification.openAlert(response);
+                this.onSearch();
+              } else {
+                this.#globalNotification.openAlert(response);
+              }
+            },
+            error: (response) => {
+              this.#globalNotification.openToastAlert('Error al eliminar', response, 'danger');
+            },
+          });
+        }
+      });
   }
 }

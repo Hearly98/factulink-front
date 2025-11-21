@@ -20,6 +20,8 @@ import { PageParamsModel } from '../../shared/models/query/page-params.model';
 import { PaginatorComponent } from '../../paginator/paginator.component';
 import { OrganizationNewEditModalComponent } from '../components/organization-new-edit-modal.component';
 import { GetOrganizationModel } from '../core/models/get-organization.model';
+import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
+import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
 
 @Component({
   selector: 'app-organization',
@@ -95,7 +97,7 @@ import { GetOrganizationModel } from '../core/models/get-organization.model';
                     >
                       <svg cIcon name="cilPencil"></svg>
                     </button>
-                    <button size="sm" cButton color="danger">
+                    <button (click)="onDelete(item.emp_id)" size="sm" cButton color="danger">
                       <svg cIcon name="cilTrash"></svg>
                     </button>
                   </td>
@@ -128,7 +130,8 @@ export class OrganizationPage extends BaseSearchComponent implements OnInit {
   public organizations: GetOrganizationModel[] = [];
   #formBuilder = inject(FormBuilder);
   #service = inject(OrganizationService);
-
+  #confirmService = inject(ConfirmService);
+  #globalNotification = inject(GlobalNotification);
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.COMPANY, viewContainerRef);
   }
@@ -182,5 +185,33 @@ export class OrganizationPage extends BaseSearchComponent implements OnInit {
         this.onSearch();
       });
     }
+  }
+
+  onDelete(id: number) {
+    this.#confirmService
+      .open({
+        title: 'Eliminar',
+        message: '¿Estás seguro de eliminar este registro?',
+        color: 'danger',
+        confirmText: 'Si, eliminar',
+        cancelText: 'Cancelar',
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.#service.delete(id).subscribe({
+            next: (response) => {
+              if (response.isValid) {
+                this.#globalNotification.openAlert(response);
+                this.onSearch();
+              } else {
+                this.#globalNotification.openAlert(response);
+              }
+            },
+            error: (response) => {
+              this.#globalNotification.openToastAlert('Error al eliminar', response, 'danger');
+            },
+          });
+        }
+      });
   }
 }

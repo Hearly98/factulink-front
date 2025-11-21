@@ -1,4 +1,4 @@
 export const documentStructure = [
-  { label: 'Nombre', formControlName: 'doc_nom', type: 'text', col: '6' },
-  { label: 'Tipo', formControlName: 'doc_tipo', type: 'text', col: '6' },
+  { label: 'Código', formControlName: 'doc_cod', type: 'text', col: '12' },
+  { label: 'Nombre', formControlName: 'doc_nom', type: 'text', col: '12' },
 ];
