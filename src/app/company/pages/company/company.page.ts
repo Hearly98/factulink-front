@@ -20,6 +20,8 @@ import { PageParamsModel } from '../../../shared/models/query/page-params.model'
 import { PaginatorComponent } from '../../../paginator/paginator.component';
 import { CompanyNewEditModalComponent } from '../../components/company-new-edit-modal.component';
 import { GetCompanyModel } from '../../core/models/get-company.model';
+import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
+import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 
 @Component({
   selector: 'app-company',
@@ -92,7 +94,7 @@ import { GetCompanyModel } from '../../core/models/get-company.model';
                         >
                           <svg cIcon name="cilPencil"></svg>
                         </button>
-                        <button size="sm" cButton color="danger">
+                        <button (click)="onDelete(item.com_id)" size="sm" cButton color="danger">
                           <svg cIcon name="cilTrash"></svg>
                         </button>
                       </td>
@@ -126,6 +128,8 @@ export class CompanyPage extends BaseSearchComponent implements OnInit {
   public form!: TypedFormGroup<FilterForm>;
   public title = 'Compañías';
   public companies: GetCompanyModel[] = [];
+  #confirmService = inject(ConfirmService);
+  #globalNotification = inject(GlobalNotification);
   #formBuilder = inject(FormBuilder);
   #service = inject(CompanyService);
 
@@ -182,5 +186,33 @@ export class CompanyPage extends BaseSearchComponent implements OnInit {
         this.onSearch();
       });
     }
+  }
+
+  onDelete(id: number) {
+    this.#confirmService
+      .open({
+        title: 'Eliminar',
+        message: '¿Estás seguro de eliminar este registro?',
+        color: 'danger',
+        confirmText: 'Si, eliminar',
+        cancelText: 'Cancelar',
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.#service.delete(id).subscribe({
+            next: (response) => {
+              if (response.isValid) {
+                this.#globalNotification.openAlert(response);
+                this.onSearch();
+              } else {
+                this.#globalNotification.openAlert(response);
+              }
+            },
+            error: (response) => {
+              this.#globalNotification.openToastAlert('Error al eliminar', response, 'danger');
+            },
+          });
+        }
+      });
   }
 }

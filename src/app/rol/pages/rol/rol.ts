@@ -21,6 +21,8 @@ import { RolService } from '../../core/services/rol.service';
 import { GetRolModel } from '../../core/models';
 import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service';
 import { GetSucursalModel } from 'src/app/sucursal/core/models';
+import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
+import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
 
 @Component({
   selector: 'app-category',
@@ -46,6 +48,8 @@ export class Rol extends BaseSearchComponent {
   public title = 'Roles';
   #rolService = inject(RolService);
   #sucursalService = inject(SucursalService);
+  #globalNotification = inject(GlobalNotification);
+  #confirmService = inject(ConfirmService);
   public roles: GetRolModel[] = [];
   public sucursales: GetSucursalModel[] = [];
 
@@ -108,5 +112,33 @@ export class Rol extends BaseSearchComponent {
 
   loadSelectCombos() {
     this.fetchData(this.#sucursalService.getAll(), this.sucursales);
+  }
+
+  onDelete(id: number) {
+    this.#confirmService
+      .open({
+        title: 'Eliminar',
+        message: '¿Estás seguro de eliminar este registro?',
+        color: 'danger',
+        confirmText: 'Si, eliminar',
+        cancelText: 'Cancelar',
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.#rolService.delete(id).subscribe({
+            next: (response) => {
+              if (response.isValid) {
+                this.#globalNotification.openAlert(response);
+                this.onSearch();
+              } else {
+                this.#globalNotification.openAlert(response);
+              }
+            },
+            error: (response) => {
+              this.#globalNotification.openToastAlert('Error al eliminar', response, 'danger');
+            },
+          });
+        }
+      });
   }
 }
