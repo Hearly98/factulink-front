@@ -19,6 +19,8 @@ import { PaginatorComponent } from '../../../paginator/paginator.component';
 import { DocumentTypeNewEditModalComponent } from '../../components/document-type-new-edit/document-type-new-edit-modal.component';
 import { GetDocumentTypeModel } from '../../core/models';
 import { DocumentTypeService } from '../../core/services/document-type.service';
+import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
+import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 
 @Component({
   selector: 'app-document-type',
@@ -97,7 +99,7 @@ import { DocumentTypeService } from '../../core/services/document-type.service';
                     >
                       <svg cIcon name="cilPencil"></svg>
                     </button>
-                    <button size="sm" cButton color="danger">
+                    <button (click)="onDelete(type.tip_id)" size="sm" cButton color="danger">
                       <svg cIcon name="cilTrash"></svg>
                     </button>
                   </td>
@@ -128,7 +130,8 @@ export class DocumentTypeComponent extends BaseSearchComponent {
   public title = 'Tipo Documentos';
   #documentTypeService = inject(DocumentTypeService);
   public documentTypes: GetDocumentTypeModel[] = [];
-
+  #confirmService = inject(ConfirmService);
+  #globalNotification = inject(GlobalNotification);
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.ADMINISTRATION, viewContainerRef);
   }
@@ -182,5 +185,33 @@ export class DocumentTypeComponent extends BaseSearchComponent {
         this.onSearch();
       });
     }
+  }
+
+  onDelete(id: number) {
+    this.#confirmService
+      .open({
+        title: 'Eliminar',
+        message: '¿Estás seguro de eliminar este registro?',
+        color: 'danger',
+        confirmText: 'Si, eliminar',
+        cancelText: 'Cancelar',
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.#documentTypeService.delete(id).subscribe({
+            next: (response) => {
+              if (response.isValid) {
+                this.#globalNotification.openAlert(response);
+                this.onSearch();
+              } else {
+                this.#globalNotification.openAlert(response);
+              }
+            },
+            error: (response) => {
+              this.#globalNotification.openToastAlert('Error al eliminar', response, 'danger');
+            },
+          });
+        }
+      });
   }
 }
