@@ -6,9 +6,9 @@ import { QueryParamsModel } from '@shared/models/query/query-params.model';
 import { Observable } from 'rxjs';
 import { ResponseDto } from '@shared/models/api/response.dto';
 import { GetSupplierModel } from '../models/get-supplier.model';
-import { UpdateCustomerModel } from 'src/app/customer/core/models';
 import { QueryResultsModel } from '@shared/models/query/query-results.model';
 import { CreateSupplierModel } from '../models';
+import { UpdateSupplierModel } from '../models/update-supplier.model';
 
 @Injectable({
   providedIn: 'root',
@@ -26,8 +26,8 @@ export class SupplierService extends BaseService {
     return this.postRequest<CreateSupplierModel, ResponseDto<GetSupplierModel>>('/', body);
   }
 
-  update(body: UpdateCustomerModel): Observable<ResponseDto<GetSupplierModel>> {
-    return this.putRequest<UpdateCustomerModel, ResponseDto<GetSupplierModel>>('/', body);
+  update(body: UpdateSupplierModel): Observable<ResponseDto<GetSupplierModel>> {
+    return this.putRequest<UpdateSupplierModel, ResponseDto<GetSupplierModel>>('/', body);
   }
 
   getById(id: number): Observable<ResponseDto<GetSupplierModel>> {

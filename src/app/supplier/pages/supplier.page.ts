@@ -1,4 +1,4 @@
-import { Component, Inject, inject, signal, ViewContainerRef } from '@angular/core';
+import { Component, Inject, inject, signal, ViewChild, ViewContainerRef } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import {
   ButtonDirective,
@@ -18,6 +18,9 @@ import { GetSupplierModel } from '../core/models/get-supplier.model';
 import { SupplierService } from '../core/services/supplier.service';
 import { FilterForm } from '../core/types/filter-form';
 import { buildFilterForm, filterSort, mapParams } from '../helpers';
+import { SupplierNewEditModalComponent } from '../component/supplier-new-edit-modal.component';
+import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
+import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 @Component({
   selector: 'app-supplier',
   imports: [
@@ -30,6 +33,7 @@ import { buildFilterForm, filterSort, mapParams } from '../helpers';
     TableDirective,
     ReactiveFormsModule,
     PaginatorComponent,
+    SupplierNewEditModalComponent,
   ],
   template: `
     <c-row>
@@ -77,19 +81,28 @@ import { buildFilterForm, filterSort, mapParams } from '../helpers';
                 </tr>
               </thead>
               <tbody>
-                @for (supplier of suppliers; track $index) {
+                @if(suppliers.length > 0){ @for (supplier of suppliers; track $index) {
                 <tr>
                   <td>
-                    <button (click)="openModal(supplier.prov_id)" size="sm">
-                      class="me-2" cButton color="info" >
+                    <button
+                      (click)="openModal(supplier.prov_id)"
+                      size="sm"
+                      class="me-2"
+                      cButton
+                      color="info"
+                    >
                       <svg cIcon name="cilPencil"></svg>
                     </button>
-                    <button size="sm" cButton color="danger">
+                    <button (click)="onDelete(supplier.prov_id)" size="sm" cButton color="danger">
                       <svg cIcon name="cilTrash"></svg>
                     </button>
                   </td>
                   <td>{{ supplier.prov_nom }}</td>
                   <td>{{ supplier.prov_ruc }}</td>
+                </tr>
+                } }@else {
+                <tr>
+                  <td colspan="2">No hay datos</td>
                 </tr>
                 }
               </tbody>
@@ -104,14 +117,18 @@ import { buildFilterForm, filterSort, mapParams } from '../helpers';
         </c-row>
       </c-card-body>
     </c-card>
+    <app-supplier-new-edit-modal #supplierNewEditModal></app-supplier-new-edit-modal>
   `,
   styles: ``,
 })
 export class SupplierPage extends BaseSearchComponent {
+  @ViewChild('supplierNewEditModal') supplierNewEditModal!: SupplierNewEditModalComponent;
   public form!: TypedFormGroup<FilterForm>;
   #formBuilder = inject(FormBuilder);
   public title = signal('Proveedores');
   #supplierService = inject(SupplierService);
+  #confirmService = inject(ConfirmService);
+  #globalNotification = inject(GlobalNotification);
   public suppliers: GetSupplierModel[] = [];
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
@@ -161,5 +178,39 @@ export class SupplierPage extends BaseSearchComponent {
     this.onSearch();
   }
 
-  openModal(id?: number) {}
+  openModal(id?: number) {
+    if (this.supplierNewEditModal) {
+      this.supplierNewEditModal.openModal(id, () => {
+        this.onSearch();
+      });
+    }
+  }
+
+  onDelete(id: number) {
+    this.#confirmService
+      .open({
+        title: 'Eliminar',
+        message: '¿Estás seguro de eliminar este registro?',
+        color: 'danger',
+        confirmText: 'Si, eliminar',
+        cancelText: 'Cancelar',
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.#supplierService.delete(id).subscribe({
+            next: (response) => {
+              if (response.isValid) {
+                this.#globalNotification.openAlert(response);
+                this.onSearch();
+              } else {
+                this.#globalNotification.openAlert(response);
+              }
+            },
+            error: (response) => {
+              this.#globalNotification.openToastAlert('Error al eliminar', response, 'danger');
+            },
+          });
+        }
+      });
+  }
 }

@@ -1,32 +1,38 @@
-export const customerStructure = [
+export const supplierStructure = [
   {
     label: 'Nombre',
-    formControlName: 'cli_nom',
+    formControlName: 'prov_nom',
     type: 'text',
     col: '12',
   },
   {
-    label: 'RUC',
-    formControlName: 'cli_ruc',
+    label: 'Tipo Documento',
+    formControlName: 'tip_id',
+    type: 'select',
+    col: '12',
+  },
+  {
+    label: 'Documento',
+    formControlName: 'prov_documento',
     type: 'text',
-    col: '6',
+    col: '12',
   },
   {
     label: 'Telefono',
-    formControlName: 'cli_telf',
+    formControlName: 'prov_telf',
     type: 'text',
-    col: '6',
+    col: '12',
   },
   {
     label: 'Correo',
-    formControlName: 'cli_correo',
+    formControlName: 'prov_correo',
     type: 'text',
-    col: '6',
+    col: '12',
   },
   {
     label: 'Direccion',
-    formControlName: 'cli_direcc',
+    formControlName: 'prov_direcc',
     type: 'text',
-    col: '6',
+    col: '12',
   },
 ];
