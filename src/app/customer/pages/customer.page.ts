@@ -1,4 +1,4 @@
-import { Component, Inject, inject, ViewContainerRef } from '@angular/core';
+import { Component, Inject, inject, ViewChild, ViewContainerRef } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import {
   ButtonDirective,
@@ -20,6 +20,7 @@ import { CustomerService } from '../core/services/customer.service';
 import { GetCustomerModel } from '../core/models';
 import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
+import { CustomerNewEditModalComponent } from '../components/customer-new-edit-modal.component';
 
 @Component({
   selector: 'app-customer',
@@ -33,6 +34,7 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
     TableDirective,
     ReactiveFormsModule,
     PaginatorComponent,
+    CustomerNewEditModalComponent,
   ],
   template: `
     <c-row>
@@ -80,7 +82,7 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
                 </tr>
               </thead>
               <tbody>
-                @for (customer of customers; track $index) {
+                @if(customers.length > 0){ @for (customer of customers; track $index) {
                 <tr>
                   <td>
                     <button
@@ -99,6 +101,10 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
                   <td>{{ customer.cli_nom }}</td>
                   <td>{{ customer.cli_ruc }}</td>
                 </tr>
+                } }@else {
+                <tr>
+                  <td colspan="2">No hay datos</td>
+                </tr>
                 }
               </tbody>
             </table>
@@ -112,10 +118,12 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
         </c-row>
       </c-card-body>
     </c-card>
+    <app-customer-new-edit-modal #customerNewEditModal></app-customer-new-edit-modal>
   `,
   styles: ``,
 })
 export class CustomerPage extends BaseSearchComponent {
+  @ViewChild('customerNewEditModal') customerNewEditModal!: CustomerNewEditModalComponent;
   public form!: TypedFormGroup<FilterForm>;
   #formBuilder = inject(FormBuilder);
   public title = 'Clientes';
@@ -171,7 +179,13 @@ export class CustomerPage extends BaseSearchComponent {
     this.onSearch();
   }
 
-  openModal(id?: number) {}
+  openModal(id?: number) {
+    if (this.customerNewEditModal) {
+      this.customerNewEditModal.openModal(id, (customer: GetCustomerModel) => {
+        this.onSearch();
+      });
+    }
+  }
 
   onDelete(id: number) {
     this.#confirmService
