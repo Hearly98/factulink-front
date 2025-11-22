@@ -18,6 +18,8 @@ import { BaseSearchComponent } from '@shared/base/search-base.component';
 import { FilterForm } from '../core/types/filter-form';
 import { CustomerService } from '../core/services/customer.service';
 import { GetCustomerModel } from '../core/models';
+import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
+import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 
 @Component({
   selector: 'app-customer',
@@ -90,7 +92,7 @@ import { GetCustomerModel } from '../core/models';
                     >
                       <svg cIcon name="cilPencil"></svg>
                     </button>
-                    <button size="sm" cButton color="danger">
+                    <button (click)="onDelete(customer.cli_id)" size="sm" cButton color="danger">
                       <svg cIcon name="cilTrash"></svg>
                     </button>
                   </td>
@@ -119,6 +121,8 @@ export class CustomerPage extends BaseSearchComponent {
   public title = 'Clientes';
   #customerService = inject(CustomerService);
   public customers: GetCustomerModel[] = [];
+  #confirmService = inject(ConfirmService);
+  #globalNotification = inject(GlobalNotification);
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.CUSTOMER, viewContainerRef);
@@ -168,4 +172,32 @@ export class CustomerPage extends BaseSearchComponent {
   }
 
   openModal(id?: number) {}
+
+  onDelete(id: number) {
+    this.#confirmService
+      .open({
+        title: 'Eliminar',
+        message: '¿Estás seguro de eliminar este registro?',
+        color: 'danger',
+        confirmText: 'Si, eliminar',
+        cancelText: 'Cancelar',
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.#customerService.delete(id).subscribe({
+            next: (response) => {
+              if (response.isValid) {
+                this.#globalNotification.openAlert(response);
+                this.onSearch();
+              } else {
+                this.#globalNotification.openAlert(response);
+              }
+            },
+            error: (response) => {
+              this.#globalNotification.openToastAlert('Error al eliminar', response, 'danger');
+            },
+          });
+        }
+      });
+  }
 }

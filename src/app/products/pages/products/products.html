@@ -24,7 +24,7 @@
             <select formControlName="cat_id" class="form-control form-select">
               <option [ngValue]="null">Todas</option>
               @for(categoria of categorias; track $index){
-                <option [ngValue]="categoria.cat_id">{{categoria.cat_nom}}</option>
+              <option [ngValue]="categoria.cat_id">{{ categoria.cat_nom }}</option>
               }
             </select>
           </c-col>
@@ -33,7 +33,7 @@
             <select formControlName="suc_id" class="form-control form-select">
               <option [ngValue]="null">Todas</option>
               @for(sucursal of sucursales; track $index){
-                <option [ngValue]="sucursal.suc_id">{{sucursal.suc_nom}}</option>
+              <option [ngValue]="sucursal.suc_id">{{ sucursal.suc_nom }}</option>
               }
             </select>
           </c-col>
@@ -73,7 +73,7 @@
                     >
                       <svg cIcon name="cilPencil"></svg>
                     </button>
-                    <button size="sm" cButton color="danger">
+                    <button (click)="onDelete(product.prod_id)" size="sm" cButton color="danger">
                       <svg cIcon name="cilTrash"></svg>
                     </button>
                   </td>

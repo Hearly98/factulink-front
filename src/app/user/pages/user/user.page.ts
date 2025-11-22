@@ -9,7 +9,6 @@ import {
   TableDirective,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
-import { CategoryNewEditModal } from 'src/app/category/components/category-new-edit-modal/category-new-edit-modal';
 import { PaginatorComponent } from 'src/app/paginator/paginator.component';
 import { UserNewEditModalComponent } from '../../components/user-new-edit/user-new-edit-modal.component';
 import { TypedFormGroup } from '@shared/types/types-form';
@@ -20,6 +19,8 @@ import { PageParamsModel } from '@shared/models/query/page-params.model';
 import { FilterForm } from '../../core/types';
 import { GetUserModel } from '../../core/models';
 import { buildFilterForm, filterSort, mapParams } from '../../helpers';
+import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
+import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
 
 @Component({
   selector: 'app-user',
@@ -92,7 +93,7 @@ import { buildFilterForm, filterSort, mapParams } from '../../helpers';
                     >
                       <svg cIcon name="cilPencil"></svg>
                     </button>
-                    <button size="sm" cButton color="danger">
+                    <button (click)="onDelete(user.usu_id)" size="sm" cButton color="danger">
                       <svg cIcon name="cilTrash"></svg>
                     </button>
                   </td>
@@ -120,6 +121,8 @@ export class UserPage extends BaseSearchComponent {
   #formBuilder = inject(FormBuilder);
   title = signal<string>('Usuarios');
   #userService = inject(UserService);
+  #confirmService = inject(ConfirmService);
+  #globalNotification = inject(GlobalNotification);
   public users: GetUserModel[] = [];
   public roles: any[] = [];
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
@@ -175,5 +178,33 @@ export class UserPage extends BaseSearchComponent {
         this.onSearch();
       });
     }
+  }
+
+  onDelete(id: number) {
+    this.#confirmService
+      .open({
+        title: 'Eliminar',
+        message: '¿Estás seguro de eliminar este registro?',
+        color: 'danger',
+        confirmText: 'Si, eliminar',
+        cancelText: 'Cancelar',
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.#userService.delete(id).subscribe({
+            next: (response) => {
+              if (response.isValid) {
+                this.#globalNotification.openAlert(response);
+                this.onSearch();
+              } else {
+                this.#globalNotification.openAlert(response);
+              }
+            },
+            error: (response) => {
+              this.#globalNotification.openToastAlert('Error al eliminar', response, 'danger');
+            },
+          });
+        }
+      });
   }
 }

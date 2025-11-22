@@ -1,5 +1,12 @@
 import { Component, Inject, inject, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
-import { ButtonDirective, CardBodyComponent, CardComponent, ColComponent, RowComponent, TableDirective } from '@coreui/angular';
+import {
+  ButtonDirective,
+  CardBodyComponent,
+  CardComponent,
+  ColComponent,
+  RowComponent,
+  TableDirective,
+} from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { ProductService } from '../../core/services/product.service';
 import { TypedFormGroup } from '../../../shared/types/types-form';
@@ -10,13 +17,15 @@ import { FilterForm } from '../../core/types/filter-form';
 import { BaseSearchComponent } from '../../../shared/base/search-base.component';
 import { MODULES } from '../../../core/config/permissions/modules';
 import { PageParamsModel } from '../../../shared/models/query/page-params.model';
-import { ProductNewEditModal } from "../../components/product-new-edit-modal/product-new-edit-modal";
-import { PaginatorComponent } from "../../../paginator/paginator.component";
+import { ProductNewEditModal } from '../../components/product-new-edit-modal/product-new-edit-modal';
+import { PaginatorComponent } from '../../../paginator/paginator.component';
 import { GetProductModel } from '../../core/models';
 import { CategoryService } from '../../../category/core/services/category.service';
 import { GetCategoryModel } from '../../../category/core/models';
 import { SucursalService } from '../../../sucursal/core/services/sucursal.service';
 import { GetSucursalModel } from '../../../sucursal/core/models';
+import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
+import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
 
 @Component({
   selector: 'app-products',
@@ -30,7 +39,7 @@ import { GetSucursalModel } from '../../../sucursal/core/models';
     TableDirective,
     ReactiveFormsModule,
     ProductNewEditModal,
-    PaginatorComponent
+    PaginatorComponent,
   ],
   templateUrl: './products.html',
   styleUrl: './products.scss',
@@ -43,13 +52,13 @@ export class Products extends BaseSearchComponent implements OnInit {
   #productService = inject(ProductService);
   #categoryService = inject(CategoryService);
   #sucursalService = inject(SucursalService);
+  #confirmService = inject(ConfirmService);
+  #globalNotification = inject(GlobalNotification);
   public products: GetProductModel[] = [];
   public categorias: GetCategoryModel[] = [];
   public sucursales: GetSucursalModel[] = [];
 
-  constructor(
-    @Inject(ViewContainerRef) viewContainerRef: ViewContainerRef
-  ) {
+  constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.PRODUCT, viewContainerRef);
   }
 
@@ -60,7 +69,7 @@ export class Products extends BaseSearchComponent implements OnInit {
   }
 
   createForm() {
-    this.form = this.#formBuilder.group(buildFilterForm())
+    this.form = this.#formBuilder.group(buildFilterForm());
   }
 
   loadSelectCombos() {
@@ -88,9 +97,9 @@ export class Products extends BaseSearchComponent implements OnInit {
       },
       error: (response) => {
         console.error(response.messages);
-      }
+      },
     });
-    this.subscriptions.push(subscription)
+    this.subscriptions.push(subscription);
   }
 
   onPageChange(page: number): void {
@@ -104,8 +113,36 @@ export class Products extends BaseSearchComponent implements OnInit {
   openModal(id?: number) {
     if (this.productNewEditModal) {
       this.productNewEditModal.openModal(id, () => {
-        this.onSearch()
-      })
+        this.onSearch();
+      });
     }
+  }
+
+  onDelete(id: number) {
+    this.#confirmService
+      .open({
+        title: 'Eliminar',
+        message: '¿Estás seguro de eliminar este registro?',
+        color: 'danger',
+        confirmText: 'Si, eliminar',
+        cancelText: 'Cancelar',
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.#categoryService.delete(id).subscribe({
+            next: (response) => {
+              if (response.isValid) {
+                this.#globalNotification.openAlert(response);
+                this.onSearch();
+              } else {
+                this.#globalNotification.openAlert(response);
+              }
+            },
+            error: (response) => {
+              this.#globalNotification.openToastAlert('Error al eliminar', response, 'danger');
+            },
+          });
+        }
+      });
   }
 }
