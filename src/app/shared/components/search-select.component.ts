@@ -1,12 +1,19 @@
-import { Component, EventEmitter, Input, Output, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnInit,
+  Output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import {
-  DropdownComponent,
-  DropdownItemDirective,
-  DropdownMenuDirective,
   DropdownModule,
-  SpinnerComponent,
+  SpinnerComponent
 } from '@coreui/angular';
 
 import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs';
@@ -16,33 +23,39 @@ import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, DropdownModule, SpinnerComponent],
   template: `
-    <div class="position-relative">
+    <div class="position-relative" #container>
       <!-- INPUT -->
       <input
         type="text"
         class="form-control"
         [placeholder]="placeholder"
         [formControl]="searchCtrl"
-        (focus)="open = true"
+        (focus)="openDropdown()"
       />
 
-      <!-- SPINNER -->
-      @if(loading()){
-      <c-spinner
-        class="position-absolute end-0 top-50 translate-middle-y me-2"
-        size="sm"
-      ></c-spinner>
-
-      }@else {
-      <div class="p-2 text-muted">Sin resultados</div>
-      }
       <!-- DROPDOWN -->
       <c-dropdown [visible]="open" class="w-100 mt-1">
-        <ul class="w-100" style="max-height: 250px; overflow:auto;">
-          @for(item of data(); track $index){
-          <li cDropdownItem (click)="selectItem(item)">
-            {{ item[bindLabel] }}
-          </li>
+        <ul cDropdownMenu class="w-100 p-0" style="max-height: 250px; overflow:auto;">
+          
+          <!-- LOADING -->
+          @if (loading()) {
+            <li class="p-2 text-center text-muted">
+              <c-spinner size="sm"></c-spinner>
+            </li>
+          }
+
+          <!-- SIN RESULTADOS -->
+          @else if (!loading() && data().length === 0) {
+            <li class="p-2 text-muted">Sin resultados</li>
+          }
+
+          <!-- LISTA -->
+          @else {
+            @for(item of data(); track $index){
+              <li cDropdownItem (click)="selectItem(item)">
+                {{ item[bindLabel] }}
+              </li>
+            }
           }
         </ul>
       </c-dropdown>
@@ -50,14 +63,14 @@ import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs';
   `,
 })
 export class SearchSelectComponent implements OnInit {
+  
   @Input() placeholder: string = 'Buscar...';
-
-  @Input() bindLabel: string = 'nombre'; // campo visible
-  @Input() bindValue: string = 'id'; // valor a devolver
-
-  @Input() serviceFn!: (term: string) => any; // función que llama al backend
+  @Input() bindLabel: string = 'label';
+  @Input() bindValue: string = 'value';
+  @Input() serviceFn!: (term: string) => any;
 
   @Output() itemSelected = new EventEmitter<any>();
+  @Output() cleared = new EventEmitter<void>(); // opcional, útil
 
   searchCtrl = new FormControl('');
   open = false;
@@ -65,25 +78,66 @@ export class SearchSelectComponent implements OnInit {
   loading = signal(false);
   data = signal<any[]>([]);
 
+  // referencia al contenedor para detectar clicks afuera
+  container = viewChild<ElementRef>('container');
+
   ngOnInit(): void {
+    this.setupSearchListener();
+  }
+
+  // -----------------------------
+  // LISTENER PRINCIPAL
+  // -----------------------------
+  setupSearchListener() {
     this.searchCtrl.valueChanges
       .pipe(
-        debounceTime(300),
+        debounceTime(350),
         distinctUntilChanged(),
-        tap(() => {
+        tap((value) => {
+          if (!value) {
+            this.data.set([]);
+            this.itemSelected.emit(null);
+            this.cleared.emit();
+            return;
+          }
           this.loading.set(true);
         }),
         switchMap((term) => this.serviceFn(term || ''))
       )
       .subscribe((resp: any) => {
-        this.data.set(resp.data || resp); // soporta resp.data o arreglo directo
+        const parsed = resp.data || resp;
+        this.data.set(parsed);
         this.loading.set(false);
       });
   }
 
+  // -----------------------------
+  // SELECTOR
+  // -----------------------------
   selectItem(item: any) {
-    this.itemSelected.emit(item[this.bindValue]);
-    this.open = false;
+    this.itemSelected.emit(item);
     this.searchCtrl.setValue(item[this.bindLabel], { emitEvent: false });
+    this.closeDropdown();
+  }
+
+  // -----------------------------
+  // CONTROL DE DROPDOWN
+  // -----------------------------
+  openDropdown() {
+    this.open = true;
+  }
+
+  closeDropdown() {
+    this.open = false;
+  }
+
+  // -----------------------------
+  // CLICK FUERA → cerrar dropdown
+  // -----------------------------
+  @HostListener('document:click', ['$event'])
+  onOutsideClick(event: MouseEvent) {
+    if (!this.container()?.nativeElement.contains(event.target)) {
+      this.closeDropdown();
+    }
   }
 }

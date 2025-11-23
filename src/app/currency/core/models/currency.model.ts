@@ -1,5 +1,5 @@
 export class CurrencyModel {
-  suc_id: number = 0;
   mon_nom: string = '';
+  mon_cod: string = '';
   est: boolean = false;
 }

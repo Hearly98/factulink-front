@@ -6,6 +6,6 @@ export const buildCurrencyForm = (): {
 } => ({
   mon_id: new FormControl(null),
   mon_nom: new FormControl(null),
-  suc_id: new FormControl(null),
+  mon_cod: new FormControl(null),
   est: new FormControl(true),
 });

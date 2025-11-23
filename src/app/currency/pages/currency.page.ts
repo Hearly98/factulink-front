@@ -79,6 +79,7 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
               <thead>
                 <tr>
                   <th>Acciones</th>
+                  <th>Código</th>
                   <th>Nombre</th>
                 </tr>
               </thead>
@@ -99,6 +100,7 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
                       <svg cIcon name="cilTrash"></svg>
                     </button>
                   </td>
+                  <td>{{ item.mon_cod }}</td>
                   <td>{{ item.mon_nom }}</td>
                 </tr>
                 }
@@ -172,7 +174,6 @@ export class CurrencyPage extends BaseSearchComponent implements OnInit {
 
   onClean() {
     this.form.reset({
-      suc_id: 1,
       order: 'desc',
     });
     this.onSearch();

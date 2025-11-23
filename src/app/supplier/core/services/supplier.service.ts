@@ -3,7 +3,7 @@ import { environment } from '../../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { BaseService } from '../../../shared/services/base.service';
 import { QueryParamsModel } from '@shared/models/query/query-params.model';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { ResponseDto } from '@shared/models/api/response.dto';
 import { GetSupplierModel } from '../models/get-supplier.model';
 import { QueryResultsModel } from '@shared/models/query/query-results.model';
@@ -43,5 +43,15 @@ export class SupplierService extends BaseService {
       `/search`,
       body
     );
+  }
+
+  searchQuick(term: string): Observable<GetSupplierModel[]> {
+    const body = new QueryParamsModel(
+      { prov_nom: term }, // filter
+      { page: 1, pageSize: 10 }, // page
+      [{ property: 'prov_nom', direction: 'asc' }] // sort
+    );
+
+    return this.search(body).pipe(map((response) => response.data.items));
   }
 }

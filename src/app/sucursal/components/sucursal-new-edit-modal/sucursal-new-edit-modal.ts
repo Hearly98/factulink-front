@@ -105,7 +105,7 @@ export class SucursalNewEditModal extends BaseComponent implements OnInit {
         }
       },
       error: (error) => {
-        this.#globalNotification.openAlert(error.message);
+        this.#globalNotification.openToastAlert('Error', error.message, 'danger');
       },
     });
     this.subscriptions.push(subscription);
@@ -125,7 +125,7 @@ export class SucursalNewEditModal extends BaseComponent implements OnInit {
           }
         },
         error: (error) => {
-          this.#globalNotification.openAlert(error.message);
+          this.#globalNotification.openToastAlert('Error', error.message, 'danger');
         },
       });
     this.subscriptions.push(subscription);

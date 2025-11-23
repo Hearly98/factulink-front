@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BaseService } from '../../../shared/services/base.service';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { ProductModel } from '../models/product.model';
 import { ResponseDto } from '../../../shared/models/api/response.dto';
 import { QueryParamsModel } from '../../../shared/models/query/query-params.model';
@@ -41,5 +41,15 @@ export class ProductService extends BaseService {
       `/search`,
       body
     );
+  }
+
+  searchQuick(term: string): Observable<GetProductModel[]> {
+    const body = new QueryParamsModel(
+      { prod_nom: term }, // filter
+      { page: 1, pageSize: 10 }, // page
+      [{ property: 'prod_nom', direction: 'asc' }] // sort
+    );
+
+    return this.search(body).pipe(map((response) => response.data.items));
   }
 }
