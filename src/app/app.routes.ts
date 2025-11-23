@@ -120,6 +120,16 @@ export const routes: Routes = [
           title: 'Cliente',
         },
       },
+      {
+        path: 'compras',
+        loadComponent: () =>
+          import('./purchase/pages/new-purchase/new-purchase.component').then(
+            (m) => m.NewPurchaseComponent
+          ),
+        data: {
+          title: 'Compra',
+        },
+      },
     ],
   },
   {
