@@ -1,3 +1,5 @@
+import { PurchaseDetailForm } from 'src/app/purchase-detail/core/types';
+
 export interface PurchaseForm {
   doc_id: number | null;
   pago_id: number | null;
@@ -9,4 +11,5 @@ export interface PurchaseForm {
   prov_correo: string | null;
   prov_telf: string | null;
   product_id: number | null;
+  details: PurchaseDetailForm[];
 }

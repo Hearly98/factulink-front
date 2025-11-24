@@ -1,8 +1,11 @@
-import { FormControl } from '@angular/forms';
+import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { PurchaseForm } from '../core/purchase.form';
+import { PurchaseDetailForm } from 'src/app/purchase-detail/core/types';
 
 export const buildPurchaseForm = (): {
-  [K in keyof PurchaseForm]: FormControl<PurchaseForm[K]>;
+  [K in keyof PurchaseForm]: K extends 'details'
+    ? FormArray<FormGroup<{ [P in keyof PurchaseDetailForm]: FormControl<PurchaseDetailForm[P]> }>>
+    : FormControl<PurchaseForm[K]>;
 } => {
   return {
     doc_id: new FormControl<number | null>(null),
@@ -15,5 +18,8 @@ export const buildPurchaseForm = (): {
     prov_correo: new FormControl<string | null>({ value: null, disabled: true }),
     prov_telf: new FormControl<string | null>({ value: null, disabled: true }),
     product_id: new FormControl<number | null>(null),
+    details: new FormArray<
+      FormGroup<{ [P in keyof PurchaseDetailForm]: FormControl<PurchaseDetailForm[P]> }>
+    >([]),
   };
 };

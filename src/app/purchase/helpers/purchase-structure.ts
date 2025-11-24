@@ -28,6 +28,7 @@ export interface SearchSelectControl<SM extends Record<string, any>> extends Con
 
 interface TextControl extends ControlBase {
   type: 'text';
+  placeholder: string;
 }
 
 export interface PurchaseStructure<SM extends Record<string, any>> {
@@ -90,11 +91,13 @@ export const purchaseStructure = (
           label: 'Documento',
           col: '4',
           type: 'text',
+          placeholder: 'Documento',
           formControlName: 'prov_documento',
         },
         {
           label: 'Dirección',
           col: '5',
+          placeholder: 'Dirección',
           type: 'text',
           formControlName: 'prov_direcc',
         },
@@ -102,12 +105,14 @@ export const purchaseStructure = (
           label: 'Correo',
           col: '4',
           type: 'text',
+          placeholder: 'Correo electrónico',
           formControlName: 'prov_correo',
         },
         {
           label: 'Teléfono',
           col: '3',
           type: 'text',
+          placeholder: 'Teléfono',
           formControlName: 'prov_telf',
         },
       ],
@@ -117,7 +122,7 @@ export const purchaseStructure = (
       controls: [
         {
           label: 'Producto',
-          col: '12',
+          col: '6',
           type: 'search-select',
           formControlName: 'product_id',
           bindLabel: 'prod_nom',
