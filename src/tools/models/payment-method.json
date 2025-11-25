@@ -1,0 +1,9 @@
+{
+  "className": "PaymentMethod",
+  "id": "mp_id",
+  "properties": {
+    "mp_cod": "string",
+    "mp_nom": "string",
+    "est": "boolean"
+  }
+}

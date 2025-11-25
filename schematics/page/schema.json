@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "id": "PageSchema",
+  "$id": "PageSchema",
   "title": "Page Options",
   "type": "object",
   "properties": {

@@ -1,0 +1,3 @@
+import { <%= className %> } from './<%= dasherize(name) %>.model';
+
+export class Create<%= className %> extends <%= className %> {}

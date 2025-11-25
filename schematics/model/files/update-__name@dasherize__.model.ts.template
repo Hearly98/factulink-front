@@ -1,0 +1,5 @@
+import { <%= className %> } from './<%= dasherize(name) %>.model';
+
+export class Update<%= className %> extends <%= className %> {
+  <%= schema.id %>!: number;
+}
