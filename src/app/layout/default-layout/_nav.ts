@@ -35,6 +35,11 @@ export const navItems: INavData[] = [
         icon: 'nav-icon-bullet',
       },
       {
+        name: 'Metodo de Pago',
+        url: '/metodo-pago',
+        icon: 'nav-icon-bullet',
+      },
+      {
         name: 'Categoria',
         url: '/categorias',
         icon: 'nav-icon-bullet',

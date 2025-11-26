@@ -121,6 +121,16 @@ export const routes: Routes = [
         },
       },
       {
+        path: 'metodo-pago',
+        loadComponent: () =>
+          import('./payment-method/pages/payment-method-search/payment-method.component').then(
+            (m) => m.PaymentMethodComponent
+          ),
+        data: {
+          title: 'Metodo de Pago',
+        },
+      },
+      {
         path: 'compras',
         loadComponent: () =>
           import('./purchase/pages/new-purchase/new-purchase.component').then(
