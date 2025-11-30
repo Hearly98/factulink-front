@@ -15,25 +15,16 @@
     <c-card>
       <c-card-body>
         <c-row class="g-3 align-items-end" [formGroup]="form">
-          <c-col sm="12" md="6" lg="4">
+          <c-col sm="12" md="6" lg="3">
             <label for="">Nombre</label>
             <input formControlName="prod_nom" type="text" class="form-control" />
           </c-col>
-          <c-col sm="12" md="6" lg="4">
+          <c-col sm="12" md="6" lg="3">
             <label for="">Categoría</label>
             <select formControlName="cat_id" class="form-control form-select">
               <option [ngValue]="null">Todas</option>
               @for(categoria of categorias; track $index){
               <option [ngValue]="categoria.cat_id">{{ categoria.cat_nom }}</option>
-              }
-            </select>
-          </c-col>
-          <c-col sm="12" md="6" lg="4">
-            <label for="">Sucursal</label>
-            <select formControlName="suc_id" class="form-control form-select">
-              <option [ngValue]="null">Todas</option>
-              @for(sucursal of sucursales; track $index){
-              <option [ngValue]="sucursal.suc_id">{{ sucursal.suc_nom }}</option>
               }
             </select>
           </c-col>
@@ -48,16 +39,13 @@
             </button>
           </c-col>
           <c-col sm="12" md="12" lg="12">
-            <table cTable color="light" striped="true">
+            <table cTable striped="true">
               <thead>
                 <tr>
                   <th>Acciones</th>
+                  <th>Código</th>
                   <th>Nombre</th>
-                  <th>Descripción</th>
                   <th>Categoría</th>
-                  <th>Precio Compra</th>
-                  <th>Precio Venta</th>
-                  <th>Stock</th>
                 </tr>
               </thead>
               <tbody>
@@ -77,12 +65,9 @@
                       <svg cIcon name="cilTrash"></svg>
                     </button>
                   </td>
+                  <td>{{ product.prod_cod_interno }}</td>
                   <td>{{ product.prod_nom }}</td>
-                  <td>{{ product.prod_descrip }}</td>
                   <td>{{ product.cat_id }}</td>
-                  <td>{{ product.prod_pcompra }}</td>
-                  <td>{{ product.prod_pventa }}</td>
-                  <td>{{ product.prod_stock }}</td>
                 </tr>
                 }
               </tbody>

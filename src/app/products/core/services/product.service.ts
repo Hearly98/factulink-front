@@ -43,13 +43,10 @@ export class ProductService extends BaseService {
     );
   }
 
-  searchQuick(term: string): Observable<GetProductModel[]> {
-    const body = new QueryParamsModel(
-      { prod_nom: term }, // filter
-      { page: 1, pageSize: 10 }, // page
-      [{ property: 'prod_nom', direction: 'asc' }] // sort
-    );
-
-    return this.search(body).pipe(map((response) => response.data.items));
+  searchQuick(body: {
+    term: string;
+    suc_id: number;
+  }): Observable<ResponseDto<GetProductModel[]>> {
+    return this.postRequest(`/search-quick`, body);
   }
 }

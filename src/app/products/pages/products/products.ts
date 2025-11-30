@@ -10,7 +10,6 @@ import {
 import { IconDirective } from '@coreui/icons-angular';
 import { ProductService } from '../../core/services/product.service';
 import { TypedFormGroup } from '../../../shared/types/types-form';
-import { ProductForm } from '../../core/types/product-form';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { buildFilterForm, filterSort, mapParams } from '../../helpers';
 import { FilterForm } from '../../core/types/filter-form';
@@ -107,7 +106,10 @@ export class Products extends BaseSearchComponent implements OnInit {
   }
 
   onClean() {
-    this.form.reset();
+    this.form.reset({
+      order: 'desc',
+    });
+    this.onSearch();
   }
 
   openModal(id?: number) {

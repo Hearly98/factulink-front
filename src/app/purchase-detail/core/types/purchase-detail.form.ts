@@ -1,11 +1,11 @@
 export interface PurchaseDetailForm {
   prod_id: number | null;
   prod_nom: string | null;
-  cat_id: number | null;
-  cat_nom: string | null;
-  unid_med: string | null;
+  prod_cod: string | null;
   cantidad: number | null;
-  precio: number | null;
-  stock: number | null;
-  subtotal: number | null;
+  unidad: string | null;
+  costo_unitario: number | null;
+  precio_unitario: number | null;
+  precio_compra: number | null;
+  dscto: number | null;
 }

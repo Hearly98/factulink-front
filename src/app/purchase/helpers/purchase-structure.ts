@@ -39,7 +39,8 @@ export const purchaseStructure = (
   CurrencySelectOptions: SelectOption[] = [],
   PaymentTypeOptions: SelectOption[] = [],
   DocumentsOptions: SelectOption[] = [],
-  DocumentTypesOptions: SelectOption[] = []
+  DocumentTypesOptions: SelectOption[] = [],
+  SucursalOptions: SelectOption[] = []
 ): PurchaseStructure<NewPurchaseComponent['serviceMap']>[] => {
   return [
     {
@@ -56,7 +57,7 @@ export const purchaseStructure = (
           label: 'Tipo de Pago',
           type: 'select',
           col: '4',
-          formControlName: 'pago_id',
+          formControlName: 'mp_id',
           options: PaymentTypeOptions,
         },
         {
@@ -124,10 +125,17 @@ export const purchaseStructure = (
           label: 'Producto',
           col: '6',
           type: 'search-select',
-          formControlName: 'product_id',
-          bindLabel: 'prod_nom',
+          formControlName: 'prod_id',
+          bindLabel: 'label',
           bindValue: 'prod_id',
           serviceFnName: 'productSearch',
+        },
+        {
+          label: 'Sucursal',
+          col: '6',
+          type: 'select',
+          formControlName: 'suc_id',
+          options: SucursalOptions,
         },
       ],
     },

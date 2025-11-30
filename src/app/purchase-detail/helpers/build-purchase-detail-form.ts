@@ -6,25 +6,19 @@ export const buildPurchaseDetailForm = (
 ): FormGroup<{ [P in keyof PurchaseDetailForm]: FormControl<PurchaseDetailForm[P]> }> => {
   return new FormGroup({
     prod_id: new FormControl<number | null>(productData?.prod_id || null),
-    prod_nom: new FormControl<string | null>({
-      value: productData?.prod_nom || null,
+    prod_nom: new FormControl<string | null>(productData?.prod_nom || null),
+    prod_cod: new FormControl<string | null>(productData?.prod_cod || null),
+    cantidad: new FormControl<number | null>(productData?.cantidad || null),
+    unidad: new FormControl<string | null>(productData?.unidad || null),
+    costo_unitario: new FormControl<number | null>(productData?.costo_unitario || null),
+    precio_unitario: new FormControl<number | null>({
+      value: productData?.prod_id || 0,
       disabled: true,
     }),
-    cat_id: new FormControl<number | null>(productData?.cat_id || null),
-    cat_nom: new FormControl<string | null>({
-      value: productData?.cat_nom || null,
+    precio_compra: new FormControl<number | null>({
+      value: productData?.precio_compra || 0,
       disabled: true,
     }),
-    unid_med: new FormControl<string | null>(productData?.unid_med || 'UND'),
-    cantidad: new FormControl<number | null>(productData?.cantidad || 1),
-    precio: new FormControl<number | null>(productData?.precio || 0),
-    stock: new FormControl<number | null>({
-      value: productData?.stock || 0,
-      disabled: true,
-    }),
-    subtotal: new FormControl<number | null>({
-      value: productData?.subtotal || 0,
-      disabled: true,
-    }),
+    dscto: new FormControl<number | null>(productData?.dscto || null),
   });
 };

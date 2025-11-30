@@ -23,9 +23,15 @@ import { ProductService } from 'src/app/products/core/services/product.service';
 import { DocumentTypeService } from 'src/app/document-type/core/services/document-type.service';
 import { CommonModule } from '@angular/common';
 import { PurchaseDetailTableComponent } from 'src/app/purchase-detail/components/purchase-detail-table.component';
-import { PurchaseDetailForm } from 'src/app/purchase-detail/core/types';
+import { PurchaseDetailCreteDTOForm, PurchaseDetailForm } from 'src/app/purchase-detail/core/types';
 import { buildPurchaseDetailForm } from 'src/app/purchase-detail/helpers';
 import { IconDirective } from '@coreui/icons-angular';
+import { PaymentMethodService } from 'src/app/payment-method/core/services/payment-method.service';
+import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service';
+import { CategoryService } from 'src/app/category/core/services/category.service';
+import { PurchaseCreateDto } from '../../core/purchase-create-dto';
+import { PurchaseService } from '../../core/services/purchase.service';
+import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 
 @Component({
   selector: 'app-new-purchase',
@@ -91,7 +97,7 @@ import { IconDirective } from '@coreui/icons-angular';
                 cButton
                 color="primary"
                 (click)="addProductToDetail()"
-                [disabled]="!form.value.product_id || !selectedProduct"
+                [disabled]="!form.value.prod_id || !selectedProduct"
               >
                 <svg cIcon name="cilPlus" class="me-2"></svg>
                 Agregar Producto
@@ -106,7 +112,6 @@ import { IconDirective } from '@coreui/icons-angular';
       <!-- Tabla de detalles -->
       <app-purchase-detail-table
         [detailsArray]="detailsArray"
-        [categories]="categories()"
         (detailRemoved)="onDetailRemoved($event)"
       ></app-purchase-detail-table>
 
@@ -116,7 +121,7 @@ import { IconDirective } from '@coreui/icons-angular';
           <c-row class="align-items-end">
             <c-col md="8" sm="12" class="mb-2">
               <label for="">Observaciones</label>
-              <textarea class="form-control" formControlName="observaciones" rows="3"></textarea>
+              <textarea class="form-control" formControlName="compr_coment" rows="3"></textarea>
             </c-col>
             <c-col md="4" sm="12" class="gap-2 text-end">
               <button class="me-2" type="button" cButton color="secondary" (click)="cancel()">
@@ -154,9 +159,12 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
   #currencyService = inject(CurrencyService);
   #documentService = inject(DocumentService);
   #supplierService = inject(SupplierService);
+  #paymentMethodService = inject(PaymentMethodService);
   #productService = inject(ProductService);
   #documentTypeService = inject(DocumentTypeService);
-
+  #sucursalService = inject(SucursalService);
+  #purchaseService = inject(PurchaseService);
+  #globalNotification = inject(GlobalNotification);
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.PURCHASE, viewContainerRef);
   }
@@ -164,16 +172,19 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
   ngOnInit() {
     this.form = this.#formBuilder.group(buildPurchaseForm());
     this.loadSelectCombos();
-    this.loadCategories();
   }
 
   get detailsArray(): FormArray<TypedFormGroup<PurchaseDetailForm>> {
-    return this.form.get('details') as FormArray<TypedFormGroup<PurchaseDetailForm>>;
+    return this.form.get('detalles') as FormArray<TypedFormGroup<PurchaseDetailForm>>;
   }
 
   serviceMap = {
     providerSearch: (term: string) => this.#supplierService.searchQuick(term),
-    productSearch: (term: string) => this.#productService.searchQuick(term),
+    productSearch: (term: string) =>
+      this.#productService.searchQuick({
+        term,
+        suc_id: this.form.get('suc_id')?.value,
+      }),
   };
 
   patchSupplier(item: any) {
@@ -187,8 +198,13 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
   }
 
   onSelectItem(formControlName: keyof PurchaseForm, item: any) {
-    // Excluir 'details' ya que es un FormArray, no un FormControl
-    if (formControlName === 'details') return;
+    if (formControlName === 'prod_id') {
+      this.form.patchValue({
+        prod_id: item.prod_id,
+      });
+      this.selectedProduct = item;
+      return;
+    }
 
     const control = this.form.get(formControlName);
     if (control) {
@@ -197,10 +213,6 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
 
     if (formControlName === 'prov_id') {
       this.patchSupplier(item);
-    }
-
-    if (formControlName === 'product_id') {
-      this.selectedProduct = item;
     }
   }
 
@@ -219,20 +231,20 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
 
     const detailForm = buildPurchaseDetailForm({
       prod_id: this.selectedProduct.prod_id,
-      prod_nom: this.selectedProduct.prod_nom,
-      cat_id: this.selectedProduct.cat_id,
-      cat_nom: this.selectedProduct.cat_nom,
-      stock: this.selectedProduct.stock || 0,
-      unid_med: this.selectedProduct.unid_med || 'UND',
       cantidad: 1,
-      precio: this.selectedProduct.precio || 0,
-      subtotal: this.selectedProduct.precio || 0,
+      prod_nom: this.selectedProduct.prod_nom,
+      prod_cod: this.selectedProduct.prod_cod,
+      unidad: this.selectedProduct.unidad,
+      costo_unitario: this.selectedProduct.pcompra,
+      precio_compra: null,
+      dscto: null,
+      precio_unitario: null,
     });
 
     this.detailsArray.push(detailForm as any);
 
     // Limpiar selección
-    this.form.get('product_id')?.setValue(null);
+    this.form.get('prod_id')?.setValue(null);
     this.selectedProduct = null;
   }
 
@@ -245,7 +257,7 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
     const documents: SelectOption[] = [];
     const paymentType: SelectOption[] = [];
     const documentTypes: SelectOption[] = [];
-
+    const sucursalOptions: SelectOption[] = [];
     this.#currencyService.getAll().subscribe({
       next: (response) =>
         response.data.map((item) => {
@@ -268,45 +280,64 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
         });
       },
     });
+    this.#sucursalService.getAll().subscribe({
+      next: (response) => {
+        response.data.map((item) => {
+          sucursalOptions.push({ value: item.suc_id, label: item.suc_nom });
+        });
+      },
+    });
 
-    this.structure.set(purchaseStructure(currencies, paymentType, documents, documentTypes));
-  }
-
-  loadCategories() {
-    // Asumiendo que tienes un servicio de categorías
-    // this.#categoryService.getAll().subscribe({
-    //   next: (response) => {
-    //     const cats = response.data.map(item => ({
-    //       value: item.cat_id,
-    //       label: item.cat_nom
-    //     }));
-    //     this.categories.set(cats);
-    //   }
-    // });
-
-    // Mock temporal
-    this.categories.set([
-      { value: 1, label: 'Electrónica' },
-      { value: 2, label: 'Alimentos' },
-      { value: 3, label: 'Bebidas' },
-      { value: 4, label: 'Limpieza' },
-    ]);
+    this.#paymentMethodService.getAll().subscribe({
+      next: (response) => {
+        response.data.map((item) => {
+          paymentType.push({ value: item.mp_id, label: item.mp_nom });
+        });
+      },
+    });
+    this.structure.set(
+      purchaseStructure(currencies, paymentType, documents, documentTypes, sucursalOptions)
+    );
   }
 
   save() {
+    debugger;
+
     if (this.form.invalid || this.detailsArray.length === 0) {
       alert('Complete todos los campos requeridos y agregue al menos un producto');
       return;
     }
+    const purchaseData: PurchaseCreateDto = {
+      compr_coment: this.form.value.compr_coment,
+      suc_id: this.form.value.suc_id,
+      prov_id: this.form.value.prov_id,
+      doc_id: this.form.value.doc_id,
+      mon_id: this.form.value.mon_id,
+      mp_id: this.form.value.mp_id,
+      usu_id: 1,
 
-    const purchaseData = {
-      ...this.form.getRawValue(),
-      details: this.detailsArray.getRawValue(),
+      detalles: this.detailsArray.getRawValue().map((v) => {
+        return {
+          prod_id: v.prod_id,
+          detc_cant: v.cantidad,
+          prod_pcompra: v.precio_compra,
+        } as PurchaseDetailCreteDTOForm;
+      }),
     };
 
-    console.log('Datos de compra a guardar:', purchaseData);
-    // Aquí llamarías a tu servicio para guardar la compra
-    // this.#purchaseService.create(purchaseData).subscribe(...)
+    this.#purchaseService.create(purchaseData).subscribe({
+      next: (response) => {
+        if (response.isValid) {
+          this.#globalNotification.openAlert(response);
+          this.cancel();
+        } else {
+          this.#globalNotification.openAlert(response);
+        }
+      },
+      error: (error) => {
+        this.#globalNotification.openToastAlert('Error', error.messages, 'danger');
+      },
+    });
   }
 
   cancel() {

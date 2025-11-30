@@ -7,7 +7,6 @@ export const buildFilterForm = (): {
   return {
     prod_nom: new FormControl(null),
     cat_id: new FormControl(null),
-    suc_id: new FormControl(1),
     est: new FormControl(true),
     order: new FormControl('desc')
   };

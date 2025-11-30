@@ -6,6 +6,7 @@ import {
   ColComponent,
   ModalBodyComponent,
   ModalComponent,
+  ModalFooterComponent,
   RowComponent,
 } from '@coreui/angular';
 import { ProductService } from '../../core/services/product.service';
@@ -38,6 +39,7 @@ import { GetUnitOfMeasureModel } from '../../../unit-of-measure/core/models';
     ColComponent,
     ButtonDirective,
     IconDirective,
+    ModalFooterComponent,
     ReactiveFormsModule,
   ],
   templateUrl: './product-new-edit-modal.html',
@@ -201,5 +203,13 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
       default:
         return 0;
     }
+  }
+
+  onChange(event: Event) {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files && input.files.length > 0 ? input.files[0] : null;
+    if (!file) return;
+
+    this.form.patchValue({ prod_img: file });
   }
 }
