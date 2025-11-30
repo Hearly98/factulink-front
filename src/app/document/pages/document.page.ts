@@ -71,7 +71,7 @@ import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-moda
                 </button>
               </c-col>
               <c-col sm="12" md="12" lg="12">
-                <table cTable color="light" striped="true">
+                <table cTable striped="true">
                   <thead>
                     <tr>
                       <th>Acciones</th>
