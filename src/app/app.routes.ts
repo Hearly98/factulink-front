@@ -167,11 +167,19 @@ export const routes: Routes = [
         },
       },
       {
-        path: 'cotizaciones',
+        path: 'historial-cotizaciones',
         loadComponent: () =>
           import('./quotation/pages/quotation-list.page').then((m) => m.QuotationListPage),
         data: {
           title: 'Cotizaciones',
+        },
+      },
+      {
+        path: 'nueva-cotizacion',
+        loadComponent: () =>
+          import('./quotation/pages/quotation-new-edit.page').then((m) => m.QuotationNewEditPage),
+        data: {
+          title: 'Nueva Cotización',
         },
       },
       {

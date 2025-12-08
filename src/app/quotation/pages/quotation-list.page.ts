@@ -59,7 +59,8 @@ import { QuotationModel } from '../core/models/quotation.model';
                 </tr>
               </thead>
               <tbody>
-                @for (quotation of quotations; track quotation.cot_id) {
+              @if(quotations.length > 0){
+  @for (quotation of quotations; track quotation.cot_id) {
                 <tr>
                   <td>
                     <button size="sm" class="me-2" cButton color="secondary">
@@ -83,6 +84,11 @@ import { QuotationModel } from '../core/models/quotation.model';
                   </td>
                 </tr>
                 }
+              }@else{
+<tr>
+  <td colspan="6">No hay datos</td>
+</tr>
+              }
               </tbody>
             </table>
             <app-paginator

@@ -132,7 +132,7 @@ export const navItems: INavData[] = [
     children: [
       {
         name: 'Nueva Cotización',
-        url: '/cotizaciones',
+        url: '/nueva-cotizacion',
         icon: 'nav-icon-bullet',
       },
       {
