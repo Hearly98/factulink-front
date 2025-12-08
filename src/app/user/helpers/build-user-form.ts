@@ -8,11 +8,12 @@ export const buildUserForm = (): {
     usu_id: new FormControl(null),
     usu_nom: new FormControl(null),
     usu_ape: new FormControl(null),
-    email: new FormControl(null),
-    password: new FormControl(null),
+    usu_correo: new FormControl(null),
+    usu_pass: new FormControl(null),
     usu_dni: new FormControl(null),
     usu_telf: new FormControl(null),
     rol_id: new FormControl(null),
+    usu_img: new FormControl(null),
     est: new FormControl(true),
   };
 };

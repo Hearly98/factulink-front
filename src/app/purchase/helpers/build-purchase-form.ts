@@ -4,8 +4,8 @@ import { PurchaseDetailForm } from 'src/app/purchase-detail/core/types';
 
 export const buildPurchaseForm = (): {
   [K in keyof PurchaseForm]: K extends 'detalles'
-    ? FormArray<FormGroup<{ [P in keyof PurchaseDetailForm]: FormControl<PurchaseDetailForm[P]> }>>
-    : FormControl<PurchaseForm[K]>;
+  ? FormArray<FormGroup<{ [P in keyof PurchaseDetailForm]: FormControl<PurchaseDetailForm[P]> }>>
+  : FormControl<PurchaseForm[K]>;
 } => {
   return {
     mon_id: new FormControl<number | null>(null),
@@ -16,6 +16,8 @@ export const buildPurchaseForm = (): {
     prov_correo: new FormControl<string | null>(null),
     prov_telf: new FormControl<string | null>(null),
     tip_id: new FormControl<number | null>(null),
+    fechaEmision: new FormControl<Date | null>(null),
+    numero: new FormControl<string | null>(null),
     compr_coment: new FormControl<string | null>(null),
     prov_id: new FormControl<number | null>(null),
     mp_id: new FormControl<number | null>(null),

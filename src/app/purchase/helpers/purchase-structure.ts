@@ -27,7 +27,7 @@ export interface SearchSelectControl<SM extends Record<string, any>> extends Con
 }
 
 interface TextControl extends ControlBase {
-  type: 'text';
+  type: 'text' | 'date';
   placeholder: string;
 }
 
@@ -47,7 +47,7 @@ export const purchaseStructure = (
       title: 'Tipo de Pago',
       controls: [
         {
-          label: 'Documento',
+          label: 'Tipo Documento',
           type: 'select',
           col: '4',
           formControlName: 'doc_id',
@@ -66,6 +66,20 @@ export const purchaseStructure = (
           col: '4',
           formControlName: 'mon_id',
           options: CurrencySelectOptions,
+        },
+        {
+          label: 'Fecha Emisión',
+          type: 'date',
+          col: '6',
+          formControlName: 'fechaEmision',
+          placeholder: ""
+        },
+        {
+          label: 'Documento',
+          type: 'text',
+          col: '6',
+          formControlName: 'numero',
+          placeholder: "Número de Documento"
         },
       ],
     },

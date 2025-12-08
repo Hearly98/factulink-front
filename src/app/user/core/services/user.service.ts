@@ -13,7 +13,7 @@ import { QueryResultsModel } from '@shared/models/query/query-results.model';
 })
 export class UserService extends BaseService {
   constructor(http: HttpClient) {
-    super(http, `${environment.apiUrl}/users`);
+    super(http, `${environment.apiUrl}/usuarios`);
   }
   getAll(): Observable<ResponseDto<GetUserModel[]>> {
     return this.getRequest('');

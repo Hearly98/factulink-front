@@ -140,6 +140,57 @@ export const routes: Routes = [
           title: 'Compra',
         },
       },
+      {
+        path: 'listado-compras',
+        loadComponent: () =>
+          import('./purchase/pages/purchase-search/purchase-search.page').then(
+            (m) => m.PurchaseSearchPage
+          ),
+        data: {
+          title: 'Listado de Compras',
+        },
+      },
+      {
+        path: 'ventas',
+        loadComponent: () =>
+          import('./sales/pages/new-sale/new-sale.page').then((m) => m.NewSalePage),
+        data: {
+          title: 'Nueva Venta',
+        },
+      },
+      {
+        path: 'listado-ventas',
+        loadComponent: () =>
+          import('./sales/pages/sales-list/sales-list.page').then((m) => m.SalesListPage),
+        data: {
+          title: 'Historial de Ventas',
+        },
+      },
+      {
+        path: 'cotizaciones',
+        loadComponent: () =>
+          import('./quotation/pages/quotation-list.page').then((m) => m.QuotationListPage),
+        data: {
+          title: 'Cotizaciones',
+        },
+      },
+      {
+        path: 'guias-remision',
+        loadComponent: () =>
+          import('./shipping-guide/pages/shipping-guide-list.page').then(
+            (m) => m.ShippingGuideListPage
+          ),
+        data: {
+          title: 'Guías de Remisión',
+        },
+      },
+      {
+        path: 'series',
+        loadComponent: () => import('./series/pages/series.page').then((m) => m.SeriesPage),
+        data: {
+          title: 'Series',
+        },
+      },
     ],
   },
   {

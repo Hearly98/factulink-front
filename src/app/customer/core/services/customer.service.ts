@@ -42,4 +42,8 @@ export class CustomerService extends BaseService {
       body
     );
   }
+
+  searchQuick(term: string): Observable<ResponseDto<GetCustomerModel[]>> {
+    return this.getRequest(`/search-quick?term=${term}`);
+  }
 }

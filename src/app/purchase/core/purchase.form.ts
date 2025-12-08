@@ -5,6 +5,8 @@ export interface PurchaseForm {
   doc_id: number | null;
   usu_id: number | null;
   prov_id: number | null;
+  numero: string | null;
+  fechaEmision: Date | null;
   mp_id: number | null;
   mon_id: number | null;
   prov_documento: string | null;

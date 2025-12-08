@@ -13,16 +13,16 @@ import { IconDirective } from '@coreui/icons-angular';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 import { BaseComponent } from '@shared/base/base.component';
 import { TypedFormGroup } from '@shared/types/types-form';
-import { GetSucursalModel } from 'src/app/sucursal/core/models';
-import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service';
-import { UserForm } from '../../core/types';
 import { MODULES } from 'src/app/core/config/permissions/modules';
-import { buildUserForm, userStructure } from '../../helpers';
-import { CreateUserModel, UpdateUserModel } from '../../core/models';
-import { UserService } from '../../core/services/user.service';
+import { PurchaseEditForm } from '../../core/types/purchase-edit.form';
+import { buildPurchaseEditForm } from '../../helpers/build-purchase-edit-form';
+import { purchaseEditStructure } from '../../helpers/purchase-edit-structure';
+import { PurchaseService } from '../../core/services/purchase.service';
+import { SupplierService } from 'src/app/supplier/core/services/supplier.service';
+import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service';
 
 @Component({
-  selector: 'app-user-new-edit-modal',
+  selector: 'app-purchase-edit-modal',
   imports: [
     CardComponent,
     CardBodyComponent,
@@ -34,7 +34,7 @@ import { UserService } from '../../core/services/user.service';
     IconDirective,
     ReactiveFormsModule,
   ],
-  template: `<c-modal alignment="center" [visible]="visible()" backdrop="static">
+  template: `<c-modal alignment="center" [visible]="visible()" backdrop="static" size="lg">
     <c-modal-body class="modal-body">
       <c-row class="mb-2">
         <c-col [sm]="6" class="space-between">
@@ -56,11 +56,33 @@ import { UserService } from '../../core/services/user.service';
                 [formControlName]="item.formControlName"
               >
                 <option [ngValue]="null">Seleccione</option>
-                @for(item of sucursales; track $index){
-                <option [ngValue]="item.suc_id">{{ item.suc_nom }}</option>
+                @if(item.formControlName === 'prv_id'){
+                  @for(supplier of suppliers; track $index){
+                    <option [ngValue]="supplier.prv_id">{{ supplier.prv_nom }}</option>
+                  }
+                }
+                @if(item.formControlName === 'suc_id'){
+                  @for(sucursal of sucursales; track $index){
+                    <option [ngValue]="sucursal.suc_id">{{ sucursal.suc_nom }}</option>
+                  }
+                }
+                @if(item.formControlName === 'com_estado'){
+                  @for(option of item.options; track $index){
+                    <option [ngValue]="option.value">{{ option.label }}</option>
+                  }
                 }
               </select>
-              }@default {
+              }
+              @case ('textarea') {
+              <textarea
+                class="form-control"
+                name=""
+                [id]="item.formControlName"
+                [formControlName]="item.formControlName"
+                rows="3"
+              ></textarea>
+              }
+              @default {
               <input
                 class="form-control"
                 [type]="item.type"
@@ -90,43 +112,47 @@ import { UserService } from '../../core/services/user.service';
   </c-modal>`,
   styles: ``,
 })
-export class UserNewEditModalComponent extends BaseComponent {
-  form!: TypedFormGroup<UserForm>;
+export class PurchaseEditModalComponent extends BaseComponent {
+  form!: TypedFormGroup<PurchaseEditForm>;
   visible = signal<boolean>(false);
-  structure = userStructure;
-  sucursales: GetSucursalModel[] = [];
+  structure = purchaseEditStructure;
+  suppliers: any[] = [];
+  sucursales: any[] = [];
+  #purchaseService = inject(PurchaseService);
+  #supplierService = inject(SupplierService);
   #sucursalService = inject(SucursalService);
-  #userService = inject(UserService);
   #globalNotification = inject(GlobalNotification);
   #formBuilder = inject(FormBuilder);
-  title = signal<string>('Crear Usuario');
+  title = signal<string>('Editar Compra');
   callback: any;
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
-    super(MODULES.USERS, viewContainerRef);
+    super(MODULES.PURCHASE, viewContainerRef);
   }
 
   ngOnInit(): void {
     this.createForm();
-    this.sucursalSelectCombo();
+    this.loadCombos();
   }
 
   createForm() {
-    this.form = this.#formBuilder.group(buildUserForm());
+    this.form = this.#formBuilder.group(buildPurchaseEditForm());
   }
 
-  openModal(idUser?: number, callback: any = null) {
+  loadCombos() {
+    this.fetchData(this.#supplierService.getAll(), this.suppliers);
+    this.fetchData(this.#sucursalService.getAll(), this.sucursales);
+  }
+
+  openModal(idPurchase: number, callback: any = null) {
     this.createForm();
     this.visible.set(true);
     this.callback = callback;
-    if (idUser) {
-      this.title.set('Editar Usuario');
-      this.loadData(idUser);
-    }
+    this.loadData(idPurchase);
   }
 
-  loadData(idUser: number) {
-    this.#userService.getById(idUser).subscribe({
+  loadData(idPurchase: number) {
+    this.#purchaseService.get(idPurchase).subscribe({
       next: (response) => {
         if (response.isValid) {
           this.form.patchValue(response.data);
@@ -135,47 +161,20 @@ export class UserNewEditModalComponent extends BaseComponent {
     });
   }
 
-  sucursalSelectCombo() {
-    this.fetchData(this.#sucursalService.getAll(), this.sucursales);
-  }
-
   onClose() {
     this.visible.set(false);
   }
 
   onSubmit() {
     if (this.form.valid) {
-      if (this.form.value.usu_id) {
-        this.update();
-      } else {
-        this.create();
-      }
+      this.update();
     } else {
       this.form.markAllAsTouched();
     }
   }
 
-  create() {
-    const { usu_id, ...body } = this.form.value;
-    const subscription = this.#userService.create(body as CreateUserModel).subscribe({
-      next: (response) => {
-        if (response.isValid) {
-          this.#globalNotification.openAlert(response);
-          this.callback(response.data);
-          this.onClose();
-        } else {
-          this.#globalNotification.openAlert(response);
-        }
-      },
-      error: (error) => {
-        this.#globalNotification.openAlert(error.message);
-      },
-    });
-    this.subscriptions.push(subscription);
-  }
-
   update() {
-    const subscription = this.#userService.update(this.form.value as UpdateUserModel).subscribe({
+    const subscription = this.#purchaseService.update(this.form.value as any).subscribe({
       next: (response) => {
         if (response.isValid) {
           this.#globalNotification.openAlert(response);

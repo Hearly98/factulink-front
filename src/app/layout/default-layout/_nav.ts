@@ -108,7 +108,7 @@ export const navItems: INavData[] = [
   },
   {
     title: true,
-    name: 'Ventas',
+    name: 'Comercial',
   },
   {
     name: 'Ventas',
@@ -120,11 +120,51 @@ export const navItems: INavData[] = [
         icon: 'nav-icon-bullet',
       },
       {
-        name: 'Listado de Ventas',
+        name: 'Historial de Ventas',
         url: '/listado-ventas',
         icon: 'nav-icon-bullet',
       },
     ],
+  },
+  {
+    name: 'Cotizaciones',
+    iconComponent: { name: 'cil-file' },
+    children: [
+      {
+        name: 'Nueva Cotización',
+        url: '/cotizaciones',
+        icon: 'nav-icon-bullet',
+      },
+      {
+        name: 'Listado de Cotizaciones',
+        url: '/historial-cotizaciones',
+        icon: 'nav-icon-bullet',
+      }
+    ],
+  },
+  {
+    name: 'Guías de Remisión',
+    iconComponent: { name: 'cil-truck' },
+    children: [
+      {
+        name: 'Nueva Guía Remisión',
+        url: '/guia-remision',
+        icon: 'nav-icon-bullet',
+      },
+      {
+        name: 'Listado de Guía Remisión',
+        url: '/historial-guias-remision',
+        icon: 'nav-icon-bullet',
+      }]
+  },
+  {
+    title: true,
+    name: 'Configuración',
+  },
+  {
+    name: 'Series',
+    url: '/series',
+    iconComponent: { name: 'cil-list-numbered' },
   },
   {
     title: true,
