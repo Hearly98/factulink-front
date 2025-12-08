@@ -183,7 +183,7 @@ export const routes: Routes = [
         },
       },
       {
-        path: 'guias-remision',
+        path: 'historial-guias-remision',
         loadComponent: () =>
           import('./shipping-guide/pages/shipping-guide-list.page').then(
             (m) => m.ShippingGuideListPage
