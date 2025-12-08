@@ -308,6 +308,8 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
       return;
     }
     const purchaseData: PurchaseCreateDto = {
+      fechaEmision: this.form.value.fechaEmision,
+      numero: this.form.value.numero,
       compr_coment: this.form.value.compr_coment,
       suc_id: this.form.value.suc_id,
       prov_id: this.form.value.prov_id,

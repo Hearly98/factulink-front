@@ -7,6 +7,8 @@ export interface PurchaseCreateDto {
   prov_id: number;
   mp_id: number;
   mon_id: number;
+  numero: string;
+  fechaEmision: Date;
   compr_coment: string;
   detalles: PurchaseDetailCreteDTOForm[];
 }

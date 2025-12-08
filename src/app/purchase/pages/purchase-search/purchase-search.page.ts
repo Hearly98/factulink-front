@@ -164,7 +164,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
                   <td>
                     <span
                       class="badge"
-                      [class.bg-warning]="purchase.estado.estado_cod === 'pendiente'"
+                      [class.bg-warning]="purchase.estado.estado_cod === 'PEND'"
                       [class.bg-success]="purchase.estado.estado_cod === 'COMP'"
                       [class.bg-danger]="purchase.estado.estado_cod === 'eliminado'"
                     >
