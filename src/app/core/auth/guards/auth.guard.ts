@@ -1,63 +1,28 @@
-/*
+import { inject } from '@angular/core';
+import { Router, CanActivateFn } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
-// Angular
-import { Injectable } from "@angular/core";
-import {
-  ActivatedRouteSnapshot,
-  CanActivate,
-  Router,
-  RouterStateSnapshot,
-} from "@angular/router";
-// RxJS
-import { map } from "rxjs/operators";
-import { Observable, of } from "rxjs";
-// Services
-import { AuthService } from "../services/auth.service";
-import { NgxPermissionsService } from "ngx-permissions";
-import { PermissionService } from "@base/permissions/services/permission.service";
-import { environment } from "@environments/environment";
+export const authGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
 
-@Injectable()
-export class AuthGuard implements CanActivate {
-  constructor(
-    private router: Router,
-    private authService: AuthService,
-    private permissionService: PermissionService,
-    private ngxPermissionsService: NgxPermissionsService
-  ) {}
-
-  canActivate(
-    route: ActivatedRouteSnapshot,
-    _: RouterStateSnapshot
-  ): Observable<boolean> {
-    if (this.authService.isAuthenticated()) {
-      return this.permissionService
-        .userPermissions(environment.application.code)
-        .pipe(
-          map((result) => {
-            const permissions = result.data.map(
-              (permission) => permission.actionCode
-            );
-            this.ngxPermissionsService.flushPermissions();
-            this.ngxPermissionsService.loadPermissions(permissions);
-
-            const permissionsVersion =
-              sessionStorage.getItem("permissionsVersion") ?? "";
-            const updateMenuConfig =
-              permissionsVersion != `${permissions.length}`;
-            sessionStorage.setItem("updateMenuConfig", `${updateMenuConfig}`);
-            sessionStorage.setItem(
-              "permissionsVersion",
-              `${permissions.length}`
-            );
-            return true;
-          })
-        );
-    }
-
-    this.router.navigate(["user/login"]);
-
-    return of(false);
+  if (authService.isAuthenticated()) {
+    return true;
   }
-}
-*/
+
+  // Redirect to login page with the return url
+  router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+  return false;
+};
+
+export const guestGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (authService.isAuthenticated()) {
+    router.navigate(['/dashboard']);
+    return false;
+  }
+
+  return true;
+};

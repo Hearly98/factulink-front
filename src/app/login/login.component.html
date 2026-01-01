@@ -5,20 +5,21 @@
         <c-card-group>
           <c-card class="p-4">
             <c-card-body>
-              <form cForm>
+              <form cForm [formGroup]="form" (ngSubmit)="onLogin()">
                 <h1>{{ loginStructure.title }}</h1>
                 <p class="text-body-secondary">{{ loginStructure.description }}</p>
-                @for (form of loginStructure.forms; track $index) {
-                  <c-input-group class="mb-3">
-                    <span cInputGroupText>
-                      <svg cIcon [name]="form.icon"></svg>
-                    </span>
-                    <input autoComplete="username" cFormControl [placeholder]="form.placeholder" [type]="form.formControlType" />
-                  </c-input-group>
+                @for (item of loginStructure.forms; track $index) {
+                <c-input-group class="mb-3">
+                  <span cInputGroupText>
+                    <svg cIcon [name]="item.icon"></svg>
+                  </span>
+                  <input [formControlName]="item.formControlName" autocomplete="on" cFormControl
+                    [placeholder]="item.placeholder" [type]="item.formControlType" />
+                </c-input-group>
                 }
                 <c-row>
                   <c-col xs="6">
-                    <button cButton class="px-4" color="primary">
+                    <button cButton class="px-4" color="primary" type="submit" [disabled]="form.invalid">
                       Login
                     </button>
                   </c-col>

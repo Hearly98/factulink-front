@@ -5,8 +5,8 @@ export const loginStructure = () => {
         forms: [
             {
                 name: 'usuario',
-                formControlName: 'username',
-                formControlType: 'text',
+                formControlName: 'email',
+                formControlType: 'email',
                 placeholder: 'Usuario',
                 icon: 'cilUser'
             },
