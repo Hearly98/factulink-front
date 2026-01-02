@@ -1,0 +1,29 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  group: VercelDeploymentFactulink
+
+steps:
+  - checkout: self
+
+  - script: npm install --frozen-lockfile
+    displayName: "📥 Install dependencies"
+
+  - script: npm install -g vercel
+    displayName: "🛠 Install Vercel CLI"
+
+  - script: |
+      vercel --prod --force --token=$(VERCEL_PAT)
+    env:
+        VERCEL_PROJECT_ID: $(VERCEL_PROJECT_ID)
+        VERCEL_ORG_ID: $(VERCEL_ORG_ID)
+    displayName: "🚀 Deploy to Vercel"
