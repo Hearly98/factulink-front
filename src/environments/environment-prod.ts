@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://10.144.143.219:8000/api/v1',
+  apiUrl: 'https://factulink-back.freekeybusiness.com/api/v1',
 };
