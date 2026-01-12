@@ -201,6 +201,13 @@ export const routes: Routes = [
           title: 'Series',
         },
       },
+      {
+        path: 'productos-sucursal',
+        loadComponent: () => import('./product-sucursal/pages/product-sucursal/product-sucursal').then((m) => m.ProductoSucursal),
+        data: {
+          title: 'Stock por Sucursal',
+        },
+      },
     ],
   },
   {

@@ -108,6 +108,15 @@ export const navItems: INavData[] = [
   },
   {
     title: true,
+    name: 'Logistica',
+  },
+  {
+    name: 'Sucursales',
+    url: '/productos-sucursal',
+    iconComponent: { name: 'cil-list-numbered' },
+  },
+  {
+    title: true,
     name: 'Comercial',
   },
   {

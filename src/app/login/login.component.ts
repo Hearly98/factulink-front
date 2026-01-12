@@ -18,6 +18,7 @@ import { buildLoginForm, loginStructure } from './helpers';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { AuthService } from '../core/auth/services/auth.service';
 import { Router } from '@angular/router';
+import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 
 @Component({
   selector: 'app-login',
@@ -41,6 +42,7 @@ import { Router } from '@angular/router';
 export class LoginComponent {
   public loginStructure = loginStructure();
   public form!: FormGroup;
+  public globalNotification = inject(GlobalNotification);
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -62,7 +64,10 @@ export class LoginComponent {
       },
       error: (err) => {
         console.error('Login error', err);
-        // Here you could show a toaster or alert
+        this.globalNotification.openToastAlert(
+          'Error',
+          err.message,
+          'danger');
       }
     });
   }
