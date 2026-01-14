@@ -143,6 +143,16 @@ export const routes: Routes = [
         },
       },
       {
+        path: 'ver-compra/:id',
+        loadComponent: () =>
+          import('./purchase/pages/purchase-view/purchase-view.component').then(
+            (m) => m.PurchaseViewComponent
+          ),
+        data: {
+          title: 'Ver Compra',
+        },
+      },
+      {
         path: 'listado-compras',
         loadComponent: () =>
           import('./purchase/pages/purchase-search/purchase-search.page').then(

@@ -13,6 +13,7 @@ export class AuthService {
   private router = inject(Router);
   private apiUrl = `${environment.apiUrl}/auth`;
   private readonly TOKEN_KEY = 'factu_token';
+  private readonly USER_KEY = 'factu_user';
 
   // State
   private _user = signal<User | null>(null);
@@ -20,10 +21,20 @@ export class AuthService {
   public isAuthenticated = computed(() => !!this._user() || !!this.getToken());
 
   constructor() {
-    // Try to load user if token exists
-    if (this.getToken()) {
+    // Try to load user if token and stored user exist
+    const token = this.getToken();
+    const storedUser = localStorage.getItem(this.USER_KEY);
+
+    if (token && storedUser) {
+      try {
+        this._user.set(JSON.parse(storedUser));
+      } catch (e) {
+        localStorage.removeItem(this.USER_KEY);
+      }
+    }
+
+    if (token) {
       this.getUser().subscribe({
-        next: (user) => this._user.set(user),
         error: () => this.logoutLocal()
       });
     }
@@ -33,7 +44,7 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap((res) => {
         this.setToken(res.access_token);
-        this._user.set(res.user);
+        this.setUser(res.user);
       })
     );
   }
@@ -42,7 +53,7 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, data).pipe(
       tap((res) => {
         this.setToken(res.access_token);
-        this._user.set(res.user);
+        this.setUser(res.user);
       })
     );
   }
@@ -59,7 +70,7 @@ export class AuthService {
 
   getUser(): Observable<User> {
     return this.http.get<User>(`${this.apiUrl}/me`).pipe(
-      tap((user) => this._user.set(user))
+      tap((user) => this.setUser(user))
     );
   }
 
@@ -71,8 +82,14 @@ export class AuthService {
     localStorage.setItem(this.TOKEN_KEY, token);
   }
 
+  private setUser(user: User): void {
+    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    this._user.set(user);
+  }
+
   logoutLocal(): void {
     localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
     this._user.set(null);
     this.router.navigate(['/login']);
   }

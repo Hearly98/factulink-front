@@ -5,7 +5,8 @@ import { PurchaseForm } from '../core/purchase.form';
 export type Control<SM extends Record<string, any>> =
   | SelectControl
   | SearchSelectControl<SM>
-  | TextControl;
+  | TextControl
+  | CheckboxControl;
 
 interface ControlBase {
   label: string;
@@ -29,6 +30,10 @@ export interface SearchSelectControl<SM extends Record<string, any>> extends Con
 interface TextControl extends ControlBase {
   type: 'text' | 'date';
   placeholder: string;
+}
+
+interface CheckboxControl extends ControlBase {
+  type: 'checkbox';
 }
 
 export interface PurchaseStructure<SM extends Record<string, any>> {
@@ -146,10 +151,16 @@ export const purchaseStructure = (
         },
         {
           label: 'Sucursal',
-          col: '6',
+          col: '4',
           type: 'select',
           formControlName: 'suc_id',
           options: SucursalOptions,
+        },
+        {
+          label: 'Afecta Stock',
+          col: '2',
+          type: 'checkbox',
+          formControlName: 'afecta_stock',
         },
       ],
     },

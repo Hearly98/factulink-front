@@ -10,12 +10,12 @@ export const buildPurchaseForm = (): {
   return {
     mon_id: new FormControl<number | null>(null),
     usu_id: new FormControl<number | null>(null),
-    prov_documento: new FormControl<string | null>(null),
+    prov_documento: new FormControl<string | null>({ value: null, disabled: true }),
     prod_id: new FormControl<number | null>(null),
     prov_direcc: new FormControl<string | null>(null),
     prov_correo: new FormControl<string | null>(null),
     prov_telf: new FormControl<string | null>(null),
-    tip_id: new FormControl<number | null>(null),
+    tip_id: new FormControl<number | null>({ value: null, disabled: true }),
     fechaEmision: new FormControl<Date | null>(null),
     numero: new FormControl<string | null>(null),
     compr_coment: new FormControl<string | null>(null),
@@ -23,6 +23,7 @@ export const buildPurchaseForm = (): {
     mp_id: new FormControl<number | null>(null),
     suc_id: new FormControl<number | null>(null),
     doc_id: new FormControl<number | null>(null),
+    afecta_stock: new FormControl<boolean | null>(false),
     detalles: new FormArray<
       FormGroup<{ [P in keyof PurchaseDetailForm]: FormControl<PurchaseDetailForm[P]> }>
     >([]),

@@ -63,7 +63,9 @@ import { environment } from '@environments/environment';
               <th style="width: 12%">Precio Unitario</th>
               <th style="width: 11%">Precio Compra</th>
               <th style="width: 11%">Dscto</th>
+              @if (showActions) {
               <th style="width: 5%"></th>
+              }
             </tr>
           </thead>
           <tbody>
@@ -82,7 +84,7 @@ import { environment } from '@environments/environment';
                 />
               </td>
               <td>
-                <p class="form-control form-control-sm">{{ detail.value.prod_cod }}</p>
+                <p class="form-control form-control-sm">{{ detail.value.prod_cod_interno }}</p>
               </td>
               <td>
                 <input
@@ -121,6 +123,7 @@ import { environment } from '@environments/environment';
               <td>
                 <input type="number" class="form-control form-control-sm" formControlName="dscto" />
               </td>
+              @if (showActions) {
               <td>
                 <button
                   type="button"
@@ -133,6 +136,7 @@ import { environment } from '@environments/environment';
                   <svg cIcon name="cilTrash" size="sm"></svg>
                 </button>
               </td>
+              }
             </tr>
             }
           </tbody>
@@ -208,6 +212,7 @@ import { environment } from '@environments/environment';
 })
 export class PurchaseDetailTableComponent implements OnInit, OnChanges {
   @Input() detailsArray!: FormArray<TypedFormGroup<PurchaseDetailForm>>;
+  @Input() showActions: boolean = true;
   @Output() detailRemoved = new EventEmitter<number>();
 
   readonly IGV = environment.igv ?? 0.18;

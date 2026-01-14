@@ -10,6 +10,7 @@ export interface PurchaseForm {
   mp_id: number | null;
   mon_id: number | null;
   prov_documento: string | null;
+  afecta_stock: boolean | null;
   prov_direcc: string | null;
   prov_correo: string | null;
   prov_telf: string | null;

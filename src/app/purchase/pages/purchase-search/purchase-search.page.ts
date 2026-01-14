@@ -1,4 +1,5 @@
 import { Component, Inject, inject, signal, ViewChild, ViewContainerRef } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ButtonDirective, CardBodyComponent, CardComponent, ColComponent, FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective, RowComponent, TableDirective, TextColorDirective } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
@@ -12,30 +13,29 @@ import { PurchaseFilterForm } from '../../core/types/purchase-filter.form';
 import { buildFilterForm, filterSort, mapParams } from '../../helpers';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
-import { PurchaseEditModalComponent } from '../../components/purchase-edit-modal/purchase-edit-modal.component';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 
 @Component({
-    selector: 'app-purchase-search',
-    imports: [
-        RowComponent,
-        ColComponent,
-        CardComponent,
-        CardBodyComponent,
-        IconDirective,
-        ButtonDirective,
-        TableDirective,
-        ReactiveFormsModule,
-        PaginatorComponent,
-        PurchaseEditModalComponent,
-        FormCheckComponent,
-        FormCheckInputDirective,
-        FormCheckLabelDirective,
-        DatePipe,
-        CurrencyPipe,
-        TextColorDirective
-    ],
-    template: `<c-row>
+  selector: 'app-purchase-search',
+  imports: [
+    RowComponent,
+    ColComponent,
+    CardComponent,
+    CardBodyComponent,
+    IconDirective,
+    ButtonDirective,
+    TableDirective,
+    ReactiveFormsModule,
+    PaginatorComponent,
+    FormCheckComponent,
+    FormCheckInputDirective,
+    FormCheckLabelDirective,
+    DatePipe,
+    CurrencyPipe,
+    TextColorDirective,
+    RouterLink
+  ],
+  template: `<c-row>
       <c-col>
         <h4>{{ title() }}</h4>
       </c-col>
@@ -144,7 +144,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
                       <svg cIcon name="cilPrint"></svg>
                     </button>
                     <button
-                      (click)="openModal(purchase.com_id)"
+                      [routerLink]="'/ver-compra/'+ purchase.compr_id"
                       size="sm"
                       class="me-2"
                       cButton
@@ -152,7 +152,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
                     >
                       <svg cIcon name="cilPencil"></svg>
                     </button>
-                    <button (click)="onDelete(purchase.com_id)" size="sm" cButton color="danger">
+                    <button (click)="onDelete(purchase.compr_id)" size="sm" cButton color="danger">
                       <svg cIcon name="cilTrash"></svg>
                     </button>
                   </td>
@@ -184,106 +184,96 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
           </c-col>
         </c-row>
       </c-card-body>
-    </c-card>
-    <app-purchase-edit-modal #purchaseEditModal></app-purchase-edit-modal>`,
-    styles: ``,
+    </c-card>`,
+  styles: ``,
 })
 export class PurchaseSearchPage extends BaseSearchComponent {
-    @ViewChild('purchaseEditModal') purchaseEditModal!: PurchaseEditModalComponent;
-    public form!: TypedFormGroup<PurchaseFilterForm>;
-    #formBuilder = inject(FormBuilder);
-    title = signal<string>('Historial de Compras');
-    #purchaseService = inject(PurchaseService);
-    #confirmService = inject(ConfirmService);
-    #globalNotification = inject(GlobalNotification);
-    public purchases: any[] = [];
+  public form!: TypedFormGroup<PurchaseFilterForm>;
+  #formBuilder = inject(FormBuilder);
+  title = signal<string>('Historial de Compras');
+  #purchaseService = inject(PurchaseService);
+  #confirmService = inject(ConfirmService);
+  #globalNotification = inject(GlobalNotification);
+  public purchases: any[] = [];
 
-    constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
-        super(MODULES.PURCHASE, viewContainerRef);
-    }
+  constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
+    super(MODULES.PURCHASE, viewContainerRef);
+  }
 
-    ngOnInit(): void {
-        this.createForm();
-        this.onSearch();
-    }
+  ngOnInit(): void {
+    this.createForm();
+    this.onSearch();
+  }
 
-    createForm() {
-        this.form = this.#formBuilder.group(buildFilterForm());
-    }
+  createForm() {
+    this.form = this.#formBuilder.group(buildFilterForm());
+  }
 
-    onSearch(filter = null, page = 1) {
-        const sort = filterSort(this.form.value);
-        const filterToUse = filter || mapParams(this.form.value);
-        const pageSize = 10;
-        const pageParams = new PageParamsModel(page, pageSize);
-        this.updateFilter(filterToUse);
-        this.updateSort(sort);
-        this.updatePage(pageParams);
-        const params = this.getPageParams();
-        const subscription = this.#purchaseService.search(params).subscribe({
+  onSearch(filter = null, page = 1) {
+    const sort = filterSort(this.form.value);
+    const filterToUse = filter || mapParams(this.form.value);
+    const pageSize = 10;
+    const pageParams = new PageParamsModel(page, pageSize);
+    this.updateFilter(filterToUse);
+    this.updateSort(sort);
+    this.updatePage(pageParams);
+    const params = this.getPageParams();
+    const subscription = this.#purchaseService.search(params).subscribe({
+      next: (response) => {
+        if (response.isValid) {
+          this.total = response.data.total;
+          this.purchases = response.data.items;
+        } else {
+          console.error(response);
+        }
+      },
+      error: (response) => {
+        console.error(response.messages);
+      },
+    });
+    this.subscriptions.push(subscription);
+  }
+
+  onPageChange(page: number): void {
+    this.onSearch(this.filter, page);
+  }
+
+  onClean() {
+    this.form.reset();
+    this.form.patchValue({
+      order: 'desc',
+      estado_cancelado: false,
+      estado_pendiente: false,
+      estado_eliminado: false,
+    });
+    this.onSearch();
+  }
+
+  onDelete(id: number) {
+    this.#confirmService
+      .open({
+        title: 'Eliminar',
+        message: '¿Estás seguro de eliminar este registro?',
+        color: 'danger',
+        confirmText: 'Si, eliminar',
+        cancelText: 'Cancelar',
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.#purchaseService.delete(id).subscribe({
             next: (response) => {
-                if (response.isValid) {
-                    this.total = response.data.total;
-                    this.purchases = response.data.items;
-                } else {
-                    console.error(response);
-                }
+              if (response.isValid) {
+                this.#globalNotification.openAlert(response);
+                this.onSearch();
+              } else {
+                this.#globalNotification.openAlert(response);
+              }
             },
             error: (response) => {
-                console.error(response.messages);
+              this.#globalNotification.openToastAlert('Error al eliminar', response, 'danger');
             },
-        });
-        this.subscriptions.push(subscription);
-    }
-
-    onPageChange(page: number): void {
-        this.onSearch(this.filter, page);
-    }
-
-    onClean() {
-        this.form.reset();
-        this.form.patchValue({
-            order: 'desc',
-            estado_cancelado: false,
-            estado_pendiente: false,
-            estado_eliminado: false,
-        });
-        this.onSearch();
-    }
-
-    openModal(id: number) {
-        if (this.purchaseEditModal) {
-            this.purchaseEditModal.openModal(id, () => {
-                this.onSearch();
-            });
+          });
         }
-    }
-
-    onDelete(id: number) {
-        this.#confirmService
-            .open({
-                title: 'Eliminar',
-                message: '¿Estás seguro de eliminar este registro?',
-                color: 'danger',
-                confirmText: 'Si, eliminar',
-                cancelText: 'Cancelar',
-            })
-            .then((confirmed) => {
-                if (confirmed) {
-                    this.#purchaseService.delete(id).subscribe({
-                        next: (response) => {
-                            if (response.isValid) {
-                                this.#globalNotification.openAlert(response);
-                                this.onSearch();
-                            } else {
-                                this.#globalNotification.openAlert(response);
-                            }
-                        },
-                        error: (response) => {
-                            this.#globalNotification.openToastAlert('Error al eliminar', response, 'danger');
-                        },
-                    });
-                }
-            });
-    }
+      });
+  }
 }

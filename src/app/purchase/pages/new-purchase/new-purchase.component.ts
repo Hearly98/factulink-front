@@ -6,6 +6,9 @@ import {
   ContainerComponent,
   RowComponent,
   ButtonDirective,
+  FormCheckComponent,
+  FormCheckInputDirective,
+  FormCheckLabelDirective,
 } from '@coreui/angular';
 import { purchaseStructure } from '../../helpers';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -28,7 +31,6 @@ import { buildPurchaseDetailForm } from 'src/app/purchase-detail/helpers';
 import { IconDirective } from '@coreui/icons-angular';
 import { PaymentMethodService } from 'src/app/payment-method/core/services/payment-method.service';
 import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service';
-import { CategoryService } from 'src/app/category/core/services/category.service';
 import { PurchaseCreateDto } from '../../core/purchase-create-dto';
 import { PurchaseService } from '../../core/services/purchase.service';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
@@ -48,6 +50,9 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
     IconDirective,
     PurchaseDetailTableComponent,
     ButtonDirective,
+    FormCheckComponent,
+    FormCheckInputDirective,
+    FormCheckLabelDirective,
   ],
   template: `
     <c-container [formGroup]="form">
@@ -69,6 +74,7 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
                 [bindLabel]="control.bindLabel"
                 [bindValue]="control.bindValue"
                 [serviceFn]="serviceMap[control.serviceFnName]"
+                [disabled]="isControlDisabled(control.formControlName)"
                 (itemSelected)="onSelectItem(control.formControlName, $event)"
               ></app-search-select>
               } @case('select'){
@@ -78,6 +84,17 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
                 <option [ngValue]="option.value">{{ option.label }}</option>
                 }
               </select>
+              } 
+              @case('checkbox') {
+              <c-form-check class="mt-2">
+                <input
+                  cFormCheckInput
+                  type="checkbox"
+                  [formControlName]="control.formControlName"
+                  [id]="control.formControlName"
+                />
+                <label cFormCheckLabel [for]="control.formControlName">{{ control.label }}</label>
+              </c-form-check>
               } @default {
               <input
                 [formControlName]="control.formControlName"
@@ -197,7 +214,17 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
     });
   }
 
+
+  isControlDisabled(formControlName: string): boolean {
+    if (formControlName === 'prod_id') {
+      return !this.form.get('suc_id')?.value;
+    }
+    return false;
+  }
+
   onSelectItem(formControlName: keyof PurchaseForm, item: any) {
+    if (!item) return;
+
     if (formControlName === 'prod_id') {
       this.form.patchValue({
         prod_id: item.prod_id,
@@ -233,7 +260,7 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
       prod_id: this.selectedProduct.prod_id,
       cantidad: 1,
       prod_nom: this.selectedProduct.prod_nom,
-      prod_cod: this.selectedProduct.prod_cod,
+      prod_cod_interno: this.selectedProduct.prod_cod,
       unidad: this.selectedProduct.unidad,
       costo_unitario: this.selectedProduct.pcompra,
       precio_compra: null,
@@ -301,8 +328,6 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
   }
 
   save() {
-    debugger;
-
     if (this.form.invalid || this.detailsArray.length === 0) {
       alert('Complete todos los campos requeridos y agregue al menos un producto');
       return;
@@ -316,8 +341,7 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
       doc_id: this.form.value.doc_id,
       mon_id: this.form.value.mon_id,
       mp_id: this.form.value.mp_id,
-      usu_id: 1,
-
+      afecta_stock: this.form.value.afecta_stock,
       detalles: this.detailsArray.getRawValue().map((v) => {
         return {
           prod_id: v.prod_id,

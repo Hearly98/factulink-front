@@ -8,6 +8,8 @@ import {
   Output,
   signal,
   viewChild,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -62,12 +64,13 @@ import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs';
     </div>
   `,
 })
-export class SearchSelectComponent implements OnInit {
-  
+export class SearchSelectComponent implements OnInit, OnChanges {
+
   @Input() placeholder: string = 'Buscar...';
   @Input() bindLabel: string = 'label';
   @Input() bindValue: string = 'value';
   @Input() serviceFn!: (term: string) => any;
+  @Input() disabled: boolean = false;
 
   @Output() itemSelected = new EventEmitter<any>();
   @Output() cleared = new EventEmitter<void>(); // opcional, útil
@@ -96,7 +99,6 @@ export class SearchSelectComponent implements OnInit {
         tap((value) => {
           if (!value) {
             this.data.set([]);
-            this.itemSelected.emit(null);
             this.cleared.emit();
             return;
           }
@@ -138,6 +140,16 @@ export class SearchSelectComponent implements OnInit {
   onOutsideClick(event: MouseEvent) {
     if (!this.container()?.nativeElement.contains(event.target)) {
       this.closeDropdown();
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['disabled']) {
+      if (this.disabled) {
+        this.searchCtrl.disable();
+      } else {
+        this.searchCtrl.enable();
+      }
     }
   }
 }
