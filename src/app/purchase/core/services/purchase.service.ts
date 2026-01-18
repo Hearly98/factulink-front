@@ -42,4 +42,11 @@ export class PurchaseService extends BaseService {
       body
     );
   }
+
+  print(id: number) {
+    return this.http.get(`${environment.apiUrl}/compras/${id}/pdf`, {
+      responseType: 'blob',
+      observe: 'response'
+    });
+  }
 }

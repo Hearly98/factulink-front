@@ -1,27 +1,48 @@
+import { QuotationDetailForm } from "./quotation-detail.form";
+
 export interface QuotationForm {
   serie_id: number | null;
-  suc_id: number | null;
-  usu_id: number | null;
-  cli_id: number | null;
-  fechaEmision: Date | null;
-  mon_id: number | null;
-  cli_documento: string | null;
-  cli_direcc: string | null;
-  cli_correo: string | null;
-  cli_telf: string | null;
-  tip_id: number | null;
-  cot_coment: string | null;
-  prod_id: number | null;
+  numero: number | null;
+  numero_completo: string | null;
+  fecha_emision: string | null;
+  fecha_valido_hasta: string | null,
+  mostrar_fecha_valido_hasta: boolean | null,
+  emp_id: number | null,
+  suc_id: number | null,
+  cli_id: number | null,
+  nombre_contacto: string | null,
+  telefono_contacto: string | null,
+  correo_contacto: string | null,
+  area_contacto: string | null,
+  mon_id: number | null,
+  mostrar_moneda: boolean | null,
+  cot_subtotal: number | null,
+  cot_igv: number | null,
+  igv_requerido: boolean | null,
+  cot_total: number | null,
+  mostrar_total: boolean | null,
+  cot_descuento: number | null,
+  observaciones: string | null,
+  mostrar_observaciones: boolean | null,
+  condiciones_pago: string | null,
+  mostrar_condiciones_pago: boolean | null,
+  tipo_pago_id: number | null,
+  mostrar_tipo_pago: boolean | null,
+  forma_pago: string | null,
+  mostrar_forma_pago: boolean | null,
+  plazo_entrega: string | null,
+  mostrar_plazo_entrega: boolean | null,
+  lugar_entrega: string | null,
+  mostrar_lugar_entrega: boolean | null,
+  garantia: string | null,
+  mostrar_garantia: boolean | null,
+  consideraciones: string | null,
+  mostrar_consideraciones: boolean | null,
+  servicio_complementario: string | null,
+  mostrar_servicio_complementario: boolean | null,
+  cli_documento: string | null,
+  cli_direcc: string | null,
+  tip_id: number | null,
+  prod_id: number | null,
   detalles: QuotationDetailForm[] | null;
-}
-
-export interface QuotationDetailForm {
-  prod_id: number;
-  cantidad: number;
-  prod_nom: string;
-  prod_cod: string;
-  unidad: string;
-  precio_unitario: number;
-  dscto: number | null;
-  precio_total: number | null;
 }

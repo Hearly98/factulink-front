@@ -99,6 +99,7 @@ import { IconDirective } from '@coreui/icons-angular';
                 <input
                   type="text"
                   class="form-control form-control-sm"
+                  [value]="totalDescuento | currency: 'S/. '"
                   readonly
                 />
               </c-col>
@@ -112,6 +113,7 @@ import { IconDirective } from '@coreui/icons-angular';
                 <input
                   type="text"
                   class="form-control form-control-sm"
+                  [value]="baseIgv | currency: 'S/. '"
                   readonly
                 />
               </c-col>
@@ -125,6 +127,7 @@ import { IconDirective } from '@coreui/icons-angular';
                 <input
                   type="text"
                   class="form-control form-control-sm"
+                  [value]="igv | currency: 'S/. '"
                   readonly
                 />
               </c-col>
@@ -138,7 +141,7 @@ import { IconDirective } from '@coreui/icons-angular';
                 <input
                   type="text"
                   class="form-control form-control-sm"
-                  [value]="getGrandTotal()"
+                  [value]="grandTotal | currency: 'S/. '"
                   readonly
                 />
               </c-col>
@@ -152,7 +155,41 @@ import { IconDirective } from '@coreui/icons-angular';
 })
 export class QuotationDetailTableComponent {
   @Input() detailsArray!: FormArray;
+  @Input() igvRequerido: boolean = false;
   @Output() detailRemoved = new EventEmitter<number>();
+
+  get subtotal(): number {
+    const total = this.detailsArray.controls.reduce((sum, control) => {
+      const cantidad = control.get('cantidad')?.value || 0;
+      const precioUnitario = control.get('precio_unitario')?.value || 0;
+      const descuento = control.get('dscto')?.value || 0;
+      const bruto = cantidad * precioUnitario;
+      const lineaTotal = Math.round((bruto - descuento) * 100) / 100;
+      return sum + lineaTotal;
+    }, 0);
+    return Math.round(total * 100) / 100;
+  }
+
+  get baseIgv(): number {
+    if (!this.igvRequerido) return 0;
+    return this.subtotal;
+  }
+
+  get totalDescuento(): number {
+    const total = this.detailsArray.controls.reduce((sum, control) => {
+      return sum + (control.get('dscto')?.value || 0);
+    }, 0);
+    return Math.round(total * 100) / 100;
+  }
+
+  get igv(): number {
+    if (!this.igvRequerido) return 0;
+    return Math.round(this.subtotal * 0.18 * 100) / 100;
+  }
+
+  get grandTotal(): number {
+    return Math.round((this.subtotal + this.igv) * 100) / 100;
+  }
 
   calculateTotal(index: number): number {
     const detail = this.detailsArray.at(index);
@@ -160,20 +197,11 @@ export class QuotationDetailTableComponent {
     const precioUnitario = detail.get('precio_unitario')?.value || 0;
     const descuento = detail.get('dscto')?.value || 0;
 
-    const subtotal = cantidad * precioUnitario;
-    const total = subtotal - descuento;
+    const bruto = cantidad * precioUnitario;
+    const total = Math.round((bruto - descuento) * 100) / 100;
 
     detail.patchValue({ precio_total: total }, { emitEvent: false });
     return total;
-  }
-
-  getGrandTotal(): number {
-    return this.detailsArray.controls.reduce((sum, control) => {
-      const cantidad = control.get('cantidad')?.value || 0;
-      const precioUnitario = control.get('precio_unitario')?.value || 0;
-      const descuento = control.get('dscto')?.value || 0;
-      return sum + (cantidad * precioUnitario - descuento);
-    }, 0);
   }
 
   onQuantityChange(index: number): void {

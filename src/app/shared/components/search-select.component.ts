@@ -72,6 +72,8 @@ export class SearchSelectComponent implements OnInit, OnChanges {
   @Input() serviceFn!: (term: string) => any;
   @Input() disabled: boolean = false;
 
+  @Input() initialValue: string = '';
+
   @Output() itemSelected = new EventEmitter<any>();
   @Output() cleared = new EventEmitter<void>(); // opcional, útil
 
@@ -86,6 +88,9 @@ export class SearchSelectComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.setupSearchListener();
+    if (this.initialValue) {
+      this.searchCtrl.setValue(this.initialValue, { emitEvent: false });
+    }
   }
 
   // -----------------------------
@@ -150,6 +155,9 @@ export class SearchSelectComponent implements OnInit, OnChanges {
       } else {
         this.searchCtrl.enable();
       }
+    }
+    if (changes['initialValue'] && !changes['initialValue'].firstChange) {
+      this.searchCtrl.setValue(this.initialValue, { emitEvent: false });
     }
   }
 }

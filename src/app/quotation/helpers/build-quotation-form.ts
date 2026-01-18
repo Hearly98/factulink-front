@@ -1,12 +1,14 @@
 import { FormArray, FormControl, Validators } from '@angular/forms';
+import { QuotationForm } from '../core/types';
+import { TypedFormControls } from '@shared/types/types-form';
 
-export function buildQuotationForm() {
+export function buildQuotationForm(): TypedFormControls<QuotationForm> {
   return {
     serie_id: new FormControl<number | null>(null),
     numero: new FormControl<number | null>(null),
-    numero_completo: new FormControl<string | null>(null),
-    fecha_emision: new FormControl<Date | null>({ value: new Date(), disabled: true }, [Validators.required]),
-    fecha_valido_hasta: new FormControl<Date | null>(null),
+    numero_completo: new FormControl<string | null>({ value: null, disabled: true }),
+    fecha_emision: new FormControl<string | null>({ value: new Date().toISOString().split('T')[0], disabled: true }, [Validators.required]),
+    fecha_valido_hasta: new FormControl<string | null>(null),
     mostrar_fecha_valido_hasta: new FormControl<boolean>(false),
     emp_id: new FormControl<number | null>(null),
     suc_id: new FormControl<number | null>(null, [Validators.required]),
@@ -45,6 +47,6 @@ export function buildQuotationForm() {
     cli_direcc: new FormControl<string | null>(null),
     tip_id: new FormControl<number | null>(null),
     prod_id: new FormControl<number | null>(null),
-    detalles: new FormArray([]),
+    detalles: new FormArray<any>([]),
   };
 }

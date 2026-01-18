@@ -195,6 +195,14 @@ export const routes: Routes = [
         },
       },
       {
+        path: 'editar-cotizacion/:id',
+        loadComponent: () =>
+          import('./quotation/pages/quotation-new-edit.page').then((m) => m.QuotationNewEditPage),
+        data: {
+          title: 'Editar Cotización',
+        },
+      },
+      {
         path: 'historial-guias-remision',
         loadComponent: () =>
           import('./shipping-guide/pages/shipping-guide-list.page').then(

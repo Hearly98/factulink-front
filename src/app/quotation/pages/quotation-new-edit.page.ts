@@ -1,5 +1,6 @@
 import { Component, inject, Inject, OnInit, signal, ViewContainerRef } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import {
   ButtonDirective,
@@ -24,7 +25,11 @@ import { ProductService } from 'src/app/products/core/services/product.service';
 import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service';
 import { CurrencyService } from 'src/app/currency/core/services/currency.service';
 import { QuotationDetailTableComponent } from '../components/quotation-detail-table.component';
-import { QuotationCreateDto, QuotationDetailCreateDto } from '../core/types/quotation-create-dto';
+import { QuotationCreateDto } from '../core/types/quotation-create-dto';
+import { messages } from '../helpers';
+import { ValidationMessagesComponent } from '@shared/components/error-messages/validation-messages.component';
+import { QuotationDetailCreateDto, QuotationForm } from '../core/types';
+import { TypedFormGroup } from '@shared/types/types-form';
 
 @Component({
   selector: 'app-quotation-new-edit',
@@ -41,9 +46,17 @@ import { QuotationCreateDto, QuotationDetailCreateDto } from '../core/types/quot
     ReactiveFormsModule,
     SearchSelectComponent,
     QuotationDetailTableComponent,
+    ValidationMessagesComponent,
   ],
   template: `
     <c-container [formGroup]="form">
+      @if(form.get('numero_completo')?.value) {
+        <c-row>
+          <c-col md="12">
+            <h5>Cotización {{ form.get('numero_completo')?.value }}</h5>
+          </c-col>
+        </c-row>
+      }
       @for (item of structure(); track $index) {
       <c-card class="mb-4">
         <c-card-body>
@@ -64,22 +77,34 @@ import { QuotationCreateDto, QuotationDetailCreateDto } from '../core/types/quot
                     [bindValue]="control.bindValue || ''"
                     [serviceFn]="control.serviceFnName ? serviceMap[control.serviceFnName] : undefined"
                     (itemSelected)="onSelectItem(control.formControlName, $event)"
+                    [initialValue]="control.formControlName ? searchSelectLabels[control.formControlName] : ''"
                   ></app-search-select>
                 } 
                 @case('select') {
-                  <select class="form-control form-select" [formControlName]="control.formControlName">
+                  <select class="form-control form-select" [formControlName]="control.formControlName"
+                   [class.is-invalid]="
+                      form.get(control.formControlName)?.invalid &&
+                      form.get(control.formControlName)?.touched
+                    "
+                  >
                     <option [ngValue]="null">Seleccione</option>
                     @for (option of control.options; track $index) {
                     <option [ngValue]="option.value">{{ option.label }}</option>
                     }
                   </select>
+                  <app-validation-messages [controlName]="control.formControlName" [form]="form" [messages]="errorMessages"></app-validation-messages>
                 } 
                 @case('textarea') {
                   <textarea
                     [formControlName]="control.formControlName"
                     [placeholder]="control.placeholder"
                     class="form-control"
+                     [class.is-invalid]="
+                      form.get(control.formControlName)?.invalid &&
+                      form.get(control.formControlName)?.touched
+                    "
                   ></textarea>
+                  <app-validation-messages [controlName]="control.formControlName" [form]="form" [messages]="errorMessages"></app-validation-messages>
                 }
                 @default {
                   <input
@@ -87,7 +112,12 @@ import { QuotationCreateDto, QuotationDetailCreateDto } from '../core/types/quot
                     [placeholder]="control.placeholder"
                     [type]="control.type"
                     class="form-control"
+                     [class.is-invalid]="
+                      form.get(control.formControlName)?.invalid &&
+                      form.get(control.formControlName)?.touched
+                    "
                   />
+                  <app-validation-messages [controlName]="control.formControlName" [form]="form" [messages]="errorMessages"></app-validation-messages>
                 } 
               }
               @if (control.showControlName) {
@@ -119,6 +149,7 @@ import { QuotationCreateDto, QuotationDetailCreateDto } from '../core/types/quot
             <c-col md="12" sm="12" class="mt-4">
               <app-quotation-detail-table
                 [detailsArray]="detailsArray"
+                [igvRequerido]="form.get('igv_requerido')?.value ?? false"
                 (detailRemoved)="onDetailRemoved($event)"
               ></app-quotation-detail-table>
             </c-col>
@@ -140,7 +171,6 @@ import { QuotationCreateDto, QuotationDetailCreateDto } from '../core/types/quot
                 cButton
                 color="success"
                 (click)="save()"
-                [disabled]="!form.valid || detailsArray.length === 0"
               >
                 <svg cIcon name="cilSave" class="me-2"></svg>
                 Guardar Cotización
@@ -157,9 +187,11 @@ import { QuotationCreateDto, QuotationDetailCreateDto } from '../core/types/quot
 })
 export class QuotationNewEditPage extends BaseComponent implements OnInit {
   structure = signal(quotationStructure());
-  form!: FormGroup;
+  form!: TypedFormGroup<QuotationForm>;
   selectedProduct: any = null;
-
+  quotaId = signal<number | null>(null);
+  searchSelectLabels: Record<string, string> = {};
+  errorMessages = messages;
   #formBuilder = inject(FormBuilder);
   #quotationService = inject(QuotationService);
   #customerService = inject(CustomerService);
@@ -167,6 +199,8 @@ export class QuotationNewEditPage extends BaseComponent implements OnInit {
   #sucursalService = inject(SucursalService);
   #currencyService = inject(CurrencyService);
   #globalNotification = inject(GlobalNotification);
+  #route = inject(ActivatedRoute);
+  #router = inject(Router);
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.SALES, viewContainerRef);
@@ -175,6 +209,60 @@ export class QuotationNewEditPage extends BaseComponent implements OnInit {
   ngOnInit() {
     this.form = this.#formBuilder.group(buildQuotationForm());
     this.loadSelectCombos();
+    this.checkEditMode();
+  }
+
+  checkEditMode() {
+    const id = this.#route.snapshot.params['id'];
+    if (id) {
+      this.quotaId.set(Number(id));
+      this.loadQuotation(this.quotaId()!);
+    }
+  }
+
+  loadQuotation(id: number) {
+    this.#quotationService.getById(id).subscribe({
+      next: (response) => {
+        if (response.isValid && response.data) {
+          const data = response.data;
+
+          // Formatear fechas para input type="date" (YYYY-MM-DD)
+          const fechaEmision = data.fecha_emision ? data.fecha_emision.substring(0, 10) : '';
+          const fechaValido = data.fecha_valido_hasta ? data.fecha_valido_hasta.substring(0, 10) : '';
+
+          const { detalles, ...rest } = data;
+
+          this.form.patchValue({
+            ...rest,
+            fecha_emision: fechaEmision,
+            fecha_valido_hasta: fechaValido,
+          });
+
+          // Labels para search-select
+          if (data.cliente) {
+            this.searchSelectLabels['cli_id'] = data.cliente.cli_nom;
+          }
+
+          this.patchCustomer(data.cliente);
+
+
+          // Cargar detalles
+          this.detailsArray.clear();
+          data.detalles.forEach((det: any) => {
+            this.detailsArray.push(this.#formBuilder.group(buildQuotationDetailForm({
+              prod_id: det.prod_id,
+              cantidad: det.cantidad,
+              prod_nom: det.producto?.prod_nom || det.descripcion,
+              prod_cod: det.producto?.prod_cod_interno || '',
+              unidad: det.producto?.unidad.und_nom || '',
+              precio_unitario: det.precio_unitario,
+              dscto: det.descuento || 0,
+              precio_total: (det.cantidad * det.precio_unitario) - (det.descuento || 0)
+            })));
+          });
+        }
+      }
+    });
   }
 
   get detailsArray(): FormArray {
@@ -186,7 +274,7 @@ export class QuotationNewEditPage extends BaseComponent implements OnInit {
     productSearch: (term: string) =>
       this.#productService.searchQuick({
         term,
-        suc_id: this.form.get('suc_id')?.value,
+        suc_id: this.form.value.suc_id!,
       }),
   };
 
@@ -253,6 +341,8 @@ export class QuotationNewEditPage extends BaseComponent implements OnInit {
   }
 
   onDetailRemoved(index: number) {
+    // La eliminación ya se hace en el componente de tabla por simplicidad, 
+    // pero si quisiéramos hacer algo más aquí lo podríamos hacer.
     console.log('Producto eliminado en índice:', index);
   }
 
@@ -287,33 +377,51 @@ export class QuotationNewEditPage extends BaseComponent implements OnInit {
       },
     });
 
-    this.structure.set(quotationStructure(series, currencies, sucursalOptions));
+    this.structure.set(quotationStructure(currencies, sucursalOptions));
   }
 
   save() {
+    debugger;
     if (this.form.invalid || this.detailsArray.length === 0) {
-      alert('Complete todos los campos requeridos y agregue al menos un producto');
+      this.#globalNotification.openToastAlert('Validación', 'Complete todos los campos requeridos');
+      this.form.markAllAsTouched();
+      const invalidControls: { campo: string; errores: any }[] = [];
+      const controls = this.form.controls;
+      Object.keys(controls).forEach((name) => {
+        const control = controls[name as keyof typeof controls];
+        if (control.invalid) {
+          invalidControls.push({
+            campo: name,
+            errores: control.errors
+          });
+        }
+      });
+      console.table(invalidControls); // Esto te dará una tabla clara en la consola
       return;
     }
 
     const quotationData: QuotationCreateDto = {
-      ...this.form.value,
+      ...(this.form.getRawValue() as any),
       detalles: this.detailsArray.getRawValue().map((v) => {
         return {
           prod_id: v.prod_id,
           cantidad: v.cantidad,
           precio_unitario: v.precio_unitario,
           descripcion: v.prod_nom,
-          descuento: v.dscto,
+          descuento: v.dscto || 0,
         } as QuotationDetailCreateDto;
       }),
     };
 
-    this.#quotationService.create(quotationData).subscribe({
+    const request = this.quotaId()
+      ? this.#quotationService.update(this.quotaId()!, quotationData)
+      : this.#quotationService.create(quotationData);
+
+    request.subscribe({
       next: (response) => {
         if (response.isValid) {
           this.#globalNotification.openAlert(response);
-          this.cancel();
+          this.#router.navigate(['/historial-cotizaciones']);
         } else {
           this.#globalNotification.openAlert(response);
         }

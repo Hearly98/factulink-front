@@ -6,43 +6,50 @@ import { ResponseDto } from '@shared/models/api/response.dto';
 import { QuotationModel } from '../models/quotation.model';
 import { PageParamsModel } from '@shared/models/query/page-params.model';
 import { SerieModel } from 'src/app/series/core/models/serie.model';
+import { BaseService } from '@shared/services/base.service';
+import { QueryParamsModel } from '@shared/models/query/query-params.model';
+import { QueryResultsModel } from '@shared/models/query/query-results.model';
 
 @Injectable({
   providedIn: 'root',
 })
-export class QuotationService {
-  #http = inject(HttpClient);
-  #apiUrl = `${environment.apiUrl}/cotizaciones`;
+export class QuotationService extends BaseService {
 
-  search(params: PageParamsModel): Observable<ResponseDto<{ items: QuotationModel[]; total: number }>> {
-    return this.#http.post<ResponseDto<{ items: QuotationModel[]; total: number }>>(
-      `${this.#apiUrl}/search`,
-      params
+  constructor(http: HttpClient) {
+    super(http, `${environment.apiUrl}/cotizaciones`);
+  }
+
+  search(body: QueryParamsModel): Observable<ResponseDto<QueryResultsModel<QuotationModel>>> {
+    return this.postRequest<QueryParamsModel, ResponseDto<QueryResultsModel<QuotationModel>>>(
+      `/search`,
+      body
     );
   }
 
   getSeries(): Observable<ResponseDto<SerieModel[]>> {
-    return this.#http.get<ResponseDto<SerieModel[]>>(`${this.#apiUrl}/series`);
+    return this.getRequest<ResponseDto<SerieModel[]>>(`/series`);
   }
 
   getById(id: number): Observable<ResponseDto<QuotationModel>> {
-    return this.#http.get<ResponseDto<QuotationModel>>(`${this.#apiUrl}/${id}`);
+    return this.getRequest<ResponseDto<QuotationModel>>(`/${id}`);
   }
 
   create(data: any): Observable<ResponseDto<QuotationModel>> {
-    return this.#http.post<ResponseDto<QuotationModel>>(this.#apiUrl, data);
+    return this.postRequest(data, '');
   }
 
-  delete(id: number): Observable<ResponseDto<void>> {
-    return this.#http.delete<ResponseDto<void>>(`${this.#apiUrl}/${id}`);
+  update(id: number, data: any): Observable<ResponseDto<QuotationModel>> {
+    return this.putRequest(`/${id}`, data);
   }
 
-  print(id: number): Observable<Blob> {
-    return this.#http.get(`${this.#apiUrl}/${id}/pdf`, {
+  anular(id: number): Observable<ResponseDto<void>> {
+    return this.postRequest(`/${id}/anular`, {});
+  }
+
+  print(id: number) {
+    return this.http.get(`${environment.apiUrl}/cotizaciones/${id}/pdf`, {
       responseType: 'blob',
-      headers: new HttpHeaders({
-        'Accept': 'application/pdf'
-      })
+      observe: 'response'
     });
   }
 }

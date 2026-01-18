@@ -1,5 +1,5 @@
 import { FormControl, Validators } from '@angular/forms';
-import { QuotationDetailForm } from '../core/types/quotation.form';
+import { QuotationDetailForm } from '../core/types/quotation-detail.form';
 
 export function buildQuotationDetailForm(data?: Partial<QuotationDetailForm>) {
   return {

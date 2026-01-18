@@ -20,7 +20,6 @@ export interface QuotationStructureSection {
 }
 
 export function quotationStructure(
-  series: SelectOption[] = [],
   currencies: SelectOption[] = [],
   sucursales: SelectOption[] = []
 ): QuotationStructureSection[] {

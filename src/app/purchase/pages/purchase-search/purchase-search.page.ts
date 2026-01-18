@@ -141,6 +141,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
                       class="me-2"
                       cButton
                       color="secondary"
+                      (click)="onPrint(purchase.compr_id, purchase.numero)"
                     >
                       <svg cIcon name="cilPrint"></svg>
                     </button>
@@ -283,5 +284,38 @@ export class PurchaseSearchPage extends BaseSearchComponent {
           });
         }
       });
+  }
+
+  onPrint(id: number, number_serie: string) {
+    this.#purchaseService.print(id).subscribe({
+      next: (response) => {
+        const blob = response.body as Blob;
+        const contentDisposition = response.headers.get('content-disposition');
+        let filename = `${number_serie}.pdf`;
+
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename="?([^";\\n]*)"?/);
+          if (match && match[1]) {
+            filename = match[1];
+          }
+        }
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        this.#globalNotification.openToastAlert(
+          'Error',
+          error.message,
+          'danger'
+        );
+      }
+    });
   }
 }

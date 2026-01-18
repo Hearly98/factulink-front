@@ -1,3 +1,5 @@
+import { GetQuotationStateModel } from "src/app/quotation-state/models";
+
 export interface QuotationModel {
   cot_id: number;
   serie_id: number;
@@ -15,5 +17,23 @@ export interface QuotationModel {
   cliente?: {
     cli_id: number;
     cli_nom: string;
+  };
+  detalles: QuotationDetailModel[];
+  estado_cotizacion?: GetQuotationStateModel
+}
+
+export interface QuotationDetailModel {
+  cdet_id: number;
+  cot_id: number;
+  prod_id: number;
+  cantidad: number;
+  precio_unitario: number;
+  descripcion: string;
+  descuento: number;
+  producto?: {
+    prod_id: number;
+    prod_nom: string;
+    prod_cod: string;
+    unidad: string;
   };
 }

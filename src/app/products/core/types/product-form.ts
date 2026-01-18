@@ -6,6 +6,6 @@ export interface ProductForm {
   prod_descrip: string | null;
   prod_cod_interno: string | null;
   cod_fabricante: string | null;
-  prod_img: any | null;
+  prod_img: string | File | null;
   est: boolean | null;
 }

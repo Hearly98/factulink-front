@@ -1,7 +1,6 @@
+import { QuotationDetailCreateDto } from "./quotation-detail-create-dto";
+
 export interface QuotationCreateDto {
-  serie_id: number;
-  numero: number;
-  numero_completo: string;
   fecha_emision: Date;
   fecha_valido_hasta: Date,
   mostrar_fecha_valido_hasta: boolean,
@@ -45,10 +44,3 @@ export interface QuotationCreateDto {
   detalles: QuotationDetailCreateDto[];
 }
 
-export interface QuotationDetailCreateDto {
-  prod_id: number;
-  cantidad: number;
-  precio_unitario: number;
-  descripcion: string;
-  descuento: number;
-}
