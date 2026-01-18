@@ -54,7 +54,7 @@ import { QuotationCreateDto, QuotationDetailCreateDto } from '../core/types/quot
           </c-row>
           <c-row>
             @for (control of item.controls; track $index) {
-            <c-col [md]="control.col">
+            <c-col [md]="control.col" class="mb-2">
               <label>{{ control.label }}</label>
               @switch (control.type) { 
                 @case('search-select') {
@@ -74,6 +74,13 @@ import { QuotationCreateDto, QuotationDetailCreateDto } from '../core/types/quot
                     }
                   </select>
                 } 
+                @case('textarea') {
+                  <textarea
+                    [formControlName]="control.formControlName"
+                    [placeholder]="control.placeholder"
+                    class="form-control"
+                  ></textarea>
+                }
                 @default {
                   <input
                     [formControlName]="control.formControlName"
@@ -82,6 +89,16 @@ import { QuotationCreateDto, QuotationDetailCreateDto } from '../core/types/quot
                     class="form-control"
                   />
                 } 
+              }
+              @if (control.showControlName) {
+                <div class="mt-1 d-flex gap-2 align-items-center">
+                  <span class="text-muted small">¿Mostrar?</span>
+                  <input
+                    class="form-check-input mt-0"
+                    type="checkbox"
+                    [formControlName]="control.showControlName"
+                  />
+                </div>
               }
             </c-col>
             }
@@ -99,25 +116,22 @@ import { QuotationCreateDto, QuotationDetailCreateDto } from '../core/types/quot
                 Agregar Producto
               </button>
             </c-col>
+            <c-col md="12" sm="12" class="mt-4">
+              <app-quotation-detail-table
+                [detailsArray]="detailsArray"
+                (detailRemoved)="onDetailRemoved($event)"
+              ></app-quotation-detail-table>
+            </c-col>
             }
           </c-row>
         </c-card-body>
       </c-card>
       }
 
-      <app-quotation-detail-table
-        [detailsArray]="detailsArray"
-        (detailRemoved)="onDetailRemoved($event)"
-      ></app-quotation-detail-table>
 
-      <c-card class="mb-4">
-        <c-card-body>
-          <c-row class="align-items-end">
-            <c-col md="8" sm="12" class="mb-2">
-              <label for="">Observaciones</label>
-              <textarea class="form-control" formControlName="cot_coment" rows="3"></textarea>
-            </c-col>
-            <c-col md="4" sm="12" class="gap-2 text-end">
+
+          <c-row class="align-items-end mb-4">
+            <c-col md="12" sm="12" class="gap-2 text-end">
               <button class="me-2" type="button" cButton color="secondary" (click)="cancel()">
                 Cancelar
               </button>
@@ -133,8 +147,6 @@ import { QuotationCreateDto, QuotationDetailCreateDto } from '../core/types/quot
               </button>
             </c-col>
           </c-row>
-        </c-card-body>
-      </c-card>
     </c-container>
   `,
   styles: `
@@ -162,7 +174,6 @@ export class QuotationNewEditPage extends BaseComponent implements OnInit {
 
   ngOnInit() {
     this.form = this.#formBuilder.group(buildQuotationForm());
-    this.form.patchValue({ usu_id: 1 }); // Usuario actual
     this.loadSelectCombos();
   }
 
@@ -184,14 +195,14 @@ export class QuotationNewEditPage extends BaseComponent implements OnInit {
       cli_documento: item.cli_documento,
       tip_id: item.tip_id,
       cli_direcc: item.cli_direcc,
-      cli_correo: item.cli_correo,
-      cli_telf: item.cli_telf,
+      correo_contacto: item.cli_correo,
+      telefono_contacto: item.cli_telf,
     });
   }
 
   onSelectItem(formControlName: string | undefined, item: any) {
     if (!formControlName) return;
-    
+
     if (formControlName === 'prod_id') {
       this.form.patchValue({
         prod_id: item.prod_id,
@@ -228,7 +239,7 @@ export class QuotationNewEditPage extends BaseComponent implements OnInit {
         cantidad: 1,
         prod_nom: this.selectedProduct.prod_nom,
         prod_cod: this.selectedProduct.prod_cod,
-        unidad: this.selectedProduct.unidad?.uni_nom || '',
+        unidad: this.selectedProduct.unidad || '',
         precio_unitario: this.selectedProduct.pventa || 0,
         dscto: 0,
         precio_total: null,
@@ -286,18 +297,14 @@ export class QuotationNewEditPage extends BaseComponent implements OnInit {
     }
 
     const quotationData: QuotationCreateDto = {
-      serie_id: this.form.value.serie_id,
-      suc_id: this.form.value.suc_id,
-      usu_id: this.form.value.usu_id,
-      cli_id: this.form.value.cli_id,
-      mon_id: this.form.value.mon_id,
-      fechaEmision: this.form.value.fechaEmision,
-      cot_coment: this.form.value.cot_coment || '',
+      ...this.form.value,
       detalles: this.detailsArray.getRawValue().map((v) => {
         return {
           prod_id: v.prod_id,
-          detc_cant: v.cantidad,
-          prod_pventa: v.precio_unitario,
+          cantidad: v.cantidad,
+          precio_unitario: v.precio_unitario,
+          descripcion: v.prod_nom,
+          descuento: v.dscto,
         } as QuotationDetailCreateDto;
       }),
     };
@@ -312,7 +319,7 @@ export class QuotationNewEditPage extends BaseComponent implements OnInit {
         }
       },
       error: (error) => {
-        this.#globalNotification.openToastAlert('Error', error.messages, 'danger');
+        this.#globalNotification.openToastAlert('Error', error.message, 'danger');
       },
     });
   }

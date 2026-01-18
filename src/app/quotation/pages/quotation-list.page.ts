@@ -1,5 +1,5 @@
 import { Component, inject, Inject, ViewContainerRef } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import {
   ButtonDirective,
@@ -63,7 +63,7 @@ import { QuotationModel } from '../core/models/quotation.model';
   @for (quotation of quotations; track quotation.cot_id) {
                 <tr>
                   <td>
-                    <button size="sm" class="me-2" cButton color="secondary">
+                    <button size="sm" class="me-2" cButton color="secondary" (click)="onPrint(quotation.cot_id)">
                       <svg cIcon name="cilPrint"></svg>
                     </button>
                     <button size="sm" class="me-2" cButton color="info">
@@ -74,7 +74,7 @@ import { QuotationModel } from '../core/models/quotation.model';
                     </button>
                   </td>
                   <td>{{ quotation.numero_completo }}</td>
-                  <td>{{ quotation.fechaEmision | date: 'dd/MM/yyyy' }}</td>
+                  <td>{{ quotation.fecha_emision | date: 'dd/MM/yyyy' }}</td>
                   <td>{{ quotation.cliente?.cli_nom }}</td>
                   <td>{{ quotation.cot_total | currency: 'S/. ' }}</td>
                   <td>
@@ -168,4 +168,23 @@ export class QuotationListPage extends BaseSearchComponent {
         }
       });
   }
+
+  onPrint(id: number) {
+    this.#quotationService.print(id).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `cotizacion-${id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        this.#globalNotification.openToastAlert('Error', error.message, 'danger');
+      }
+    });
+  }
+
 }

@@ -3,8 +3,6 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormArray, ReactiveFormsModule } from '@angular/forms';
 import {
   ButtonDirective,
-  CardBodyComponent,
-  CardComponent,
   ColComponent,
   RowComponent,
   TableDirective,
@@ -19,21 +17,12 @@ import { IconDirective } from '@coreui/icons-angular';
     ReactiveFormsModule,
     RowComponent,
     ColComponent,
-    CardComponent,
-    CardBodyComponent,
     TableDirective,
     ButtonDirective,
     IconDirective,
     CurrencyPipe,
   ],
   template: `
-    <c-card class="mb-4">
-      <c-card-body>
-        <c-row>
-          <c-col [md]="12">
-            <h5>Detalle de Productos</h5>
-          </c-col>
-        </c-row>
         <c-row>
           <c-col [md]="12">
             @if (detailsArray.length > 0) {
@@ -101,22 +90,64 @@ import { IconDirective } from '@coreui/icons-angular';
                   </td>
                 </tr>
               </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="6" class="text-end"><strong>Total:</strong></td>
-                  <td colspan="2"><strong>{{ getGrandTotal() | currency: 'S/. ' }}</strong></td>
-                </tr>
-              </tfoot>
             </table>
-            } @else {
-            <div class="alert alert-info">
-              No hay productos agregados. Busque y agregue productos para continuar.
-            </div>
+             <c-row class="align-items-end text-end flex-column fs-7">
+          <c-col md="12" class="mb-2">
+            <c-row>
+              <c-col><strong>DSCTO. TOTAL:</strong></c-col>
+              <c-col md="2">
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  readonly
+                />
+              </c-col>
+            </c-row>
+          </c-col>
+
+          <c-col md="12" class="mb-2">
+            <c-row>
+              <c-col><strong>BASE I.G.V:</strong></c-col>
+              <c-col md="2">
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  readonly
+                />
+              </c-col>
+            </c-row>
+          </c-col>
+
+          <c-col md="12" class="mb-2">
+            <c-row>
+              <c-col><strong>I.G.V. (18%):</strong></c-col>
+              <c-col md="2">
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  readonly
+                />
+              </c-col>
+            </c-row>
+          </c-col>
+
+          <c-col md="12">
+            <c-row>
+              <c-col><strong>TOTAL A PAGAR:</strong></c-col>
+              <c-col md="2">
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  [value]="getGrandTotal()"
+                  readonly
+                />
+              </c-col>
+            </c-row>
+          </c-col>
+        </c-row>
             }
           </c-col>
         </c-row>
-      </c-card-body>
-    </c-card>
   `,
 })
 export class QuotationDetailTableComponent {
@@ -128,10 +159,10 @@ export class QuotationDetailTableComponent {
     const cantidad = detail.get('cantidad')?.value || 0;
     const precioUnitario = detail.get('precio_unitario')?.value || 0;
     const descuento = detail.get('dscto')?.value || 0;
-    
+
     const subtotal = cantidad * precioUnitario;
     const total = subtotal - descuento;
-    
+
     detail.patchValue({ precio_total: total }, { emitEvent: false });
     return total;
   }

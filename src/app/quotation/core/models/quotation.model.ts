@@ -2,7 +2,8 @@ export interface QuotationModel {
   cot_id: number;
   serie_id: number;
   numero_completo: string;
-  fechaEmision: string;
+  fecha_emision: string;
+  fecha_valido_hasta: string;
   cli_id: number;
   cot_total: number;
   est: boolean;

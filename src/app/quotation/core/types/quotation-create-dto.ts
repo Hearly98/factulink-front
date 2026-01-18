@@ -1,16 +1,54 @@
 export interface QuotationCreateDto {
   serie_id: number;
-  suc_id: number;
-  usu_id: number;
-  cli_id: number;
-  mon_id: number;
-  fechaEmision: Date;
-  cot_coment: string;
+  numero: number;
+  numero_completo: string;
+  fecha_emision: Date;
+  fecha_valido_hasta: Date,
+  mostrar_fecha_valido_hasta: boolean,
+  emp_id: number,
+  suc_id: number,
+  cli_id: number,
+  nombre_contacto: string,
+  telefono_contacto: string,
+  correo_contacto: string,
+  area_contacto: string,
+  mon_id: number,
+  mostrar_moneda: boolean,
+  cot_subtotal: number,
+  cot_igv: number,
+  igv_requerido: boolean,
+  cot_total: number,
+  mostrar_total: boolean,
+  cot_descuento: number,
+  observaciones: string,
+  mostrar_observaciones: boolean,
+  condiciones_pago: string,
+  mostrar_condiciones_pago: boolean,
+  tipo_pago_id: number,
+  mostrar_tipo_pago: boolean,
+  forma_pago: string,
+  mostrar_forma_pago: boolean,
+  plazo_entrega: string,
+  mostrar_plazo_entrega: boolean,
+  lugar_entrega: string,
+  mostrar_lugar_entrega: boolean,
+  garantia: string,
+  mostrar_garantia: boolean,
+  consideraciones: string,
+  mostrar_consideraciones: boolean,
+  servicio_complementario: string,
+  mostrar_servicio_complementario: boolean,
+  cli_documento: string,
+  cli_direcc: string,
+  tip_id: number,
+  prod_id: number,
   detalles: QuotationDetailCreateDto[];
 }
 
 export interface QuotationDetailCreateDto {
   prod_id: number;
-  detc_cant: number;
-  prod_pventa: number;
+  cantidad: number;
+  precio_unitario: number;
+  descripcion: string;
+  descuento: number;
 }

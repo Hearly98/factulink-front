@@ -57,7 +57,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
             <label for="fecha_fin" class="form-label">&nbsp;</label>
             <input formControlName="fecha_fin" type="date" class="form-control" id="fecha_fin" />
           </c-col>
-          <c-col sm="12" md="6" lg="2">
+          <c-col sm="12" md="6" lg="3">
             <label for="search" class="form-label">Filtro General</label>
             <input
               formControlName="search"
@@ -67,7 +67,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
               placeholder="Buscar..."
             />
           </c-col>
-          <c-col sm="12" md="6" lg="3">
+          <c-col sm="12" md="6" lg="4">
             <label class="form-label">Filtro de Estados</label>
             <div  class="form-control fs-7">
             <div class="d-flex gap-3 align-items-center">
@@ -132,6 +132,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
                 </tr>
               </thead>
               <tbody>
+                @if (purchases.length > 0) {
                 @for (purchase of purchases; track $index) {
                 <tr>
                   <td>
@@ -172,6 +173,13 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
                     </span>
                   </td>
                 </tr>
+                }}
+                @else {
+                  <tr>
+                    <td colspan="7">
+                      No se encontraron resultados
+                    </td>
+                  </tr>
                 }
               </tbody>
             </table>

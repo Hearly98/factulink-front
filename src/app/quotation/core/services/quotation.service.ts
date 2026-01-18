@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ResponseDto } from '@shared/models/api/response.dto';
@@ -35,5 +35,14 @@ export class QuotationService {
 
   delete(id: number): Observable<ResponseDto<void>> {
     return this.#http.delete<ResponseDto<void>>(`${this.#apiUrl}/${id}`);
+  }
+
+  print(id: number): Observable<Blob> {
+    return this.#http.get(`${this.#apiUrl}/${id}/pdf`, {
+      responseType: 'blob',
+      headers: new HttpHeaders({
+        'Accept': 'application/pdf'
+      })
+    });
   }
 }
