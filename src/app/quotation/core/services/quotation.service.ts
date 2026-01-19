@@ -35,7 +35,7 @@ export class QuotationService extends BaseService {
   }
 
   create(data: any): Observable<ResponseDto<QuotationModel>> {
-    return this.postRequest(data, '');
+    return this.postRequest('', data);
   }
 
   update(id: number, data: any): Observable<ResponseDto<QuotationModel>> {
