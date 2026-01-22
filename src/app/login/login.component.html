@@ -1,34 +1,48 @@
-<div class="bg-light dark:bg-transparent min-vh-100 d-flex flex-row align-items-center">
-  <c-container breakpoint="md">
-    <c-row class="justify-content-center">
-      <c-col lg="5" xl="5">
-        <c-card-group>
-          <c-card class="p-4">
-            <c-card-body>
-              <form cForm [formGroup]="form" (ngSubmit)="onLogin()">
-                <h1>{{ loginStructure.title }}</h1>
-                <p class="text-body-secondary">{{ loginStructure.description }}</p>
-                @for (item of loginStructure.forms; track $index) {
-                <c-input-group class="mb-3">
-                  <span cInputGroupText>
-                    <svg cIcon [name]="item.icon"></svg>
-                  </span>
-                  <input [formControlName]="item.formControlName" autocomplete="on" cFormControl
-                    [placeholder]="item.placeholder" [type]="item.formControlType" />
-                </c-input-group>
-                }
-                <c-row>
-                  <c-col xs="6">
-                    <button cButton class="px-4" color="primary" type="submit" [disabled]="form.invalid">
-                      Login
-                    </button>
-                  </c-col>
-                </c-row>
-              </form>
-            </c-card-body>
-          </c-card>
-        </c-card-group>
-      </c-col>
-    </c-row>
-  </c-container>
-</div>
+<main class="login-main">
+  <div class="login-wrapper">
+    <!-- Logo -->
+    <div class="login-logo animate__animated animate__fadeInDown">
+      <img src="logo-factulink.png" alt="FactuLink Logo" />
+    </div>
+
+    <!-- Card de Login -->
+    <c-card class="login-card animate__animated animate__fadeInUp">
+      <c-card-body class="login-card-body">
+        <div class="login-header">
+          <h1>{{ loginStructure.title }}</h1>
+          <p>{{ loginStructure.description }}</p>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onLogin()" class="login-form">
+          @for (item of loginStructure.forms; track $index) {
+          <div class="form-group">
+            <label class="form-label" [for]="item.formControlName">
+              {{ item.name === 'usuario' ? 'Correo electrónico' : 'Contraseña' }}
+            </label>
+            <div class="input-container">
+              <svg cIcon [name]="item.icon" class="input-icon"></svg>
+              <input [id]="item.formControlName" [formControlName]="item.formControlName" [type]="item.formControlType"
+                class="form-control" [placeholder]="item.placeholder" autocomplete="on" />
+            </div>
+          </div>
+          }
+
+          <button cButton class="btn-login" type="submit" [disabled]="form.invalid || isLoading()">
+            <ng-container *ngIf="!isLoading(); else loading">
+              Ingresar
+            </ng-container>
+            <ng-template #loading>
+              <c-spinner size="sm" class="me-2"></c-spinner>
+              Ingresando...
+            </ng-template>
+          </button>
+        </form>
+      </c-card-body>
+    </c-card>
+
+    <!-- Footer -->
+    <p class="login-footer">
+      Sistema de Facturación Electrónica
+    </p>
+  </div>
+</main>

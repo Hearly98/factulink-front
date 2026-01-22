@@ -1,18 +1,16 @@
-import { Component, inject } from '@angular/core';
-import { NgStyle } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
+import { NgIf } from '@angular/common';
 import { IconDirective } from '@coreui/icons-angular';
 import {
   ButtonDirective,
   CardBodyComponent,
   CardComponent,
-  CardGroupComponent,
   ColComponent,
   ContainerComponent,
   FormControlDirective,
   FormDirective,
-  InputGroupComponent,
-  InputGroupTextDirective,
-  RowComponent
+  RowComponent,
+  SpinnerComponent
 } from '@coreui/angular';
 import { buildLoginForm, loginStructure } from './helpers';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -23,32 +21,42 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
+  styleUrl: './login.component.scss',
   imports: [
     ContainerComponent,
     RowComponent,
     ColComponent,
-    CardGroupComponent,
     CardComponent,
     CardBodyComponent,
     FormDirective,
-    InputGroupComponent,
-    InputGroupTextDirective,
     IconDirective,
     FormControlDirective,
     ButtonDirective,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    SpinnerComponent,
+    NgIf
   ]
 })
 export class LoginComponent {
   public loginStructure = loginStructure();
   public form!: FormGroup;
   public globalNotification = inject(GlobalNotification);
+  public isLoading = signal(false);
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
 
   constructor() {
     this.createForm();
+    this.updateStructure();
+  }
+
+  private updateStructure() {
+    this.loginStructure.title = 'Bienvenido';
+    this.loginStructure.description = 'Inicia sesión para acceder al sistema';
+    this.loginStructure.forms[0].placeholder = 'correo@empresa.com';
+    this.loginStructure.forms[0].icon = 'cilEnvelopeOpen';
+    this.loginStructure.forms[1].placeholder = '••••••••';
   }
 
   private createForm() {
@@ -58,11 +66,14 @@ export class LoginComponent {
   onLogin() {
     if (this.form.invalid) return;
 
+    this.isLoading.set(true);
     this.authService.login(this.form.value).subscribe({
       next: () => {
+        this.isLoading.set(false);
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
+        this.isLoading.set(false);
         console.error('Login error', err);
         this.globalNotification.openToastAlert(
           'Error',
