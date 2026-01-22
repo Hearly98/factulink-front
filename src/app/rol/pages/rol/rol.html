@@ -17,17 +17,6 @@
         <label for="">Nombre</label>
         <input formControlName="rol_nom" type="text" class="form-control" />
       </c-col>
-      <c-col sm="12" md="6" lg="4">
-        <label for="">Sucursal</label>
-        <select formControlName="suc_id" class="form-control form-select">
-          <option [ngValue]="null">Seleccione</option>
-          @for(sucursal of sucursales; track $index){
-          <option [ngValue]="sucursal.suc_id">
-            {{ sucursal.suc_nom }}
-          </option>
-          }
-        </select>
-      </c-col>
       <c-col>
         <button cButton color="primary" (click)="onSearch()" class="me-2">
           <svg cIcon name="cilSearch"></svg>
@@ -51,7 +40,6 @@
             <tr>
               <th>Acciones</th>
               <th>Nombre</th>
-              <th>Empresa</th>
             </tr>
           </thead>
           <tbody>
@@ -66,7 +54,6 @@
                 </button>
               </td>
               <td>{{ rol.rol_nom }}</td>
-              <td>{{ rol?.sucursal?.suc_nom }}</td>
             </tr>
             } } @else {
             <tr>
@@ -75,12 +62,8 @@
             }
           </tbody>
         </table>
-        <app-paginator
-          [(page)]="page.page"
-          [pageSize]="page.pageSize"
-          [total]="total"
-          (pageChange)="onPageChange($event)"
-        ></app-paginator>
+        <app-paginator [(page)]="page.page" [pageSize]="page.pageSize" [total]="total"
+          (pageChange)="onPageChange($event)"></app-paginator>
       </c-col>
     </c-row>
   </c-card-body>

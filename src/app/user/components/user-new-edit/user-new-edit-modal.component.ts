@@ -20,6 +20,8 @@ import { MODULES } from 'src/app/core/config/permissions/modules';
 import { buildUserForm, userStructure } from '../../helpers';
 import { CreateUserModel, UpdateUserModel } from '../../core/models';
 import { UserService } from '../../core/services/user.service';
+import { GetRolModel } from 'src/app/rol/core/models';
+import { RolService } from 'src/app/rol/core/services/rol.service';
 
 @Component({
   selector: 'app-user-new-edit-modal',
@@ -56,8 +58,8 @@ import { UserService } from '../../core/services/user.service';
                 [formControlName]="item.formControlName"
               >
                 <option [ngValue]="null">Seleccione</option>
-                @for(item of sucursales; track $index){
-                <option [ngValue]="item.suc_id">{{ item.suc_nom }}</option>
+                @for(item of roles; track $index){
+                <option [ngValue]="item.rol_id">{{ item.rol_nom }}</option>
                 }
               </select>
               }@default {
@@ -94,8 +96,8 @@ export class UserNewEditModalComponent extends BaseComponent {
   form!: TypedFormGroup<UserForm>;
   visible = signal<boolean>(false);
   structure = userStructure;
-  sucursales: GetSucursalModel[] = [];
-  #sucursalService = inject(SucursalService);
+  roles: GetRolModel[] = [];
+  #rolService = inject(RolService);
   #userService = inject(UserService);
   #globalNotification = inject(GlobalNotification);
   #formBuilder = inject(FormBuilder);
@@ -108,7 +110,7 @@ export class UserNewEditModalComponent extends BaseComponent {
 
   ngOnInit(): void {
     this.createForm();
-    this.sucursalSelectCombo();
+    this.rolSelectCombo();
   }
 
   createForm() {
@@ -135,8 +137,8 @@ export class UserNewEditModalComponent extends BaseComponent {
     });
   }
 
-  sucursalSelectCombo() {
-    this.fetchData(this.#sucursalService.getAll(), this.sucursales);
+  rolSelectCombo() {
+    this.fetchData(this.#rolService.getAll(), this.roles);
   }
 
   onClose() {

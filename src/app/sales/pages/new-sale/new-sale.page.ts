@@ -57,15 +57,6 @@ import { SerieModel } from 'src/app/series/core/models/serie.model';
               </select>
             </c-col>
             <c-col [md]="3">
-              <label for="serie_id">Serie</label>
-              <select class="form-control form-select" formControlName="serie_id">
-                <option [ngValue]="null">Seleccione</option>
-                @for (option of series; track option.value) {
-                <option [ngValue]="option.value">{{ option.label }}</option>
-                }
-              </select>
-            </c-col>
-            <c-col [md]="3">
               <label for="suc_id">Sucursal</label>
               <select class="form-control form-select" formControlName="suc_id">
                 <option [ngValue]="null">Seleccione</option>

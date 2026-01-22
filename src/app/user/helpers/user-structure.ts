@@ -13,13 +13,13 @@ export const userStructure = [
   },
   {
     label: 'Email',
-    formControlName: 'usu_correo',
+    formControlName: 'email',
     type: 'email',
     col: 12,
   },
   {
     label: 'Contraseña',
-    formControlName: 'usu_pass',
+    formControlName: 'password',
     type: 'password',
     col: 12,
   },
@@ -41,11 +41,5 @@ export const userStructure = [
     type: 'select',
     col: 6,
     options: []
-  },
-  {
-    label: 'Imagen',
-    formControlName: 'usu_img',
-    type: 'file',
-    col: 6,
   },
 ];

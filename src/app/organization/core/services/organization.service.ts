@@ -23,11 +23,17 @@ export class OrganizationService extends BaseService {
     return this.getRequest<ResponseDto<GetOrganizationModel>>(`/${id}`);
   }
 
-  create(body: CreateOrganizationModel): Observable<ResponseDto<GetOrganizationModel>> {
+  create(body: CreateOrganizationModel | FormData): Observable<ResponseDto<GetOrganizationModel>> {
+    if (body instanceof FormData) {
+      return this.postRequestForm<ResponseDto<GetOrganizationModel>>('/', body);
+    }
     return this.postRequest<CreateOrganizationModel, ResponseDto<GetOrganizationModel>>('/', body);
   }
 
-  update(body: UpdateOrganizationModel): Observable<ResponseDto<GetOrganizationModel>> {
+  update(body: UpdateOrganizationModel | FormData): Observable<ResponseDto<GetOrganizationModel>> {
+    if (body instanceof FormData) {
+      return this.putRequestForm<ResponseDto<GetOrganizationModel>>('/', body);
+    }
     return this.putRequest<UpdateOrganizationModel, ResponseDto<GetOrganizationModel>>('/', body);
   }
 

@@ -8,6 +8,5 @@ export const buildRolForm = (): {
     rol_id: new FormControl(null),
     rol_nom: new FormControl(null),
     est: new FormControl(true),
-    suc_id: new FormControl(null),
   };
 };

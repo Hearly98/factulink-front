@@ -5,5 +5,5 @@ export const organizationStructure = [
   { label: 'Dirección', formControlName: 'emp_direcc', type: 'text', col: '12' },
   { label: 'Teléfono', formControlName: 'emp_telf', type: 'text', col: '6' },
   { label: 'Página', formControlName: 'emp_pag', type: 'text', col: '6' },
-  { label: 'Logo', formControlName: 'emp_logo', type: 'text', col: '6' },
+  { label: 'Logo', formControlName: 'emp_logo', type: 'file', col: '12' },
 ];

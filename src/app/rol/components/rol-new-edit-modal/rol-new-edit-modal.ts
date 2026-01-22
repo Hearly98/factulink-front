@@ -55,7 +55,6 @@ export class RolNewEditModal extends BaseComponent implements OnInit {
 
   ngOnInit(): void {
     this.createForm();
-    this.sucursalSelectCombo();
   }
 
   createForm() {
@@ -79,10 +78,6 @@ export class RolNewEditModal extends BaseComponent implements OnInit {
         }
       },
     });
-  }
-
-  sucursalSelectCombo() {
-    this.fetchData(this.#sucursalService.getAll(), this.sucursales);
   }
 
   onClose() {
