@@ -14,5 +14,6 @@ export const buildProductForm = (): {
     est: new FormControl<boolean>(true),
     cod_fabricante: new FormControl<string | null>(null),
     prod_cod_interno: new FormControl<string | null>(null),
+    sucursales: new FormControl<number[]>([]),
   };
 };

@@ -1,6 +1,6 @@
 import { Component, Inject, inject, signal, ViewChild, ViewContainerRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ButtonDirective, CardBodyComponent, CardComponent, ColComponent, FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective, RowComponent, TableDirective, TextColorDirective } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { PaginatorComponent } from 'src/app/paginator/paginator.component';
@@ -69,36 +69,23 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
           </c-col>
           <c-col sm="12" md="6" lg="4">
             <label class="form-label">Filtro de Estados</label>
-            <div  class="form-control fs-7">
-            <div class="d-flex gap-3 align-items-center">
-              <c-form-check>
-                <input
-                  cFormCheckInput
-                  type="checkbox"
-                  formControlName="estado_cancelado"
-                  id="estado_cancelado"
-                />
-                <label cFormCheckLabel for="estado_cancelado" cTextColor="success">Cancelados</label>
-              </c-form-check>
-              <c-form-check>
-                <input
-                  cFormCheckInput
-                  type="checkbox"
-                  formControlName="estado_pendiente"
-                  id="estado_pendiente"
-                />
-                <label cFormCheckLabel for="estado_pendiente" cTextColor="warning">Pendientes</label>
-              </c-form-check>
-              <c-form-check>
-                <input
-                  cFormCheckInput
-                  type="checkbox"
-                  formControlName="estado_eliminado"
-                  id="estado_eliminado"
-                />
-                <label cFormCheckLabel for="estado_eliminado" cTextColor="danger">Eliminados</label>
-              </c-form-check>
-            </div>
+            <div class="form-control fs-7">
+              <div class="d-flex gap-3 align-items-center">
+                @for (state of availableStates; track state.id) {
+                  <c-form-check>
+                    <input
+                      cFormCheckInput
+                      type="checkbox"
+                      [checked]="isEstadoChecked(state.id)"
+                      (change)="toggleEstado(state.id)"
+                      [id]="'state_' + state.id"
+                    />
+                    <label cFormCheckLabel [for]="'state_' + state.id" [cTextColor]="state.color">
+                      {{ state.nombre }}
+                    </label>
+                  </c-form-check>
+                }
+              </div>
             </div>
           </c-col>
           <c-col sm="12" md="6" lg="3">
@@ -197,13 +184,19 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
   styles: ``,
 })
 export class PurchaseSearchPage extends BaseSearchComponent {
-  public form!: TypedFormGroup<PurchaseFilterForm>;
+  public form!: FormGroup;
   #formBuilder = inject(FormBuilder);
   title = signal<string>('Historial de Compras');
   #purchaseService = inject(PurchaseService);
   #confirmService = inject(ConfirmService);
   #globalNotification = inject(GlobalNotification);
   public purchases: any[] = [];
+
+  availableStates = [
+    { id: 2, nombre: 'Pagados', color: 'success' },
+    { id: 1, nombre: 'Pendientes', color: 'warning' },
+    { id: 3, nombre: 'Anulados', color: 'danger' },
+  ];
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.PURCHASE, viewContainerRef);
@@ -216,6 +209,21 @@ export class PurchaseSearchPage extends BaseSearchComponent {
 
   createForm() {
     this.form = this.#formBuilder.group(buildFilterForm());
+  }
+
+  toggleEstado(id: number) {
+    const currentEstados = this.form.get('estados')?.value || [];
+    const index = currentEstados.indexOf(id);
+    if (index > -1) {
+      currentEstados.splice(index, 1);
+    } else {
+      currentEstados.push(id);
+    }
+    this.form.get('estados')?.setValue([...currentEstados]);
+  }
+
+  isEstadoChecked(id: number): boolean {
+    return (this.form.get('estados')?.value || []).includes(id);
   }
 
   onSearch(filter = null, page = 1) {
@@ -251,9 +259,7 @@ export class PurchaseSearchPage extends BaseSearchComponent {
     this.form.reset();
     this.form.patchValue({
       order: 'desc',
-      estado_cancelado: false,
-      estado_pendiente: false,
-      estado_eliminado: false,
+      estados: ['COMP'], // Or whatever default was intended
     });
     this.onSearch();
   }

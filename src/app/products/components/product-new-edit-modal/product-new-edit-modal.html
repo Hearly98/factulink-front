@@ -12,12 +12,7 @@
           <c-col [md]="item.col" class="mb-2">
             <label for="" class="form-label">{{ item.label }}</label>
             @switch (item.type) { @case ('select') {
-            <select
-              class="form-control form-select"
-              name=""
-              id=""
-              [formControlName]="item.formControlName"
-            >
+            <select class="form-control form-select" name="" id="" [formControlName]="item.formControlName">
               <option [ngValue]="null">Seleccione</option>
               @for(dataItem of getDataSource(item); track $index){
               <option [ngValue]="getIdField(item, dataItem)">
@@ -26,39 +21,30 @@
               }
             </select>
             } @case ('number') {
-            <input
-              class="form-control"
-              type="number"
-              name=""
-              id=""
-              [formControlName]="item.formControlName"
-            />
+            <input class="form-control" type="number" name="" id="" [formControlName]="item.formControlName" />
             } @case ('date') {
-            <input
-              class="form-control"
-              type="date"
-              name=""
-              id=""
-              [formControlName]="item.formControlName"
-            />
+            <input class="form-control" type="date" name="" id="" [formControlName]="item.formControlName" />
             } @case ('file') {
-            <input
-              class="form-control"
-              type="file"
-              (change)="onChange($event)"
-              [name]="item.label"
-              [id]="item.formControlName"
-              [formControlName]="item.formControlName"
-            />
+            <input class="form-control" type="file" (change)="onChange($event)" [name]="item.label"
+              [id]="item.formControlName" [formControlName]="item.formControlName" />
             } @default {
-            <input
-              class="form-control"
-              type="text"
-              name=""
-              id=""
-              [formControlName]="item.formControlName"
-            />
+            <input class="form-control" type="text" name="" id="" [formControlName]="item.formControlName" />
             } }
+          </c-col>
+          }
+          @if (!isEditMode) {
+          <c-col md="12" class="mb-2">
+            <label class="form-label">Sucursales</label>
+            <div class="d-flex gap-2 align-items-center">
+              <button type="button" cButton color="primary" variant="outline" (click)="openSucursalSelector()"
+                class="flex-grow-1">
+                <svg cIcon name="cilBuilding"></svg>
+                Seleccionar Sucursales
+              </button>
+            </div>
+            <small class="text-muted d-block mt-1">
+              {{ getSucursalNames() }}
+            </small>
           </c-col>
           }
         </c-row>
@@ -75,4 +61,6 @@
       Guardar
     </button>
   </c-modal-footer>
+
+  <app-sucursal-selector-modal></app-sucursal-selector-modal>
 </c-modal>

@@ -7,5 +7,6 @@ export interface ProductForm {
   prod_cod_interno: string | null;
   cod_fabricante: string | null;
   prod_img: string | File | null;
+  sucursales: number[] | null;
   est: boolean | null;
 }

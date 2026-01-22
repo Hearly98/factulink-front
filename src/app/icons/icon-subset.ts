@@ -93,6 +93,7 @@ import {
   cilTrash,
   cilUnderline,
   cilUser,
+  cilCloudUpload,
   cilUserFemale,
   cilUserFollow,
   cilUserUnfollow,
@@ -101,6 +102,7 @@ import {
   cilPlus,
   cilX,
   cilSearch,
+  cilCheckAlt,
   cilInfo,
   cilTruck
 } from '@coreui/icons';
@@ -113,6 +115,7 @@ export const iconSubset = {
   cilInfo,
   cilSearch,
   cilTruck,
+  cilCheckAlt,
   cilPlus,
   cilWarning,
   cilCart,
@@ -192,6 +195,7 @@ export const iconSubset = {
   cilPen,
   cilPencil,
   cilPeople,
+  cilCloudUpload,
   cilPrint,
   cilPuzzle,
   cilReportSlash,

@@ -7,5 +7,6 @@ export class ProductModel {
   prod_cod_interno: string = '';
   cod_fabricante: string = '';
   prod_img: string = '';
+  sucursales?: number[] = [];
   est?: boolean = false;
 }

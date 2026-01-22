@@ -1,4 +1,4 @@
-import { Component, Inject, inject, OnInit, ViewContainerRef } from '@angular/core';
+import { Component, Inject, inject, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -12,7 +12,7 @@ import {
 import { ProductService } from '../../core/services/product.service';
 import { IconDirective } from '@coreui/icons-angular';
 import { buildProductForm, productStructure } from '../../helpers';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TypedFormGroup } from '../../../shared/types/types-form';
 import { ProductForm } from '../../core/types/product-form';
 import { BaseComponent } from '../../../shared/base/base.component';
@@ -27,6 +27,7 @@ import { CurrencyService } from '../../../currency/core/services/currency.servic
 import { GetCurrencyModel } from '../../../currency/core/models/get-currency.model';
 import { UnitOfMeasureService } from '../../../unit-of-measure/core/services/unit-of-measure.service';
 import { GetUnitOfMeasureModel } from '../../../unit-of-measure/core/models';
+import { SucursalSelectorModalComponent } from '../../../shared/components/sucursal-selector-modal.component';
 
 @Component({
   selector: 'app-product-new-edit-modal',
@@ -41,12 +42,14 @@ import { GetUnitOfMeasureModel } from '../../../unit-of-measure/core/models';
     IconDirective,
     ModalFooterComponent,
     ReactiveFormsModule,
+    SucursalSelectorModalComponent,
   ],
   templateUrl: './product-new-edit-modal.html',
   styleUrl: './product-new-edit-modal.scss',
 })
 export class ProductNewEditModal extends BaseComponent implements OnInit {
-  form!: TypedFormGroup<ProductForm>;
+  @ViewChild(SucursalSelectorModalComponent) sucursalSelector!: SucursalSelectorModalComponent;
+  form!: FormGroup;
   visible = false;
   structure = productStructure;
   sucursales: GetSucursalModel[] = [];
@@ -62,6 +65,7 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
   #formBuilder = inject(FormBuilder);
   title = 'Crear Producto';
   callback: any;
+  isEditMode = false;
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.PRODUCT, viewContainerRef);
@@ -80,12 +84,31 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
     this.createForm();
     this.visible = true;
     this.callback = callback;
+    this.isEditMode = !!idProduct;
     if (idProduct) {
       this.title = 'Editar Producto';
       this.loadData(idProduct);
     } else {
       this.title = 'Crear Producto';
     }
+  }
+
+  openSucursalSelector() {
+    const currentSucursales = this.form.get('sucursales')?.value || [];
+    this.sucursalSelector.openModal(currentSucursales, (selectedIds: number[]) => {
+      this.form.patchValue({ sucursales: selectedIds });
+    });
+  }
+
+  getSucursalNames(): string {
+    const selectedIds = this.form.get('sucursales')?.value || [];
+    if (selectedIds.length === 0) return 'Ninguna sucursal seleccionada';
+
+    const names = this.sucursales
+      .filter(s => selectedIds.includes(s.suc_id))
+      .map(s => s.suc_nom);
+
+    return names.join(', ');
   }
 
   loadData(idProduct: number) {
@@ -123,7 +146,13 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
 
   create() {
     const { prod_id, ...body } = this.form.value;
-    const subscription = this.#productService.create(body as CreateProductModel).subscribe({
+    // Include sucursales only on creation
+    const createData = {
+      ...body,
+      sucursales: body.sucursales || []
+    };
+
+    const subscription = this.#productService.create(createData as CreateProductModel).subscribe({
       next: (response) => {
         if (response.isValid) {
           this.#globalNotification.openAlert(response);
@@ -141,8 +170,11 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
   }
 
   update() {
+    // Exclude sucursales from update
+    const { sucursales, ...updateData } = this.form.value;
+
     const subscription = this.#productService
-      .update(this.form.value as UpdateProductModel)
+      .update(updateData as UpdateProductModel)
       .subscribe({
         next: (response) => {
           if (response.isValid) {
