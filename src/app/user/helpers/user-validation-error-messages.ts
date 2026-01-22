@@ -1,4 +1,4 @@
-export const messages = {
+export const userValidationMessage = {
     usu_nom: {
         required: 'El nombre es obligatorio',
     },

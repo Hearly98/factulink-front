@@ -17,11 +17,12 @@ import { GetSucursalModel } from 'src/app/sucursal/core/models';
 import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service';
 import { UserForm } from '../../core/types';
 import { MODULES } from 'src/app/core/config/permissions/modules';
-import { buildUserForm, userStructure } from '../../helpers';
+import { buildUserForm, userStructure, userValidationMessage } from '../../helpers';
 import { CreateUserModel, UpdateUserModel } from '../../core/models';
 import { UserService } from '../../core/services/user.service';
 import { GetRolModel } from 'src/app/rol/core/models';
 import { RolService } from 'src/app/rol/core/services/rol.service';
+import { ValidationMessagesComponent } from '@shared/components/error-messages/validation-messages.component';
 
 @Component({
   selector: 'app-user-new-edit-modal',
@@ -35,6 +36,7 @@ import { RolService } from 'src/app/rol/core/services/rol.service';
     ButtonDirective,
     IconDirective,
     ReactiveFormsModule,
+    ValidationMessagesComponent
   ],
   template: `<c-modal alignment="center" [visible]="visible()" backdrop="static">
     <c-modal-body class="modal-body">
@@ -54,6 +56,10 @@ import { RolService } from 'src/app/rol/core/services/rol.service';
               <select
                 class="form-control form-select"
                 name=""
+                [class.is-invalid]="
+                      form.get(item.formControlName)?.invalid &&
+                      form.get(item.formControlName)?.touched
+                    "
                 [id]="item.formControlName"
                 [formControlName]="item.formControlName"
               >
@@ -62,14 +68,20 @@ import { RolService } from 'src/app/rol/core/services/rol.service';
                 <option [ngValue]="item.rol_id">{{ item.rol_nom }}</option>
                 }
               </select>
+                  <app-validation-messages [controlName]="item.formControlName" [form]="form" [messages]="errorMessages"></app-validation-messages>
               }@default {
               <input
                 class="form-control"
                 [type]="item.type"
                 name=""
+                [class.is-invalid]="
+                      form.get(item.formControlName)?.invalid &&
+                      form.get(item.formControlName)?.touched
+                    "
                 [id]="item.formControlName"
                 [formControlName]="item.formControlName"
               />
+                  <app-validation-messages [controlName]="item.formControlName" [form]="form" [messages]="errorMessages"></app-validation-messages>
               } }
             </c-col>
             }
@@ -97,6 +109,7 @@ export class UserNewEditModalComponent extends BaseComponent {
   visible = signal<boolean>(false);
   structure = userStructure;
   roles: GetRolModel[] = [];
+  errorMessages = userValidationMessage;
   #rolService = inject(RolService);
   #userService = inject(UserService);
   #globalNotification = inject(GlobalNotification);

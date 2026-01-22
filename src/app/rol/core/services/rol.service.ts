@@ -16,7 +16,7 @@ export class RolService extends BaseService {
   }
 
   getAll(): Observable<ResponseDto<GetRolModel[]>> {
-    return this.getRequest('/selectCombo');
+    return this.getRequest('');
   }
 
   create(body: CreateRolModel): Observable<ResponseDto<GetRolModel>> {
