@@ -1,5 +1,5 @@
 import { Component, inject, Inject, OnInit, ViewContainerRef } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {
   ButtonDirective,
@@ -21,6 +21,10 @@ import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service
 import { ProductService } from 'src/app/products/core/services/product.service';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 import { SerieModel } from 'src/app/series/core/models/serie.model';
+import { PaymentMethodService } from 'src/app/payment-method/core/services/payment-method.service';
+import { TypedFormGroup } from '@shared/types/types-form';
+import { SaleForm } from '../../core/types';
+import { buildSaleForm } from '../../helpers';
 
 @Component({
   selector: 'app-new-sale',
@@ -68,6 +72,22 @@ import { SerieModel } from 'src/app/series/core/models/serie.model';
             <c-col [md]="3">
               <label for="fechaEmision">Fecha de Emisión</label>
               <input formControlName="fechaEmision" type="date" class="form-control" />
+            </c-col>
+            <c-col [md]="3">
+              <label for="serie_id">Tipo de Pago</label>
+              <select class="form-control form-select" formControlName="mp_id">
+                <option [ngValue]="null">Seleccione</option>
+                @for (option of paymentMethods; track option.value) {
+                <option [ngValue]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </c-col>
+            <c-col [md]="12">
+              <hr />
+            </c-col>
+            <c-col [md]="12">
+              <label for="vendedor_id">Vendedor</label>
+              <input formControlName="vendedor_id" type="number" class="form-control" value="1" />
             </c-col>
           </c-row>
         </c-card-body>
@@ -158,40 +178,37 @@ import { SerieModel } from 'src/app/series/core/models/serie.model';
   `,
 })
 export class NewSalePage extends BaseComponent implements OnInit {
-  form!: FormGroup;
+  form!: TypedFormGroup<SaleForm>;
   documentTypes: SelectOption[] = [];
   series: SelectOption[] = [];
   sucursales: SelectOption[] = [];
   selectedProduct: any = null;
-
+  paymentMethods: SelectOption[] = [];
   #formBuilder = inject(FormBuilder);
   #saleService = inject(SaleService);
   #documentService = inject(DocumentService);
   #customerService = inject(CustomerService);
   #sucursalService = inject(SucursalService);
   #productService = inject(ProductService);
+  #paymentMethod = inject(PaymentMethodService);
   #globalNotification = inject(GlobalNotification);
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.SALES, viewContainerRef);
+    this.createForm();
   }
 
   ngOnInit() {
-    this.form = this.#formBuilder.group({
-      doc_id: [null],
-      serie_id: [null],
-      suc_id: [null],
-      cli_id: [null],
-      vendedor_id: [1],
-      fechaEmision: [new Date().toISOString().split('T')[0]],
-      observaciones: [''],
-      detalles: [[]],
-    });
+    this.createForm();
     this.loadSelectCombos();
   }
 
+  createForm() {
+    this.form = this.#formBuilder.group(buildSaleForm())
+  }
+
   customerSearch = (term: string) => this.#customerService.getAll();
-  productSearch = (term: string) => this.#productService.searchQuick({ term, suc_id: this.form.get('suc_id')?.value });
+  productSearch = (term: string) => this.#productService.searchQuick({ term, suc_id: this.form.get('suc_id')?.value as number });
 
   loadSelectCombos() {
     this.#documentService.getAll().subscribe({
@@ -208,6 +225,15 @@ export class NewSalePage extends BaseComponent implements OnInit {
         this.sucursales = response.data.map((item) => ({
           value: item.suc_id,
           label: item.suc_nom,
+        }));
+      },
+    });
+
+    this.#paymentMethod.getAll().subscribe({
+      next: (response) => {
+        this.paymentMethods = response.data.map((item) => ({
+          value: item.mp_id,
+          label: item.mp_nom,
         }));
       },
     });

@@ -1,29 +1,19 @@
-export interface SaleModel {
-  venta_id: number;
-  serie_id: number;
-  numero_completo: string;
-  fechaEmision: string;
-  doc_id: number;
-  suc_id: number;
-  vendedor_id: number;
-  cli_id: number;
-  venta_total: number;
-  est: boolean;
-  serie?: {
-    ser_id: number;
-    ser_num: string;
-    doc_cod: string;
-  };
-  documento?: {
-    doc_id: number;
-    doc_nom: string;
-  };
-  cliente?: {
-    cli_id: number;
-    cli_nom: string;
-  };
-  estado?: {
-    estado_cod: string;
-    estado_nom: string;
-  };
+import { GetCustomerModel } from "src/app/customer/core/models";
+import { GetDocumentModel } from "src/app/document/core/models/get-document.model";
+import { GetStateSaleModel } from "src/app/sale-state/core/models/get-state-sale.model";
+
+export class SaleModel {
+  venta_id: number = 0;
+  serie_id: number = 0;
+  numero_completo: string = "";
+  fechaEmision: string = "";
+  doc_id: number = 0;
+  suc_id: number = 0;
+  vendedor_id: number = 0;
+  cli_id: number = 0;
+  venta_total: number = 0;
+  est: boolean = false;
+  documento?: GetDocumentModel;
+  cliente?: GetCustomerModel;
+  estado?: GetStateSaleModel;
 }
