@@ -28,13 +28,15 @@
           }
 
           <button cButton class="btn-login" type="submit" [disabled]="form.invalid || isLoading()">
-            <ng-container *ngIf="!isLoading(); else loading">
+            @if (!isLoading()) {
+            <ng-container>
               Ingresar
             </ng-container>
-            <ng-template #loading>
+
+            }@else {
               <c-spinner size="sm" class="me-2"></c-spinner>
               Ingresando...
-            </ng-template>
+            }
           </button>
         </form>
       </c-card-body>

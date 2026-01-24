@@ -1,15 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
-import { NgIf } from '@angular/common';
 import { IconDirective } from '@coreui/icons-angular';
 import {
   ButtonDirective,
   CardBodyComponent,
   CardComponent,
-  ColComponent,
-  ContainerComponent,
-  FormControlDirective,
-  FormDirective,
-  RowComponent,
   SpinnerComponent
 } from '@coreui/angular';
 import { buildLoginForm, loginStructure } from './helpers';
@@ -23,18 +17,12 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   imports: [
-    ContainerComponent,
-    RowComponent,
-    ColComponent,
     CardComponent,
     CardBodyComponent,
-    FormDirective,
     IconDirective,
-    FormControlDirective,
     ButtonDirective,
     ReactiveFormsModule,
     SpinnerComponent,
-    NgIf
   ]
 })
 export class LoginComponent {
