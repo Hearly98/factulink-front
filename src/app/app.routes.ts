@@ -179,6 +179,14 @@ export const routes: Routes = [
         },
       },
       {
+        path: 'ver-venta/:id',
+        loadComponent: () =>
+          import('./sales/pages/sale-view/sale-view.component').then((m) => m.SaleViewComponent),
+        data: {
+          title: 'Ver Venta',
+        },
+      },
+      {
         path: 'historial-cotizaciones',
         loadComponent: () =>
           import('./quotation/pages/quotation-list.page').then((m) => m.QuotationListPage),

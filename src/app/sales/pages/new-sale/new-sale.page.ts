@@ -1,5 +1,5 @@
-import { Component, inject, Inject, OnInit, ViewContainerRef } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { Component, inject, Inject, OnInit, signal, ViewContainerRef } from '@angular/core';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {
   ButtonDirective,
@@ -8,6 +8,9 @@ import {
   ColComponent,
   ContainerComponent,
   RowComponent,
+  FormCheckComponent,
+  FormCheckInputDirective,
+  FormCheckLabelDirective,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { BaseComponent } from '@shared/base/base.component';
@@ -20,11 +23,18 @@ import { CustomerService } from 'src/app/customer/core/services/customer.service
 import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service';
 import { ProductService } from 'src/app/products/core/services/product.service';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
-import { SerieModel } from 'src/app/series/core/models/serie.model';
 import { PaymentMethodService } from 'src/app/payment-method/core/services/payment-method.service';
 import { TypedFormGroup } from '@shared/types/types-form';
 import { SaleForm } from '../../core/types';
 import { buildSaleForm } from '../../helpers';
+import { saleStructure } from '../../helpers/sale-structure';
+import { SaleDetailForm } from 'src/app/sale-detail/core/types';
+import { SaleDetailTableComponent } from 'src/app/sale-detail/components/sale-detail-table.component';
+import { mapSaleCreateDto } from '../../helpers/map-sale-create-dto';
+import { CurrencyService } from 'src/app/currency/core/services/currency.service';
+import { DocumentTypeService } from 'src/app/document-type/core/services/document-type.service';
+import { CompanyService } from 'src/app/company/core/services/company.service';
+import { OrganizationService } from 'src/app/organization/core/services/organization.service';
 
 @Component({
   selector: 'app-new-sale',
@@ -40,121 +50,96 @@ import { buildSaleForm } from '../../helpers';
     SearchSelectComponent,
     IconDirective,
     ButtonDirective,
+    SaleDetailTableComponent,
+    FormCheckComponent,
+    FormCheckInputDirective,
+    FormCheckLabelDirective,
   ],
   template: `
     <c-container [formGroup]="form">
+      @for (item of structure(); track $index) {
       <c-card class="mb-4">
         <c-card-body>
           <c-row>
             <c-col [md]="12">
-              <h5>Información de la Venta</h5>
+              <h5>{{ item.title }}</h5>
             </c-col>
           </c-row>
           <c-row>
-            <c-col [md]="3">
-              <label for="doc_id">Tipo de Documento</label>
-              <select class="form-control form-select" formControlName="doc_id" (change)="onDocumentTypeChange()">
-                <option [ngValue]="null">Seleccione</option>
-                @for (option of documentTypes; track option.value) {
-                <option [ngValue]="option.value">{{ option.label }}</option>
-                }
-              </select>
-            </c-col>
-            <c-col [md]="3">
-              <label for="suc_id">Sucursal</label>
-              <select class="form-control form-select" formControlName="suc_id">
-                <option [ngValue]="null">Seleccione</option>
-                @for (option of sucursales; track option.value) {
-                <option [ngValue]="option.value">{{ option.label }}</option>
-                }
-              </select>
-            </c-col>
-            <c-col [md]="3">
-              <label for="fechaEmision">Fecha de Emisión</label>
-              <input formControlName="fechaEmision" type="date" class="form-control" />
-            </c-col>
-            <c-col [md]="3">
-              <label for="serie_id">Tipo de Pago</label>
-              <select class="form-control form-select" formControlName="mp_id">
-                <option [ngValue]="null">Seleccione</option>
-                @for (option of paymentMethods; track option.value) {
-                <option [ngValue]="option.value">{{ option.label }}</option>
-                }
-              </select>
-            </c-col>
-            <c-col [md]="12">
-              <hr />
-            </c-col>
-            <c-col [md]="12">
-              <label for="vendedor_id">Vendedor</label>
-              <input formControlName="vendedor_id" type="number" class="form-control" value="1" />
-            </c-col>
-          </c-row>
-        </c-card-body>
-      </c-card>
-
-      <c-card class="mb-4">
-        <c-card-body>
-          <c-row>
-            <c-col [md]="12">
-              <h5>Cliente</h5>
-            </c-col>
-          </c-row>
-          <c-row>
-            <c-col [md]="12">
-              <label for="cli_id">Buscar Cliente</label>
+            @for (control of item.controls; track $index) {
+            <c-col [md]="control.col">
+              <label [for]="control.formControlName">{{ control.label }}</label>
+              @switch (control.type) { @case('search-select') {
               <app-search-select
-                placeholder="Buscar cliente..."
-                bindLabel="cli_nom"
-                bindValue="cli_id"
-                [serviceFn]="customerSearch"
-                (itemSelected)="onSelectCustomer($event)"
+                [placeholder]="control.label"
+                [bindLabel]="control.bindLabel"
+                [bindValue]="control.bindValue"
+                [serviceFn]="serviceMap[control.serviceFnName]"
+                [disabled]="isControlDisabled(control.formControlName)"
+                (itemSelected)="onSelectItem(control.formControlName, $event)"
               ></app-search-select>
+              } @case('select'){
+              <select class="form-control form-select" [formControlName]="control.formControlName">
+                <option [ngValue]="null">Seleccione</option>
+                @for (option of control.options; track $index) {
+                <option [ngValue]="option.value">{{ option.label }}</option>
+                }
+              </select>
+              } 
+              @case('checkbox') {
+              <c-form-check class="mt-2">
+                <input
+                  cFormCheckInput
+                  type="checkbox"
+                  [formControlName]="control.formControlName"
+                  [id]="control.formControlName"
+                />
+                <label cFormCheckLabel [for]="control.formControlName">{{ control.label }}</label>
+              </c-form-check>
+              } @default {
+              <input
+                [formControlName]="control.formControlName"
+                [placeholder]="control.placeholder"
+                [type]="control.type"
+                class="form-control"
+              />
+              } }
             </c-col>
-          </c-row>
-        </c-card-body>
-      </c-card>
-
-      <c-card class="mb-4">
-        <c-card-body>
-          <c-row>
-            <c-col [md]="12">
-              <h5>Agregar Producto</h5>
-            </c-col>
-          </c-row>
-          <c-row>
-            <c-col [md]="8">
-              <label for="prod_id">Buscar Producto</label>
-              <app-search-select
-                placeholder="Buscar producto..."
-                bindLabel="prod_nom"
-                bindValue="prod_id"
-                [serviceFn]="productSearch"
-                (itemSelected)="onSelectProduct($event)"
-              ></app-search-select>
-            </c-col>
+            }
+            <!-- Botón para agregar producto después del search-select de producto -->
+            @if (item.title === 'Agregar Producto') {
             <c-col [md]="4" class="mt-4">
+              <label for="" class="d-none"></label>
               <button
                 type="button"
                 cButton
                 color="primary"
-                (click)="addProduct()"
-                [disabled]="!selectedProduct"
+                (click)="addProductToDetail()"
+                [disabled]="!form.value.prod_id || !selectedProduct"
               >
                 <svg cIcon name="cilPlus" class="me-2"></svg>
                 Agregar Producto
               </button>
             </c-col>
+            }
           </c-row>
         </c-card-body>
       </c-card>
+      }
 
+      <!-- Tabla de detalles -->
+      <app-sale-detail-table
+        [detailsArray]="detailsArray"
+        (detailRemoved)="onDetailRemoved($event)"
+      ></app-sale-detail-table>
+
+      <!-- Botones de acción -->
       <c-card class="mb-4">
         <c-card-body>
           <c-row class="align-items-end">
             <c-col md="8" sm="12" class="mb-2">
               <label for="">Observaciones</label>
-              <textarea class="form-control" formControlName="observaciones" rows="3"></textarea>
+              <textarea class="form-control" formControlName="venta_coment" rows="3"></textarea>
             </c-col>
             <c-col md="4" sm="12" class="gap-2 text-end">
               <button class="me-2" type="button" cButton color="secondary" (click)="cancel()">
@@ -165,7 +150,7 @@ import { buildSaleForm } from '../../helpers';
                 cButton
                 color="success"
                 (click)="save()"
-                [disabled]="!form.valid"
+                [disabled]="!form.valid || detailsArray.length === 0"
               >
                 <svg cIcon name="cilSave" class="me-2"></svg>
                 Guardar Venta
@@ -176,14 +161,18 @@ import { buildSaleForm } from '../../helpers';
       </c-card>
     </c-container>
   `,
+  styles: `
+    .gap-2 {
+      gap: 0.5rem;
+    }
+  `,
 })
 export class NewSalePage extends BaseComponent implements OnInit {
-  form!: TypedFormGroup<SaleForm>;
-  documentTypes: SelectOption[] = [];
-  series: SelectOption[] = [];
-  sucursales: SelectOption[] = [];
+  structure = signal(saleStructure());
+  form!: FormGroup;
   selectedProduct: any = null;
-  paymentMethods: SelectOption[] = [];
+  showFechaVencimiento = signal(false);
+
   #formBuilder = inject(FormBuilder);
   #saleService = inject(SaleService);
   #documentService = inject(DocumentService);
@@ -191,92 +180,240 @@ export class NewSalePage extends BaseComponent implements OnInit {
   #sucursalService = inject(SucursalService);
   #productService = inject(ProductService);
   #paymentMethod = inject(PaymentMethodService);
+  #currencyService = inject(CurrencyService);
+  #documentTypeService = inject(DocumentTypeService);
+  #organizationService = inject(OrganizationService);
   #globalNotification = inject(GlobalNotification);
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.SALES, viewContainerRef);
-    this.createForm();
   }
 
   ngOnInit() {
-    this.createForm();
+    this.form = this.#formBuilder.group(buildSaleForm());
     this.loadSelectCombos();
+    this.setupPaymentMethodListener();
   }
 
-  createForm() {
-    this.form = this.#formBuilder.group(buildSaleForm())
+  get detailsArray(): FormArray<TypedFormGroup<SaleDetailForm>> {
+    return this.form.get('detalles') as FormArray<TypedFormGroup<SaleDetailForm>>;
   }
 
-  customerSearch = (term: string) => this.#customerService.getAll();
-  productSearch = (term: string) => this.#productService.searchQuick({ term, suc_id: this.form.get('suc_id')?.value as number });
+  serviceMap = {
+    customerSearch: (term: string) => this.#customerService.getAll(),
+    productSearch: (term: string) =>
+      this.#productService.searchQuick({
+        term,
+        suc_id: this.form.get('suc_id')?.value ?? 0,
+      }),
+  };
+
+  patchCustomer(item: any) {
+    this.form.patchValue({
+      cli_documento: item.cli_documento,
+      tip_id: item.tip_id,
+      cli_direcc: item.cli_direcc,
+      cli_correo: item.cli_correo,
+      cli_telf: item.cli_telf,
+    });
+  }
+
+  isControlDisabled(formControlName: string): boolean {
+    if (formControlName === 'prod_id') {
+      return !this.form.get('suc_id')?.value;
+    }
+    return false;
+  }
+
+  onSelectItem(formControlName: keyof SaleForm, item: any) {
+    if (!item) return;
+
+    if (formControlName === 'prod_id') {
+      this.form.patchValue({
+        prod_id: item.prod_id,
+      });
+      this.selectedProduct = item;
+      return;
+    }
+
+    const control = this.form.get(formControlName);
+    if (control) {
+      control.setValue(item[formControlName]);
+    }
+
+    if (formControlName === 'cli_id') {
+      this.patchCustomer(item);
+    }
+  }
+
+  addProductToDetail() {
+    if (!this.selectedProduct) return;
+
+    // Verificar si el producto ya existe en el detalle
+    const exists = this.detailsArray.controls.some(
+      (control) => control.value.prod_id === this.selectedProduct.prod_id
+    );
+
+    if (exists) {
+      alert('Este producto ya ha sido agregado');
+      return;
+    }
+
+    const detailForm = this.#formBuilder.group({
+      prod_id: [this.selectedProduct.prod_id],
+      cantidad: [1],
+      prod_nom: [{ value: this.selectedProduct.prod_nom, disabled: true }],
+      prod_cod_interno: [this.selectedProduct.prod_cod],
+      unidad: [this.selectedProduct.unidad],
+      precio_unitario: [{ value: null }],
+      precio_venta: [{ value: null, disabled: true }],
+      dscto: [null],
+    });
+
+    this.detailsArray.push(detailForm as any);
+
+    // Limpiar selección
+    this.form.get('prod_id')?.setValue(null);
+    this.selectedProduct = null;
+  }
+
+  onDetailRemoved(index: number) {
+    console.log('Producto eliminado en índice:', index);
+  }
 
   loadSelectCombos() {
+    const currencies: SelectOption[] = [];
+    const documents: SelectOption[] = [];
+    const paymentType: SelectOption[] = [];
+    const documentTypes: SelectOption[] = [];
+    const sucursalOptions: SelectOption[] = [];
+    const companyOptions: SelectOption[] = [];
+
+    this.#currencyService.getAll().subscribe({
+      next: (response) =>
+        response.data.map((item) => {
+          currencies.push({ value: item.mon_id, label: item.mon_nom });
+        }),
+    });
+
     this.#documentService.getAll().subscribe({
       next: (response) => {
-        this.documentTypes = response.data.map((item) => ({
-          value: item.doc_id,
-          label: item.doc_nom,
-        }));
+        response.data.map((item) => {
+          documents.push({ value: item.doc_id, label: item.doc_nom });
+        });
+      },
+    });
+
+    this.#documentTypeService.getAll().subscribe({
+      next: (response) => {
+        response.data.map((item) => {
+          documentTypes.push({ value: item.tip_id, label: item.tip_nom });
+        });
       },
     });
 
     this.#sucursalService.getAll().subscribe({
       next: (response) => {
-        this.sucursales = response.data.map((item) => ({
-          value: item.suc_id,
-          label: item.suc_nom,
-        }));
+        response.data.map((item) => {
+          sucursalOptions.push({ value: item.suc_id, label: item.suc_nom });
+        });
       },
     });
 
     this.#paymentMethod.getAll().subscribe({
       next: (response) => {
-        this.paymentMethods = response.data.map((item) => ({
-          value: item.mp_id,
-          label: item.mp_nom,
-        }));
+        response.data.map((item) => {
+          paymentType.push({ value: item.mp_id, label: item.mp_nom });
+        });
       },
+    });
+
+    this.#organizationService.getAll().subscribe({
+      next: (response) => {
+        response.data.map((item) => {
+          companyOptions.push({ value: item.emp_id, label: item.emp_nom });
+        });
+      },
+    });
+
+    this.updateStructure(currencies, paymentType, documents, documentTypes, sucursalOptions, companyOptions);
+  }
+
+  setupPaymentMethodListener() {
+    this.form.get('mp_id')?.valueChanges.subscribe((mpId) => {
+      const isCredito = mpId === 2;
+      this.showFechaVencimiento.set(isCredito);
+
+      const currencies: SelectOption[] = [];
+      const documents: SelectOption[] = [];
+      const paymentType: SelectOption[] = [];
+      const documentTypes: SelectOption[] = [];
+      const sucursalOptions: SelectOption[] = [];
+      const companyOptions: SelectOption[] = [];
+
+      // Reconstruir las opciones desde los valores actuales del structure
+      const currentStructure = this.structure();
+      currentStructure.forEach(section => {
+        section.controls.forEach(control => {
+          if (control.type === 'select' && 'options' in control) {
+            switch (control.formControlName) {
+              case 'mon_id':
+                currencies.push(...control.options);
+                break;
+              case 'mp_id':
+                paymentType.push(...control.options);
+                break;
+              case 'doc_id':
+                documents.push(...control.options);
+                break;
+              case 'tip_id':
+                documentTypes.push(...control.options);
+                break;
+              case 'suc_id':
+                sucursalOptions.push(...control.options);
+                break;
+              case 'emp_id':
+                companyOptions.push(...control.options);
+                break;
+            }
+          }
+        });
+      });
+
+      this.updateStructure(currencies, paymentType, documents, documentTypes, sucursalOptions, companyOptions);
     });
   }
 
-  onDocumentTypeChange() {
-    const docId = this.form.get('doc_id')?.value;
-    if (docId) {
-      this.#saleService.getSeriesByDocType(docId).subscribe({
-        next: (response) => {
-          if (response.isValid) {
-            this.series = response.data.map((item: SerieModel) => ({
-              value: item.ser_id,
-              label: item.ser_num,
-            }));
-          }
-        },
-      });
-    }
-  }
-
-  onSelectCustomer(customer: { cli_id: number }) {
-    this.form.patchValue({ cli_id: customer.cli_id });
-  }
-
-  onSelectProduct(product: { prod_id: number }) {
-    this.selectedProduct = product;
-  }
-
-  addProduct() {
-    if (!this.selectedProduct) return;
-    // Lógica para agregar producto a detalles
-    console.log('Producto agregado:', this.selectedProduct);
-    this.selectedProduct = null;
+  updateStructure(
+    currencies: SelectOption[],
+    paymentType: SelectOption[],
+    documents: SelectOption[],
+    documentTypes: SelectOption[],
+    sucursalOptions: SelectOption[],
+    companyOptions: SelectOption[]
+  ) {
+    this.structure.set(
+      saleStructure(
+        currencies,
+        paymentType,
+        documents,
+        documentTypes,
+        sucursalOptions,
+        companyOptions,
+        this.showFechaVencimiento()
+      )
+    );
   }
 
   save() {
-    if (this.form.invalid) {
-      alert('Complete todos los campos requeridos');
+    if (this.form.invalid || this.detailsArray.length === 0) {
+      alert('Complete todos los campos requeridos y agregue al menos un producto');
       return;
     }
 
-    this.#saleService.create(this.form.value).subscribe({
+    const saleData = mapSaleCreateDto(this.form.getRawValue());
+
+    this.#saleService.create(saleData).subscribe({
       next: (response) => {
         if (response.isValid) {
           this.#globalNotification.openAlert(response);
@@ -286,12 +423,14 @@ export class NewSalePage extends BaseComponent implements OnInit {
         }
       },
       error: (error) => {
-        this.#globalNotification.openToastAlert('Error', error.messages, 'danger');
+        console.error('Error completo:', error);
+        this.#globalNotification.openToastAlert('Error', error.message, 'danger');
       },
     });
   }
 
   cancel() {
     this.form.reset();
+    this.detailsArray.clear();
   }
 }

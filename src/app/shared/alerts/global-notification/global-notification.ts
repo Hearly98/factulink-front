@@ -50,7 +50,7 @@ export class GlobalNotification {
     const props = {
       title,
       message,
-      color,
+      selectColor: color,
       autohide: true,
       delay: DEFAULT_DELAY,
     };

@@ -1,39 +1,49 @@
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ResponseDto } from '@shared/models/api/response.dto';
 import { SaleModel } from '../models/sale.model';
-import { PageParamsModel } from '@shared/models/query/page-params.model';
 import { SerieModel } from 'src/app/series/core/models/serie.model';
+import { QueryParamsModel } from '@shared/models/query/query-params.model';
+import { BaseService } from '@shared/services/base.service';
+import { QueryResultsModel } from '@shared/models/query/query-results.model';
 
 @Injectable({
   providedIn: 'root',
 })
-export class SaleService {
-  #http = inject(HttpClient);
-  #apiUrl = `${environment.apiUrl}/ventas`;
+export class SaleService extends BaseService {
+  constructor(http: HttpClient) {
+    super(http, `${environment.apiUrl}/ventas`);
+  }
 
-  search(params: PageParamsModel): Observable<ResponseDto<{ items: SaleModel[]; total: number }>> {
-    return this.#http.post<ResponseDto<{ items: SaleModel[]; total: number }>>(
-      `${this.#apiUrl}/search`,
-      params
+  search(body: QueryParamsModel): Observable<ResponseDto<QueryResultsModel<SaleModel>>> {
+    return this.postRequest<QueryParamsModel, ResponseDto<QueryResultsModel<SaleModel>>>(
+      `/search`,
+      body
     );
   }
 
   getSeriesByDocType(docId: number): Observable<ResponseDto<SerieModel[]>> {
-    return this.#http.get<ResponseDto<SerieModel[]>>(`${this.#apiUrl}/series/${docId}`);
+    return this.getRequest<ResponseDto<SerieModel[]>>(`/series/${docId}`);
   }
 
   getById(id: number): Observable<ResponseDto<SaleModel>> {
-    return this.#http.get<ResponseDto<SaleModel>>(`${this.#apiUrl}/${id}`);
+    return this.getRequest<ResponseDto<SaleModel>>(`/${id}`);
   }
 
   create(data: any): Observable<ResponseDto<SaleModel>> {
-    return this.#http.post<ResponseDto<SaleModel>>(this.#apiUrl, data);
+    return this.postRequest<any, ResponseDto<SaleModel>>('', data);
   }
 
   delete(id: number): Observable<ResponseDto<void>> {
-    return this.#http.delete<ResponseDto<void>>(`${this.#apiUrl}/${id}`);
+    return this.deleteRequest<ResponseDto<void>>(`/${id}`);
+  }
+
+  print(id: number) {
+    return this.http.get(`${environment.apiUrl}/ventas/${id}/pdf?formato=a4`, {
+      responseType: 'blob',
+      observe: 'response'
+    });
   }
 }

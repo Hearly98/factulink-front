@@ -1,8 +1,11 @@
 export interface SaleDetailForm {
-    venta_id: number | null,
-    prod_id: number | null,
-    prod_pventa: number | null,
-    detv_cant: number | null,
-    detv_descuento: number | null,
-    detv_total: number | null,
+    prod_id: number | null;
+    prod_nom: string | null;
+    prod_cod_interno: string | null;
+    cantidad: number | null;
+    unidad: string | null;
+    costo_unitario: number | null;
+    precio_unitario: number | null;
+    precio_venta: number | null;
+    dscto: number | null;
 }

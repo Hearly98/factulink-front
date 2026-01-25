@@ -99,7 +99,7 @@ import { CustomerNewEditModalComponent } from '../components/customer-new-edit-m
                     </button>
                   </td>
                   <td>{{ customer.cli_nom }}</td>
-                  <td>{{ customer.cli_ruc }}</td>
+                  <td>{{ customer.cli_documento }}</td>
                 </tr>
                 } }@else {
                 <tr>

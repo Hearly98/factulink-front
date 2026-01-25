@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CategoryNewEditModal } from './category-new-edit-modal';
+import { RolNewEditModal } from './rol-new-edit-modal';
 
-describe('CategoryNewEditModal', () => {
-  let component: CategoryNewEditModal;
-  let fixture: ComponentFixture<CategoryNewEditModal>;
+describe('RolNewEditModal', () => {
+  let component: RolNewEditModal;
+  let fixture: ComponentFixture<RolNewEditModal>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CategoryNewEditModal]
+      imports: [RolNewEditModal]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CategoryNewEditModal);
+    fixture = TestBed.createComponent(RolNewEditModal);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

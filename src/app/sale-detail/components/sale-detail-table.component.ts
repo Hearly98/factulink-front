@@ -6,31 +6,25 @@ import {
   OnInit,
   Output,
   SimpleChanges,
-  effect,
-  inject,
   signal,
 } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {
   TableDirective,
-  TableColorDirective,
-  TableActiveDirective,
   CardComponent,
   CardBodyComponent,
-  CardHeaderComponent,
   ButtonDirective,
   RowComponent,
   ColComponent,
 } from '@coreui/angular';
 import { TypedFormGroup } from '@shared/types/types-form';
-import { SelectOption } from '@shared/types';
-import { PurchaseDetailForm } from '../core/types';
+import { SaleDetailForm } from '../core/types';
 import { IconDirective } from '@coreui/icons-angular';
 import { environment } from '@environments/environment';
 
 @Component({
-  selector: 'app-purchase-detail-table',
+  selector: 'app-sale-detail-table',
   standalone: true,
   imports: [
     CommonModule,
@@ -59,10 +53,9 @@ import { environment } from '@environments/environment';
               <th style="width: 25%">Codigo</th>
               <th style="width: 10%">Cantidad</th>
               <th style="width: 12%">Unid. Medida</th>
-              <th style="width: 12%">Costo Unitario</th>
               <th style="width: 12%">Precio Unitario</th>
-              <th style="width: 11%">Precio Compra</th>
               <th style="width: 11%">Dscto</th>
+              <th style="width: 11%">Precio Venta</th>
               @if (showActions) {
               <th style="width: 5%"></th>
               }
@@ -99,13 +92,6 @@ import { environment } from '@environments/environment';
               </td>
               <td>
                 <input
-                  type="text"
-                  class="form-control form-control-sm"
-                  formControlName="costo_unitario"
-                />
-              </td>
-              <td>
-                <input
                   type="number"
                   class="form-control form-control-sm"
                   formControlName="precio_unitario"
@@ -113,17 +99,17 @@ import { environment } from '@environments/environment';
                   step="0.01"
                 />
               </td>
+                <td>
+                <input type="number" class="form-control form-control-sm" formControlName="dscto" />
+              </td>
               <td>
                 <input
                   type="number"
                   class="form-control form-control-sm"
-                  formControlName="precio_compra"
-                  readonly
+                  formControlName="precio_venta"
                 />
               </td>
-              <td>
-                <input type="number" class="form-control form-control-sm" formControlName="dscto" />
-              </td>
+            
               @if (showActions) {
               <td>
                 <button
@@ -156,10 +142,9 @@ import { environment } from '@environments/environment';
               </c-col>
             </c-row>
           </c-col>
-
-          <c-col md="12" class="mb-2">
+   <c-col md="12" class="mb-2">
             <c-row>
-              <c-col><strong>BASE I.G.V:</strong></c-col>
+              <c-col><strong>BASE I.G.V.:</strong></c-col>
               <c-col md="2">
                 <input
                   type="text"
@@ -170,7 +155,6 @@ import { environment } from '@environments/environment';
               </c-col>
             </c-row>
           </c-col>
-
           <c-col md="12" class="mb-2">
             <c-row>
               <c-col><strong>I.G.V. (18%):</strong></c-col>
@@ -211,8 +195,8 @@ import { environment } from '@environments/environment';
     `,
   ],
 })
-export class PurchaseDetailTableComponent implements OnInit, OnChanges {
-  @Input() detailsArray!: FormArray<TypedFormGroup<PurchaseDetailForm>>;
+export class SaleDetailTableComponent implements OnInit, OnChanges {
+  @Input() detailsArray!: FormArray<TypedFormGroup<SaleDetailForm>>;
   @Input() showActions: boolean = true;
   @Output() detailRemoved = new EventEmitter<number>();
 
@@ -220,10 +204,9 @@ export class PurchaseDetailTableComponent implements OnInit, OnChanges {
 
   // Totales como SIGNALS
   totalDscto = signal(0);
-  totalBase = signal(0);
   totalIgv = signal(0);
   totalFinal = signal(0);
-
+  totalBase = signal(0);
   ngOnInit() {
     this.detailsArray.valueChanges.subscribe(() => {
       this.recalculate(this.detailsArray.getRawValue());
@@ -239,28 +222,22 @@ export class PurchaseDetailTableComponent implements OnInit, OnChanges {
     }
   }
 
-  recalculate(rows: PurchaseDetailForm[]) {
+  /** ========== RECALCULAR TOTALLY REACTIVE ========== */
+  recalculate(rows: SaleDetailForm[]) {
     let total = 0;
     let totalDescuento = 0;
     let totalIgv = 0;
     let totalBase = 0;
-
     rows.forEach((r) => {
-      const costoUnitario = Number(r.costo_unitario) || 0; // SIN IGV (base)
+      const precioUnitario = Number(r.precio_unitario) || 0; // CON IGV
       const cant = Number(r.cantidad) || 0;
       const dscto = Number(r.dscto) || 0;
 
-      // Precio unitario CON IGV
-      const precioUnitario = costoUnitario * (this.IGV);
-      
-      // Precio compra = (precio con IGV * cantidad) - descuento
-      const precioCompra = (precioUnitario * cant) - dscto;
-      
-      // Separar base e IGV del precio compra
-      const baseLinea = precioCompra / (this.IGV);
-      const igvLinea = precioCompra - baseLinea;
+      const ventaLinea = (precioUnitario * cant) - dscto;
+      const baseLinea = Math.round((ventaLinea / 1.18) * 100) / 100;
+      const igvLinea = Math.round((ventaLinea - baseLinea) * 100) / 100;
 
-      total += precioCompra;
+      total += ventaLinea;
       totalIgv += igvLinea;
       totalDescuento += dscto;
       totalBase += baseLinea;
@@ -271,16 +248,14 @@ export class PurchaseDetailTableComponent implements OnInit, OnChanges {
 
       rowGroup?.patchValue(
         {
-          precio_unitario: Math.round(precioUnitario * 100) / 100,
-          precio_compra: Math.round(precioCompra * 100) / 100
+          precio_venta: Math.round(ventaLinea * 100) / 100
         },
         { emitEvent: false }
       );
     });
-
     this.totalBase.set(Math.round(totalBase * 100) / 100);
-    this.totalIgv.set(Math.round(totalIgv * 100) / 100);
     this.totalDscto.set(Math.round(totalDescuento * 100) / 100);
+    this.totalIgv.set(Math.round(totalIgv * 100) / 100);
     this.totalFinal.set(Math.round(total * 100) / 100);
   }
 
