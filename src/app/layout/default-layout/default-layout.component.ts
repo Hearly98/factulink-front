@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 import { IconDirective } from '@coreui/icons-angular';
 import {
@@ -11,17 +12,19 @@ import {
   SidebarHeaderComponent,
   SidebarNavComponent,
   SidebarToggleDirective,
-  SidebarTogglerDirective
+  SidebarTogglerDirective,
+  INavData
 } from '@coreui/angular';
 
 import { DefaultFooterComponent, DefaultHeaderComponent } from './';
-import { navItems } from './_nav';
+import { MenuOptionsNavService } from '../../menu-options/services/menu-options-nav.service';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './default-layout.component.html',
   styleUrls: ['./default-layout.component.scss'],
   imports: [
+    CommonModule,
     SidebarComponent,
     SidebarHeaderComponent,
     SidebarBrandComponent,
@@ -38,6 +41,24 @@ import { navItems } from './_nav';
     ShadowOnScrollDirective
   ]
 })
-export class DefaultLayoutComponent {
-  public navItems = [...navItems];
+export class DefaultLayoutComponent implements OnInit {
+  public navItems = signal<INavData[]>([]);
+  private menuOptionsNavService = inject(MenuOptionsNavService);
+
+  ngOnInit() {
+    this.loadMenu();
+  }
+
+  private loadMenu() {
+    this.menuOptionsNavService.listMenu().subscribe({
+      next: (items: INavData[]) => {
+        this.navItems.set(items);
+      },
+      error: (err: Error) => {
+        console.error('Error loading menu:', err);
+        // Fallback a menú vacío o por defecto
+        this.navItems.set([]);
+      }
+    });
+  }
 }

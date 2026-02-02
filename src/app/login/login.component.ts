@@ -11,6 +11,8 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { AuthService } from '../core/auth/services/auth.service';
 import { Router } from '@angular/router';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
+import { MenuOptionsNavService } from '../menu-options/services/menu-options-nav.service';
+import { switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -33,6 +35,7 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private menuOptionsNavService = inject(MenuOptionsNavService);
 
   constructor() {
     this.createForm();
@@ -55,7 +58,12 @@ export class LoginComponent {
     if (this.form.invalid) return;
 
     this.isLoading.set(true);
-    this.authService.login(this.form.value).subscribe({
+    this.authService.login(this.form.value).pipe(
+      switchMap(() => {
+        // Cargar permisos después del login exitoso
+        return this.menuOptionsNavService.loadUserPermissions();
+      })
+    ).subscribe({
       next: () => {
         this.isLoading.set(false);
         this.router.navigate(['/dashboard']);
@@ -65,7 +73,7 @@ export class LoginComponent {
         console.error('Login error', err);
         this.globalNotification.openToastAlert(
           'Error',
-          err.message,
+          err.message || 'Error al iniciar sesión',
           'danger');
       }
     });

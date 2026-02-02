@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, throwError, map, of } from 'rxjs';
+import { Observable, tap, catchError, throwError, map, switchMap, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AuthResponse, User } from '../models/auth.models';
 
@@ -28,16 +28,15 @@ export class AuthService {
     if (token && storedUser) {
       try {
         this._user.set(JSON.parse(storedUser));
+        // NO cargar permisos aquí para evitar dependencia circular
       } catch (e) {
+        // Solo limpiar si hay error al parsear el usuario
         localStorage.removeItem(this.USER_KEY);
       }
     }
 
-    if (token) {
-      this.getUser().subscribe({
-        error: () => this.logoutLocal()
-      });
-    }
+    // NO verificar el usuario al inicializar para evitar borrar el localStorage
+    // La verificación se hará cuando sea necesario (en guards o al navegar)
   }
 
   login(credentials: any): Observable<AuthResponse> {
@@ -46,6 +45,7 @@ export class AuthService {
         this.setToken(res.access_token);
         this.setUser(res.user);
       })
+      // NO cargar permisos aquí - se cargarán después del login en el componente
     );
   }
 
@@ -55,6 +55,7 @@ export class AuthService {
         this.setToken(res.access_token);
         this.setUser(res.user);
       })
+      // NO cargar permisos aquí - se cargarán después del registro en el componente
     );
   }
 
@@ -90,6 +91,7 @@ export class AuthService {
   logoutLocal(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
+    sessionStorage.removeItem('menuConfig');
     this._user.set(null);
     this.router.navigate(['/login']);
   }
