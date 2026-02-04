@@ -30,6 +30,7 @@ import { messages } from '../helpers';
 import { ValidationMessagesComponent } from '@shared/components/error-messages/validation-messages.component';
 import { QuotationDetailCreateDto, QuotationForm } from '../core/types';
 import { TypedFormGroup } from '@shared/types/types-form';
+import { PaymentMethodService } from 'src/app/payment-method/core/services/payment-method.service';
 
 @Component({
   selector: 'app-quotation-new-edit',
@@ -193,6 +194,7 @@ export class QuotationNewEditPage extends BaseComponent implements OnInit {
   searchSelectLabels: Record<string, string> = {};
   errorMessages = messages;
   #formBuilder = inject(FormBuilder);
+  #paymentMethodService = inject(PaymentMethodService);
   #quotationService = inject(QuotationService);
   #customerService = inject(CustomerService);
   #productService = inject(ProductService);
@@ -350,6 +352,7 @@ export class QuotationNewEditPage extends BaseComponent implements OnInit {
     const series: SelectOption[] = [];
     const currencies: SelectOption[] = [];
     const sucursalOptions: SelectOption[] = [];
+    const paymentMethods: SelectOption[] = [];
 
     // Cargar series de cotizaciones (doc_cod = 'COT')
     this.#quotationService.getSeries().subscribe({
@@ -377,7 +380,15 @@ export class QuotationNewEditPage extends BaseComponent implements OnInit {
       },
     });
 
-    this.structure.set(quotationStructure(currencies, sucursalOptions));
+    this.#paymentMethodService.getAll().subscribe({
+      next: (response) => {
+        response.data.forEach((item) => {
+          paymentMethods.push({ value: item.mp_id, label: item.mp_nom });
+        });
+      },
+    });
+
+    this.structure.set(quotationStructure(currencies, sucursalOptions, paymentMethods));
   }
 
   save() {
