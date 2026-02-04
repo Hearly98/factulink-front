@@ -25,8 +25,36 @@
             } @case ('date') {
             <input class="form-control" type="date" name="" id="" [formControlName]="item.formControlName" />
             } @case ('file') {
-            <input class="form-control" type="file" (change)="onChange($event)" [name]="item.label"
-              [id]="item.formControlName" [formControlName]="item.formControlName" />
+            <div class="d-flex flex-column align-items-start gap-2">
+              <label class="btn btn-outline-primary btn-sm mt-1">
+                <svg cIcon name="cilCloudUpload" class="me-1"></svg>
+                {{ selectedFile ? 'Cambiar Imagen' : 'Seleccionar Imagen' }}
+                <input
+                  type="file"
+                  class="d-none"
+                  (change)="onChange($event)"
+                  accept="image/jpeg,image/png,image/jpg"
+                />
+              </label>
+              
+              @if (imagePreview()) {
+                <div class="position-relative mt-2">
+                  <img [src]="imagePreview()" alt="Imagen Preview" 
+                       class="img-thumbnail shadow-sm" 
+                       style="width: 100px; height: 100px; object-fit: contain; background: #f8f9fa;" />
+                  <button (click)="removeImage()" 
+                          class="btn btn-danger btn-sm position-absolute top-0 start-100 translate-middle rounded-circle p-1"
+                          style="line-height: 1;"
+                          type="button">
+                    <svg cIcon name="cilX" size="sm"></svg>
+                  </button>
+                </div>
+              }
+              
+              <small class="text-muted" style="font-size: 0.75rem;">
+                Límite: <strong class="text-primary">50KB</strong> (JPG, PNG)
+              </small>
+            </div>
             } @default {
             <input class="form-control" type="text" name="" id="" [formControlName]="item.formControlName" />
             } }

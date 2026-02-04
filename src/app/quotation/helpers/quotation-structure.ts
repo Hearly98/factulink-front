@@ -21,7 +21,8 @@ export interface QuotationStructureSection {
 
 export function quotationStructure(
   currencies: SelectOption[] = [],
-  sucursales: SelectOption[] = []
+  sucursales: SelectOption[] = [],
+  tipoPagos: SelectOption[] = []
 ): QuotationStructureSection[] {
   return [
     {
@@ -150,6 +151,7 @@ export function quotationStructure(
           formControlName: 'tipo_pago_id',
           type: 'select',
           col: 6,
+          options: tipoPagos,
           placeholder: 'Tipo de Pago',
           showControlName: 'mostrar_tipo_pago',
         },

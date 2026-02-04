@@ -1,4 +1,4 @@
-import { Component, Inject, inject, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, Inject, inject, OnInit, signal, ViewChild, ViewContainerRef } from '@angular/core';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -13,11 +13,8 @@ import { ProductService } from '../../core/services/product.service';
 import { IconDirective } from '@coreui/icons-angular';
 import { buildProductForm, productStructure } from '../../helpers';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { TypedFormGroup } from '../../../shared/types/types-form';
-import { ProductForm } from '../../core/types/product-form';
 import { BaseComponent } from '../../../shared/base/base.component';
 import { MODULES } from '../../../core/config/permissions/modules';
-import { CreateProductModel, UpdateProductModel } from '../../core/models';
 import { GlobalNotification } from '../../../shared/alerts/global-notification/global-notification';
 import { SucursalService } from '../../../sucursal/core/services/sucursal.service';
 import { GetSucursalModel } from '../../../sucursal/core/models';
@@ -56,6 +53,8 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
   categorias: GetCategoryModel[] = [];
   monedas: GetCurrencyModel[] = [];
   unidades: GetUnitOfMeasureModel[] = [];
+  selectedFile: File | null = null;
+  imagePreview = signal<string | null>(null);
   #sucursalService = inject(SucursalService);
   #categoryService = inject(CategoryService);
   #currencyService = inject(CurrencyService);
@@ -82,6 +81,8 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
 
   openModal(idProduct?: number, callback: any = null) {
     this.createForm();
+    this.selectedFile = null;
+    this.imagePreview.set(null);
     this.visible = true;
     this.callback = callback;
     this.isEditMode = !!idProduct;
@@ -116,6 +117,9 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
       next: (response) => {
         if (response.isValid) {
           this.form.patchValue(response.data);
+          if (response.data.prod_img) {
+            this.imagePreview.set(response.data.image_url);
+          }
         }
       },
     });
@@ -144,15 +148,33 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
     }
   }
 
-  create() {
-    const { prod_id, ...body } = this.form.value;
-    // Include sucursales only on creation
-    const createData = {
-      ...body,
-      sucursales: body.sucursales || []
-    };
+  private buildFormData(): FormData {
+    const formData = new FormData();
+    const formValues = this.form.value as any;
 
-    const subscription = this.#productService.create(createData as CreateProductModel).subscribe({
+    Object.keys(formValues).forEach(key => {
+      if (key !== 'prod_img' && formValues[key] !== null && formValues[key] !== undefined) {
+        if (key === 'sucursales' && Array.isArray(formValues[key])) {
+          formValues[key].forEach((sucId: number) => {
+            formData.append('sucursales[]', sucId.toString());
+          });
+        } else {
+          formData.append(key, formValues[key]);
+        }
+      }
+    });
+
+    if (this.selectedFile) {
+      formData.append('prod_img', this.selectedFile);
+    }
+
+    return formData;
+  }
+
+  create() {
+    const body = this.buildFormData();
+
+    const subscription = this.#productService.create(body as any).subscribe({
       next: (response) => {
         if (response.isValid) {
           this.#globalNotification.openAlert(response);
@@ -170,11 +192,11 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
   }
 
   update() {
-    // Exclude sucursales from update
-    const { sucursales, ...updateData } = this.form.value;
+    const body = this.buildFormData();
+    body.append('_method', 'PUT');
 
     const subscription = this.#productService
-      .update(updateData as UpdateProductModel)
+      .create(body as any)
       .subscribe({
         next: (response) => {
           if (response.isValid) {
@@ -242,6 +264,33 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
     const file = input?.files && input.files.length > 0 ? input.files[0] : null;
     if (!file) return;
 
+    if (file.size > 50 * 1024) {
+      this.#globalNotification.openToastAlert('Archivo demasiado grande', 'La imagen no debe superar los 50KB', 'danger');
+      if (input) input.value = '';
+      return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      this.#globalNotification.openToastAlert('Tipo de archivo no permitido', 'Solo se permiten imágenes JPG o PNG', 'danger');
+      if (input) input.value = '';
+      return;
+    }
+
+    this.selectedFile = file;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.imagePreview.set(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
     this.form.patchValue({ prod_img: file });
+  }
+
+  removeImage() {
+    this.selectedFile = null;
+    this.imagePreview.set(null);
+    this.form.patchValue({ prod_img: null });
   }
 }

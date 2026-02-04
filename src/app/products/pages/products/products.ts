@@ -131,7 +131,7 @@ export class Products extends BaseSearchComponent implements OnInit {
       })
       .then((confirmed) => {
         if (confirmed) {
-          this.#categoryService.delete(id).subscribe({
+          this.#productService.delete(id).subscribe({
             next: (response) => {
               if (response.isValid) {
                 this.#globalNotification.openAlert(response);
