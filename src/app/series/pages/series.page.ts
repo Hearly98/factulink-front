@@ -53,7 +53,7 @@ import { SerieModalComponent } from '../components/serie-modal.component';
       <c-card-body>
         <c-row>
           <c-col sm="12">
-            <table cTable striped="true">
+            <table cTable [responsive]="true" striped="true">
               <thead>
                 <tr>
                   <th>Acciones</th>

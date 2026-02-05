@@ -71,7 +71,7 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
                 </button>
               </c-col>
               <c-col sm="12" md="12" lg="12">
-                <table cTable striped="true">
+                <table cTable [responsive]="true" striped="true">
                   <thead>
                     <tr>
                       <th>Acciones</th>

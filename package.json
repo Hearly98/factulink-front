@@ -44,6 +44,7 @@
     "@popperjs/core": "~2.11.8",
     "@storybook/addon-docs": "^10.0.7",
     "bootstrap": "^5.3.8",
+    "browser-image-compression": "^2.0.2",
     "chart.js": "^4.5.0",
     "lodash-es": "^4.17.21",
     "ngx-permissions": "^19.0.0",

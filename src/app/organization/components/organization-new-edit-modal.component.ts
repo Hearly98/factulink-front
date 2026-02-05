@@ -29,6 +29,7 @@ import { UpdateOrganizationModel } from '../core/models/update-organization.mode
 import { OrganizationService } from '../core/services/organization.service';
 import { GlobalNotification } from '../../shared/alerts/global-notification/global-notification';
 import { environment } from '../../../environments/environment';
+import { ImageCompressionService } from '../../shared/services/image-compression.service';
 
 @Component({
   selector: 'app-organization-new-edit-modal',
@@ -71,14 +72,20 @@ import { environment } from '../../../environments/environment';
                 </select>
                 }@case ('file') {
                 <div class="d-flex flex-column align-items-start gap-2">
-                  <label class="btn btn-outline-primary btn-sm mt-1">
+                  <label class="btn btn-outline-primary btn-sm mt-1" [class.disabled]="isCompressing()">
                     <svg cIcon name="cilCloudUpload" class="me-1"></svg>
-                    {{ selectedFile ? 'Cambiar Logo' : 'Seleccionar Logo' }}
+                    @if (isCompressing()) {
+                      <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                      Comprimiendo...
+                    } @else {
+                      {{ selectedFile ? 'Cambiar Logo' : 'Seleccionar Logo' }}
+                    }
                     <input
                       type="file"
                       class="d-none"
                       (change)="onFileChange($event)"
-                      accept="image/jpeg,image/png,image/jpg"
+                      accept="image/jpeg,image/png,image/jpg,image/webp"
+                      [disabled]="isCompressing()"
                     />
                   </label>
                   
@@ -90,14 +97,20 @@ import { environment } from '../../../environments/environment';
                       <button (click)="removeImage()" 
                               class="btn btn-danger btn-sm position-absolute top-0 start-100 translate-middle rounded-circle p-1"
                               style="line-height: 1;"
-                              type="button">
+                              type="button"
+                              [disabled]="isCompressing()">
                         <svg cIcon name="cilX" size="sm"></svg>
                       </button>
                     </div>
                   }
                   
                   <small class="text-muted" style="font-size: 0.75rem;">
-                    Límite: <strong class="text-primary">50KB</strong> (JPG, PNG)
+                    Límite: <strong class="text-primary">50KB</strong> (JPG, PNG, WebP)
+                    <br>
+                    <span class="text-info">
+                      <svg cIcon name="cilInfo" size="sm" class="me-1"></svg>
+                      Las imágenes se optimizan automáticamente
+                    </span>
                   </small>
                 </div>
                 }@default {
@@ -146,9 +159,11 @@ export class OrganizationNewEditModalComponent extends BaseComponent {
   companias: GetCompanyModel[] = [];
   selectedFile: File | null = null;
   imagePreview = signal<string | null>(null);
+  isCompressing = signal<boolean>(false);
   #companyService = inject(CompanyService);
   #organizationService = inject(OrganizationService);
   #globalNotification = inject(GlobalNotification);
+  #imageCompressionService = inject(ImageCompressionService);
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.ORGANIZATION, viewContainerRef);
     this.createForm();
@@ -196,33 +211,97 @@ export class OrganizationNewEditModalComponent extends BaseComponent {
     });
   }
 
-  onFileChange(event: any) {
+  async onFileChange(event: any) {
     const file = event.target.files[0];
-    if (file) {
-      if (file.size > 50 * 1024) {
-        this.#globalNotification.openToastAlert('Archivo demasiado grande', 'El logo no debe superar los 50KB', 'danger');
-        event.target.value = '';
-        return;
+    if (!file) return;
+
+    // Validar tipo de archivo
+    if (!this.#imageCompressionService.isValidImageFile(file)) {
+      this.#globalNotification.openToastAlert(
+        'Tipo de archivo no permitido', 
+        'Solo se permiten imágenes JPG, PNG o WebP', 
+        'danger'
+      );
+      event.target.value = '';
+      return;
+    }
+
+    const originalSizeKB = file.size / 1024;
+    console.log(`📁 Logo seleccionado: ${file.name} (${originalSizeKB.toFixed(2)} KB)`);
+
+    // Si el archivo ya es menor a 50KB, usarlo directamente
+    if (file.size <= 50 * 1024) {
+      console.log('✅ Logo ya está dentro del límite, no necesita compresión');
+      this.processValidFile(file);
+      return;
+    }
+
+    // Mostrar indicador de compresión
+    this.isCompressing.set(true);
+    this.#globalNotification.openToastAlert(
+      'Comprimiendo logo', 
+      `Optimizando logo de ${originalSizeKB.toFixed(0)} KB...`, 
+      'info'
+    );
+
+    try {
+      // Comprimir imagen
+      const result = await this.#imageCompressionService.compressImage(file, 50);
+
+      if (result.success && result.file) {
+        const finalSizeKB = result.compressedSize / 1024;
+        
+        // Si después de la compresión sigue siendo muy grande
+        if (result.compressedSize > 50 * 1024) {
+          this.#globalNotification.openToastAlert(
+            'Logo demasiado grande', 
+            `El logo no pudo comprimirse a menos de 50KB. Tamaño final: ${finalSizeKB.toFixed(2)} KB. Por favor, selecciona un logo más pequeño.`, 
+            'danger'
+          );
+          event.target.value = '';
+          this.isCompressing.set(false);
+          return;
+        }
+
+        // Éxito en la compresión
+        const compressionRatio = ((result.originalSize - result.compressedSize) / result.originalSize * 100).toFixed(1);
+        this.#globalNotification.openToastAlert(
+          'Logo optimizado', 
+          `Logo comprimido exitosamente: ${originalSizeKB.toFixed(0)} KB → ${finalSizeKB.toFixed(2)} KB (${compressionRatio}% reducción)`, 
+          'success'
+        );
+
+        this.processValidFile(result.file);
+      } else {
+        throw new Error(result.error || 'Error desconocido en la compresión');
       }
-
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-      if (!allowedTypes.includes(file.type)) {
-        this.#globalNotification.openToastAlert('Tipo de archivo no permitido', 'Solo se permiten imágenes JPG o PNG', 'danger');
-        event.target.value = '';
-        return;
-      }
-
-      this.selectedFile = file;
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.imagePreview.set(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error al comprimir logo:', error);
+      this.#globalNotification.openToastAlert(
+        'Error de compresión', 
+        'No se pudo comprimir el logo. Por favor, intenta con otra imagen.', 
+        'danger'
+      );
+      event.target.value = '';
+    } finally {
+      this.isCompressing.set(false);
     }
   }
 
+  private processValidFile(file: File) {
+    this.selectedFile = file;
+
+    // Generar preview
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.imagePreview.set(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  }
+
   removeImage() {
+    if (this.isCompressing()) return; // No permitir remover mientras se comprime
+    
     this.selectedFile = null;
     this.imagePreview.set(null);
     this.form.patchValue({ emp_logo: null });

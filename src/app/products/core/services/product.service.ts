@@ -20,11 +20,17 @@ export class ProductService extends BaseService {
     return this.getRequest('');
   }
 
-  create(body: CreateProductModel): Observable<ResponseDto<GetProductModel>> {
+  create(body: CreateProductModel | FormData): Observable<ResponseDto<GetProductModel>> {
+    if (body instanceof FormData) {
+      return this.postRequestForm<ResponseDto<GetProductModel>>('/', body);
+    }
     return this.postRequest<CreateProductModel, ResponseDto<GetProductModel>>('/', body);
   }
 
-  update(body: UpdateProductModel): Observable<ResponseDto<GetProductModel>> {
+  update(body: UpdateProductModel | FormData): Observable<ResponseDto<GetProductModel>> {
+    if (body instanceof FormData) {
+      return this.putRequestForm<ResponseDto<GetProductModel>>('/', body);
+    }
     return this.putRequest<UpdateProductModel, ResponseDto<GetProductModel>>('/', body);
   }
 
