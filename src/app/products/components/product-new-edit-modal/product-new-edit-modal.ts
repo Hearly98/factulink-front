@@ -25,6 +25,7 @@ import { GetCurrencyModel } from '../../../currency/core/models/get-currency.mod
 import { UnitOfMeasureService } from '../../../unit-of-measure/core/services/unit-of-measure.service';
 import { GetUnitOfMeasureModel } from '../../../unit-of-measure/core/models';
 import { SucursalSelectorModalComponent } from '../../../shared/components/sucursal-selector-modal.component';
+import { ImageCompressionService } from '../../../shared/services/image-compression.service';
 
 @Component({
   selector: 'app-product-new-edit-modal',
@@ -55,6 +56,7 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
   unidades: GetUnitOfMeasureModel[] = [];
   selectedFile: File | null = null;
   imagePreview = signal<string | null>(null);
+  isCompressing = signal<boolean>(false);
   #sucursalService = inject(SucursalService);
   #categoryService = inject(CategoryService);
   #currencyService = inject(CurrencyService);
@@ -62,6 +64,7 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
   #globalNotification = inject(GlobalNotification);
   #productService = inject(ProductService);
   #formBuilder = inject(FormBuilder);
+  #imageCompressionService = inject(ImageCompressionService);
   title = 'Crear Producto';
   callback: any;
   isEditMode = false;
@@ -96,7 +99,13 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
 
   openSucursalSelector() {
     const currentSucursales = this.form.get('sucursales')?.value || [];
-    this.sucursalSelector.openModal(currentSucursales, (selectedIds: number[]) => {
+    
+    // Asegurar que siempre sea un array de números
+    const sucursalesIds = currentSucursales.map((item: any) => {
+      return typeof item === 'object' ? item.suc_id : Number(item);
+    }).filter((id: number) => !isNaN(id));
+    
+    this.sucursalSelector.openModal(sucursalesIds, (selectedIds: number[]) => {
       this.form.patchValue({ sucursales: selectedIds });
     });
   }
@@ -105,8 +114,13 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
     const selectedIds = this.form.get('sucursales')?.value || [];
     if (selectedIds.length === 0) return 'Ninguna sucursal seleccionada';
 
+    // Convertir a números si es necesario
+    const ids = selectedIds.map((item: any) => {
+      return typeof item === 'object' ? item.suc_id : Number(item);
+    }).filter((id: number) => !isNaN(id));
+
     const names = this.sucursales
-      .filter(s => selectedIds.includes(s.suc_id))
+      .filter(s => ids.includes(s.suc_id))
       .map(s => s.suc_nom);
 
     return names.join(', ');
@@ -116,9 +130,22 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
     this.#productService.getById(idProduct).subscribe({
       next: (response) => {
         if (response.isValid) {
-          this.form.patchValue(response.data);
-          if (response.data.prod_img) {
-            this.imagePreview.set(response.data.image_url);
+          const productData = response.data;
+          
+          // Asegurar que sucursales sea un array de números
+          if (productData.sucursales && Array.isArray(productData.sucursales)) {
+            // Si sucursales contiene objetos, extraer solo los IDs
+            const sucursalesIds = productData.sucursales.map((suc: any) => {
+              return typeof suc === 'object' ? suc.suc_id : suc;
+            });
+            productData.sucursales = sucursalesIds;
+          } else {
+            productData.sucursales = [];
+          }
+          
+          this.form.patchValue(productData);
+          if (productData.prod_img) {
+            this.imagePreview.set(productData.image_url);
           }
         }
       },
@@ -145,6 +172,11 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
       }
     } else {
       this.form.markAllAsTouched();
+      this.#globalNotification.openToastAlert(
+        'Formulario inválido', 
+        'Por favor, complete todos los campos requeridos', 
+        'danger'
+      );
     }
   }
 
@@ -153,13 +185,26 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
     const formValues = this.form.value as any;
 
     Object.keys(formValues).forEach(key => {
-      if (key !== 'prod_img' && formValues[key] !== null && formValues[key] !== undefined) {
-        if (key === 'sucursales' && Array.isArray(formValues[key])) {
-          formValues[key].forEach((sucId: number) => {
-            formData.append('sucursales[]', sucId.toString());
+      const value = formValues[key];
+      
+      // Saltar campos que son null, undefined o strings vacías (excepto para campos booleanos)
+      if (key !== 'prod_img' && value !== null && value !== undefined && value !== '') {
+        if (key === 'sucursales' && Array.isArray(value)) {
+          // Manejar array de sucursales correctamente
+          value.forEach((item: any) => {
+            // Asegurar que solo se envíen números, no objetos
+            const sucId = typeof item === 'object' ? item.suc_id : item;
+            if (sucId && !isNaN(Number(sucId))) {
+              formData.append('sucursales[]', sucId.toString());
+            }
           });
         } else {
-          formData.append(key, formValues[key]);
+          // Convertir valores a string para evitar problemas de serialización
+          if (typeof value === 'boolean') {
+            formData.append(key, value ? 'true' : 'false');
+          } else {
+            formData.append(key, value.toString());
+          }
         }
       }
     });
@@ -174,7 +219,7 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
   create() {
     const body = this.buildFormData();
 
-    const subscription = this.#productService.create(body as any).subscribe({
+    const subscription = this.#productService.create(body).subscribe({
       next: (response) => {
         if (response.isValid) {
           this.#globalNotification.openAlert(response);
@@ -196,7 +241,7 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
     body.append('_method', 'PUT');
 
     const subscription = this.#productService
-      .create(body as any)
+      .create(body) // Sending as POST with _method PUT is safer for file uploads in PHP
       .subscribe({
         next: (response) => {
           if (response.isValid) {
@@ -259,26 +304,88 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
     }
   }
 
-  onChange(event: Event) {
+  async onChange(event: Event) {
     const input = event.target as HTMLInputElement | null;
     const file = input?.files && input.files.length > 0 ? input.files[0] : null;
     if (!file) return;
 
-    if (file.size > 50 * 1024) {
-      this.#globalNotification.openToastAlert('Archivo demasiado grande', 'La imagen no debe superar los 50KB', 'danger');
+    // Validar tipo de archivo
+    if (!this.#imageCompressionService.isValidImageFile(file)) {
+      this.#globalNotification.openToastAlert(
+        'Tipo de archivo no permitido', 
+        'Solo se permiten imágenes JPG, PNG o WebP', 
+        'danger'
+      );
       if (input) input.value = '';
       return;
     }
 
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    if (!allowedTypes.includes(file.type)) {
-      this.#globalNotification.openToastAlert('Tipo de archivo no permitido', 'Solo se permiten imágenes JPG o PNG', 'danger');
-      if (input) input.value = '';
+    const originalSizeKB = file.size / 1024;
+    console.log(`📁 Archivo seleccionado: ${file.name} (${originalSizeKB.toFixed(2)} KB)`);
+
+    // Si el archivo ya es menor a 50KB, usarlo directamente
+    if (file.size <= 50 * 1024) {
+      console.log('✅ Archivo ya está dentro del límite, no necesita compresión');
+      this.processValidFile(file);
       return;
     }
 
+    // Mostrar indicador de compresión
+    this.isCompressing.set(true);
+    this.#globalNotification.openToastAlert(
+      'Comprimiendo imagen', 
+      `Optimizando imagen de ${originalSizeKB.toFixed(0)} KB...`, 
+      'info'
+    );
+
+    try {
+      // Comprimir imagen
+      const result = await this.#imageCompressionService.compressImage(file, 50);
+
+      if (result.success && result.file) {
+        const finalSizeKB = result.compressedSize / 1024;
+        
+        // Si después de la compresión sigue siendo muy grande
+        if (result.compressedSize > 50 * 1024) {
+          this.#globalNotification.openToastAlert(
+            'Imagen demasiado grande', 
+            `La imagen no pudo comprimirse a menos de 50KB. Tamaño final: ${finalSizeKB.toFixed(2)} KB. Por favor, selecciona una imagen más pequeña.`, 
+            'danger'
+          );
+          if (input) input.value = '';
+          this.isCompressing.set(false);
+          return;
+        }
+
+        // Éxito en la compresión
+        const compressionRatio = ((result.originalSize - result.compressedSize) / result.originalSize * 100).toFixed(1);
+        this.#globalNotification.openToastAlert(
+          'Imagen optimizada', 
+          `Imagen comprimida exitosamente: ${originalSizeKB.toFixed(0)} KB → ${finalSizeKB.toFixed(2)} KB (${compressionRatio}% reducción)`, 
+          'success'
+        );
+
+        this.processValidFile(result.file);
+      } else {
+        throw new Error(result.error || 'Error desconocido en la compresión');
+      }
+    } catch (error) {
+      console.error('Error al comprimir imagen:', error);
+      this.#globalNotification.openToastAlert(
+        'Error de compresión', 
+        'No se pudo comprimir la imagen. Por favor, intenta con otra imagen.', 
+        'danger'
+      );
+      if (input) input.value = '';
+    } finally {
+      this.isCompressing.set(false);
+    }
+  }
+
+  private processValidFile(file: File) {
     this.selectedFile = file;
 
+    // Generar preview
     const reader = new FileReader();
     reader.onload = () => {
       this.imagePreview.set(reader.result as string);
@@ -289,6 +396,8 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
   }
 
   removeImage() {
+    if (this.isCompressing()) return; // No permitir remover mientras se comprime
+    
     this.selectedFile = null;
     this.imagePreview.set(null);
     this.form.patchValue({ prod_img: null });

@@ -54,7 +54,7 @@ import { ShippingGuideModel } from '../core/models/shipping-guide.model';
         </c-row>
         <c-row>
           <c-col sm="12">
-            <table cTable striped="true">
+            <table cTable [responsive]="true" striped="true">
               <thead>
                 <tr>
                   <th>Acciones</th>

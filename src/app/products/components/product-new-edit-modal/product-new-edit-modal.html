@@ -26,14 +26,20 @@
             <input class="form-control" type="date" name="" id="" [formControlName]="item.formControlName" />
             } @case ('file') {
             <div class="d-flex flex-column align-items-start gap-2">
-              <label class="btn btn-outline-primary btn-sm mt-1">
+              <label class="btn btn-outline-primary btn-sm mt-1" [class.disabled]="isCompressing()">
                 <svg cIcon name="cilCloudUpload" class="me-1"></svg>
-                {{ selectedFile ? 'Cambiar Imagen' : 'Seleccionar Imagen' }}
+                @if (isCompressing()) {
+                  <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                  Comprimiendo...
+                } @else {
+                  {{ selectedFile ? 'Cambiar Imagen' : 'Seleccionar Imagen' }}
+                }
                 <input
                   type="file"
                   class="d-none"
                   (change)="onChange($event)"
-                  accept="image/jpeg,image/png,image/jpg"
+                  accept="image/jpeg,image/png,image/jpg,image/webp"
+                  [disabled]="isCompressing()"
                 />
               </label>
               
@@ -45,14 +51,20 @@
                   <button (click)="removeImage()" 
                           class="btn btn-danger btn-sm position-absolute top-0 start-100 translate-middle rounded-circle p-1"
                           style="line-height: 1;"
-                          type="button">
+                          type="button"
+                          [disabled]="isCompressing()">
                     <svg cIcon name="cilX" size="sm"></svg>
                   </button>
                 </div>
               }
               
               <small class="text-muted" style="font-size: 0.75rem;">
-                Límite: <strong class="text-primary">50KB</strong> (JPG, PNG)
+                Límite: <strong class="text-primary">50KB</strong> (JPG, PNG, WebP)
+                <br>
+                <span class="text-info">
+                  <svg cIcon name="cilInfo" size="sm" class="me-1"></svg>
+                  Las imágenes se optimizan automáticamente
+                </span>
               </small>
             </div>
             } @default {
