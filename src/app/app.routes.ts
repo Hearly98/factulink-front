@@ -31,6 +31,13 @@ export const routes: Routes = [
         },
       },
       {
+        path: 'marcas',
+        loadComponent: () => import('./brand/pages/brand/brand').then((m) => m.BrandComponent),
+        data: {
+          title: 'Marcas',
+        },
+      },
+      {
         path: 'empresas',
         loadComponent: () =>
           import('./organization/pages/organization.page').then((m) => m.OrganizationPage),
@@ -232,6 +239,48 @@ export const routes: Routes = [
         loadComponent: () => import('./product-sucursal/pages/product-sucursal/product-sucursal').then((m) => m.ProductoSucursal),
         data: {
           title: 'Stock por Sucursal',
+        },
+      },
+      {
+        path: 'almacenes',
+        loadComponent: () => import('./almacen/pages/almacen/almacen').then((m) => m.AlmacenComponent),
+        data: {
+          title: 'Almacenes',
+        },
+      },
+      {
+        path: 'almacen-stock/:id',
+        loadComponent: () => import('./almacen/pages/almacen-stock/almacen-stock').then((m) => m.AlmacenStockComponent),
+        data: {
+          title: 'Stock del Almacén',
+        },
+      },
+      {
+        path: 'kardex',
+        loadComponent: () => import('./kardex/pages/kardex-report/kardex-report').then((m) => m.KardexReportComponent),
+        data: {
+          title: 'Kardex de Inventario',
+        },
+      },
+      {
+        path: 'movimientos',
+        loadComponent: () => import('./movimiento/pages/movimiento-list/movimiento-list').then((m) => m.MovimientoListComponent),
+        data: {
+          title: 'Movimientos',
+        },
+      },
+      {
+        path: 'nuevo-movimiento',
+        loadComponent: () => import('./movimiento/pages/movimiento-form/movimiento-form').then((m) => m.MovimientoFormComponent),
+        data: {
+          title: 'Nuevo Movimiento',
+        },
+      },
+      {
+        path: 'editar-movimiento/:id',
+        loadComponent: () => import('./movimiento/pages/movimiento-form/movimiento-form').then((m) => m.MovimientoFormComponent),
+        data: {
+          title: 'Editar Movimiento',
         },
       },
     ],

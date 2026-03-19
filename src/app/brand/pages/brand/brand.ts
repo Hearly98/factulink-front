@@ -8,7 +8,7 @@ import {
   TableDirective,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
-import { CategoryService } from '../../core/services/category.service';
+import { BrandService } from '../../core/services/brand.service';
 import { TypedFormGroup } from '../../../shared/types/types-form';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { buildFilterForm, filterSort, mapParams } from '../../helpers';
@@ -16,15 +16,20 @@ import { FilterForm } from '../../core/types/filter-form';
 import { BaseSearchComponent } from '../../../shared/base/search-base.component';
 import { MODULES } from '../../../core/config/permissions/modules';
 import { PageParamsModel } from '../../../shared/models/query/page-params.model';
-import { CategoryNewEditModal } from '../../components/category-new-edit-modal/category-new-edit-modal';
+import { BrandNewEditModal } from '../../components/brand-new-edit-modal/brand-new-edit-modal';
 import { PaginatorComponent } from '../../../paginator/paginator.component';
-import { GetCategoryModel } from '../../core/models';
+import { GetMarcaModel } from '../../core/models';
 import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
+import { CommonModule } from '@angular/common';
+import { GetSucursalModel } from '../../../sucursal/core/models';
+import { SucursalService } from '../../../sucursal/core/services/sucursal.service';
 
 @Component({
-  selector: 'app-category',
+  selector: 'app-brand',
+  standalone: true,
   imports: [
+    CommonModule,
     RowComponent,
     ColComponent,
     CardComponent,
@@ -33,29 +38,38 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
     ButtonDirective,
     TableDirective,
     ReactiveFormsModule,
-    CategoryNewEditModal,
+    BrandNewEditModal,
     PaginatorComponent,
   ],
-  templateUrl: './category.html',
-  styleUrl: './category.scss',
+  templateUrl: './brand.html',
+  styleUrl: './brand.scss',
 })
-export class Category extends BaseSearchComponent implements OnInit {
-  @ViewChild('categoryNewEditModal') categoryNewEditModal!: CategoryNewEditModal;
+export class BrandComponent extends BaseSearchComponent implements OnInit {
+  @ViewChild('brandNewEditModal') brandNewEditModal!: BrandNewEditModal;
   public form!: TypedFormGroup<FilterForm>;
-  readonly #confirmService = inject(ConfirmService);
   readonly #formBuilder = inject(FormBuilder);
-  public title = 'Categorias';
-  readonly #categoryService = inject(CategoryService);
+  public title = 'Marcas';
+  readonly #brandService = inject(BrandService);
+  readonly #sucursalService = inject(SucursalService);
+  readonly #confirmService = inject(ConfirmService);
   readonly #globalNotification = inject(GlobalNotification);
-  public categories: GetCategoryModel[] = [];
+  public marcas: GetMarcaModel[] = [];
+  public sucursales: GetSucursalModel[] = [];
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
-    super(MODULES.ADMINISTRATION, viewContainerRef);
+    super(MODULES.CATEGORY, viewContainerRef);
   }
 
   ngOnInit(): void {
     this.createForm();
+    this.loadSucursales();
     this.onSearch();
+  }
+
+  loadSucursales() {
+    this.#sucursalService.getAll().subscribe((res: any) => {
+      if (res.isValid) this.sucursales = res.data;
+    });
   }
 
   createForm() {
@@ -71,13 +85,11 @@ export class Category extends BaseSearchComponent implements OnInit {
     this.updateSort(sort);
     this.updatePage(pageParams);
     const params = this.getPageParams();
-    const subscription = this.#categoryService.search(params).subscribe({
+    const subscription = this.#brandService.search(params).subscribe({
       next: (response) => {
         if (response.isValid) {
-          this.total = response.data.total;
-          this.categories = response.data.items;
-        } else {
-          this.#globalNotification.openAlert(response);
+          this.marcas = response.data.items || [];
+          this.total = this.marcas.length;
         }
       },
       error: (response) => {
@@ -92,13 +104,13 @@ export class Category extends BaseSearchComponent implements OnInit {
   }
 
   onClean() {
-    this.form.reset();
+    this.form.reset({ order: 'desc' });
     this.onSearch();
   }
 
   openModal(id?: number) {
-    if (this.categoryNewEditModal) {
-      this.categoryNewEditModal.openModal(id, () => {
+    if (this.brandNewEditModal) {
+      this.brandNewEditModal.openModal(id, () => {
         this.onSearch();
       });
     }
@@ -108,14 +120,14 @@ export class Category extends BaseSearchComponent implements OnInit {
     this.#confirmService
       .open({
         title: 'Eliminar',
-        message: '¿Estás seguro de eliminar este registro?',
+        message: '¿Estás seguro de eliminar esta marca?',
         color: 'danger',
         confirmText: 'Si, eliminar',
         cancelText: 'Cancelar',
       })
       .then((confirmed) => {
         if (confirmed) {
-          this.#categoryService.delete(id).subscribe({
+          this.#brandService.delete(id).subscribe({
             next: (response) => {
               if (response.isValid) {
                 this.#globalNotification.openAlert(response);
@@ -125,7 +137,7 @@ export class Category extends BaseSearchComponent implements OnInit {
               }
             },
             error: (response) => {
-              this.#globalNotification.openToastAlert('Error al eliminar', response, 'danger');
+              this.#globalNotification.openToastAlert('Error al eliminar', response.error?.message || 'Error', 'danger');
             },
           });
         }

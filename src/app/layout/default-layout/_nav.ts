@@ -45,6 +45,11 @@ export const navItems: INavData[] = [
         icon: 'nav-icon-bullet',
       },
       {
+        name: 'Marca',
+        url: '/marcas',
+        icon: 'nav-icon-bullet',
+      },
+      {
         name: 'Sucursal',
         url: '/sucursales',
         icon: 'nav-icon-bullet',
@@ -111,9 +116,24 @@ export const navItems: INavData[] = [
     name: 'Logistica',
   },
   {
-    name: 'Sucursales',
+    name: 'Almacenes',
+    url: '/almacenes',
+    iconComponent: { name: 'cil-layers' },
+  },
+  {
+    name: 'Sucursales Stock',
     url: '/productos-sucursal',
     iconComponent: { name: 'cil-list-numbered' },
+  },
+  {
+    name: 'Kardex',
+    url: '/kardex',
+    iconComponent: { name: 'cil-spreadsheet' },
+  },
+  {
+    name: 'Movimientos',
+    url: '/movimientos',
+    iconComponent: { name: 'cil-transfer' },
   },
   {
     title: true,
