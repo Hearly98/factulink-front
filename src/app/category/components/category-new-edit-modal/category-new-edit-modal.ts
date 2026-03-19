@@ -18,8 +18,6 @@ import { BaseComponent } from '../../../shared/base/base.component';
 import { MODULES } from '../../../core/config/permissions/modules';
 import { CreateCategoryModel, UpdateCategoryModel } from '../../core/models';
 import { GlobalNotification } from '../../../shared/alerts/global-notification/global-notification';
-import { SucursalService } from '../../../sucursal/core/services/sucursal.service';
-import { GetSucursalModel } from '../../../sucursal/core/models';
 
 @Component({
   selector: 'app-category-new-edit-modal',
@@ -41,8 +39,6 @@ export class CategoryNewEditModal extends BaseComponent implements OnInit {
   form!: TypedFormGroup<CategoryForm>;
   visible = false;
   structure = categoryStructure;
-  sucursales: GetSucursalModel[] = []
-  #sucursalService = inject(SucursalService);
   #globalNotification = inject(GlobalNotification);
   #categoryService = inject(CategoryService);
   #formBuilder = inject(FormBuilder);
@@ -50,12 +46,11 @@ export class CategoryNewEditModal extends BaseComponent implements OnInit {
   callback: any;
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
-    super(MODULES.CATEGORY, viewContainerRef);
+    super(MODULES.MARCA, viewContainerRef);
   }
 
   ngOnInit(): void {
     this.createForm();
-    this.sucursalSelectCombo();
   }
 
   createForm() {
@@ -79,10 +74,6 @@ export class CategoryNewEditModal extends BaseComponent implements OnInit {
         }
       },
     });
-  }
-
-  sucursalSelectCombo() {
-    this.fetchData(this.#sucursalService.getAll(), this.sucursales);
   }
 
   onClose() {

@@ -1,6 +1,6 @@
 export interface FilterForm {
-    alm_nom: string | null;
+    nombre: string | null;
     suc_id: number | null;
-    est: boolean | null;
+    activo: boolean | null;
     order: string | null;
 }

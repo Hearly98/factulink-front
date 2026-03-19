@@ -16,8 +16,6 @@ import { BaseComponent } from '../../../shared/base/base.component';
 import { MODULES } from '../../../core/config/permissions/modules';
 import { CreateMarcaModel, UpdateMarcaModel } from '../../core/models';
 import { GlobalNotification } from '../../../shared/alerts/global-notification/global-notification';
-import { SucursalService } from '../../../sucursal/core/services/sucursal.service';
-import { GetSucursalModel } from '../../../sucursal/core/models';
 import { StructureItem } from '../../helpers/brand-structure';
 import { CommonModule } from '@angular/common';
 
@@ -43,29 +41,20 @@ export class BrandNewEditModal extends BaseComponent implements OnInit {
   readonly #globalNotification = inject(GlobalNotification);
   readonly #brandService = inject(BrandService);
   readonly #formBuilder = inject(FormBuilder);
-  readonly #sucursalService = inject(SucursalService);
   title = 'Crear Marca';
   callback: any;
   isEditMode = false;
-  sucursales: GetSucursalModel[] = [];
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
-    super(MODULES.CATEGORY, viewContainerRef);
+    super(MODULES.MARCA, viewContainerRef);
   }
 
   ngOnInit(): void {
     this.createForm();
-    this.loadSucursales();
   }
 
   createForm() {
     this.form = this.#formBuilder.group(buildBrandForm());
-  }
-
-  loadSucursales() {
-    this.#sucursalService.getAll().subscribe((res: any) => {
-      if (res.isValid) this.sucursales = res.data;
-    });
   }
 
   openModal(idBrand?: number, callback: any = null) {
@@ -146,10 +135,5 @@ export class BrandNewEditModal extends BaseComponent implements OnInit {
   isFieldInvalid(fieldName: string): boolean {
     const field = this.form.get(fieldName);
     return field ? field.invalid && field.touched : false;
-  }
-
-  getSelectData(dataSource: string): any[] {
-    if (dataSource === 'sucursales') return this.sucursales;
-    return [];
   }
 }

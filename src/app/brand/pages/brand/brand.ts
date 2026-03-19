@@ -22,8 +22,6 @@ import { GetMarcaModel } from '../../core/models';
 import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 import { CommonModule } from '@angular/common';
-import { GetSucursalModel } from '../../../sucursal/core/models';
-import { SucursalService } from '../../../sucursal/core/services/sucursal.service';
 
 @Component({
   selector: 'app-brand',
@@ -50,26 +48,17 @@ export class BrandComponent extends BaseSearchComponent implements OnInit {
   readonly #formBuilder = inject(FormBuilder);
   public title = 'Marcas';
   readonly #brandService = inject(BrandService);
-  readonly #sucursalService = inject(SucursalService);
   readonly #confirmService = inject(ConfirmService);
   readonly #globalNotification = inject(GlobalNotification);
   public marcas: GetMarcaModel[] = [];
-  public sucursales: GetSucursalModel[] = [];
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
-    super(MODULES.CATEGORY, viewContainerRef);
+    super(MODULES.MARCA, viewContainerRef);
   }
 
   ngOnInit(): void {
     this.createForm();
-    this.loadSucursales();
     this.onSearch();
-  }
-
-  loadSucursales() {
-    this.#sucursalService.getAll().subscribe((res: any) => {
-      if (res.isValid) this.sucursales = res.data;
-    });
   }
 
   createForm() {

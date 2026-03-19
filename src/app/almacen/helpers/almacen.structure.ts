@@ -1,9 +1,15 @@
 export const AlmacenStructure = [
     {
         label: 'Nombre de Almacén',
-        formControlName: 'alm_nom',
+        formControlName: 'nombre',
         type: 'text',
         col: '12',
+    },
+    {
+        label: 'Descripción',
+        formControlName: 'descripcion',
+        type: 'text',
+        col: '12'
     },
     {
         label: 'Sucursal',

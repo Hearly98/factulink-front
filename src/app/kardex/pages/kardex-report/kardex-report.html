@@ -20,8 +20,8 @@
                         <label cLabel>Almacén</label>
                         <select cSelect formControlName="alm_id">
                             <option [value]="null">Todos los almacenes</option>
-                            <option *ngFor="let alm of warehouses" [value]="alm.alm_id">
-                                {{ alm.alm_nom }}
+                            <option *ngFor="let alm of warehouses" [value]="alm.almacen_id">
+                                {{ alm.nombre }}
                             </option>
                         </select>
                     </c-col>
@@ -120,7 +120,7 @@
                                         {{ item.kar_tip }}
                                     </span>
                                 </td>
-                                <td>{{ item.alm_nom }}</td>
+                                <td>{{ item.nombre }}</td>
                                 <td class="text-end fw-bold"
                                     [ngClass]="item.kar_cant > 0 ? 'text-success' : 'text-danger'">
                                     {{ item.kar_cant > 0 ? '+' : '' }}{{ item.kar_cant }}

@@ -4,6 +4,7 @@ import { BaseService } from '../../../shared/services/base.service';
 import { Observable } from 'rxjs';
 import { ResponseDto } from '../../../shared/models/api/response.dto';
 import { environment } from '../../../../environments/environment';
+import { GetAlmacenModel } from '../models';
 
 export interface ProductoAlmacenModel {
   id: number;
@@ -18,10 +19,7 @@ export interface ProductoAlmacenModel {
     prod_cod_interno: string;
     prod_nom: string;
   };
-  almacen?: {
-    almacen_id: number;
-    alm_nom: string;
-  };
+  almacen?: GetAlmacenModel
 }
 
 @Injectable({

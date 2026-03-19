@@ -20,18 +20,6 @@
                       [ngClass]="{ 'is-invalid': isFieldInvalid(field.formControlName) }"
                     />
                   }
-                  @if (field.type === 'select') {
-                    <select
-                      [formControlName]="field.formControlName"
-                      cFormControl
-                      [ngClass]="{ 'is-invalid': isFieldInvalid(field.formControlName) }"
-                    >
-                      <option [ngValue]="null">Seleccione...</option>
-                      @for (item of getSelectData(field.dataSource || ''); track $index) {
-                        <option [ngValue]="item.suc_id">{{ item.suc_nom }}</option>
-                      }
-                    </select>
-                  }
                 </div>
               </c-col>
             }

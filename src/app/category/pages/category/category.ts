@@ -50,7 +50,7 @@ export class Category extends BaseSearchComponent implements OnInit {
   public categories: GetCategoryModel[] = [];
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
-    super(MODULES.ADMINISTRATION, viewContainerRef);
+    super(MODULES.MARCA, viewContainerRef);
   }
 
   ngOnInit(): void {

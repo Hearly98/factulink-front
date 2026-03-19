@@ -7,6 +7,7 @@ import {
   ModalBodyComponent,
   ModalComponent,
   RowComponent,
+  SpinnerComponent,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -14,12 +15,13 @@ import { BaseComponent } from '@shared/base/base.component';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 import { TypedFormGroup } from '@shared/types/types-form';
 import { CustomerForm } from '../core/types/customer-form';
-import { buildCustomerForm, customerStructure } from '../helpers';
+import { buildCustomerForm, customerErrorMessages, customerStructure } from '../helpers';
 import { CustomerService } from '../core/services/customer.service';
 import { MODULES } from 'src/app/core/config/permissions/modules';
 import { CreateCustomerModel, UpdateCustomerModel } from '../core/models';
 import { GetDocumentTypeModel } from 'src/app/document-type/core/models';
 import { DocumentTypeService } from 'src/app/document-type/core/services/document-type.service';
+import { ValidationMessagesComponent } from '@shared/components/error-messages/validation-messages.component';
 
 @Component({
   selector: 'app-customer-new-edit-modal',
@@ -33,6 +35,8 @@ import { DocumentTypeService } from 'src/app/document-type/core/services/documen
     ButtonDirective,
     IconDirective,
     ReactiveFormsModule,
+    SpinnerComponent,
+    ValidationMessagesComponent,
   ],
   template: `
     <c-modal alignment="center" [visible]="visible" backdrop="static">
@@ -45,31 +49,52 @@ import { DocumentTypeService } from 'src/app/document-type/core/services/documen
         <c-card>
           <c-card-body [formGroup]="form">
             <c-row>
-              @for(item of structure; track $index){
-              <c-col [md]="item.col">
-                <label for="" class="form-label">{{ item.label }}</label>
-                @switch (item.type) { @case ('select') {
-                <select
-                  class="form-control form-select"
-                  name=""
-                  id=""
-                  [formControlName]="item.formControlName"
-                >
-                  <option [ngValue]="null">Seleccione</option>
-                  @for(item of documentTypes; track $index){
-                  <option [ngValue]="item.tip_id">{{ item.tip_nom }}</option>
+              @for (item of structure; track $index) {
+                <c-col [md]="item.col">
+                  <label for="" class="form-label">{{ item.label }}</label>
+                  @switch (item.type) {
+                    @case ('select') {
+                      <select
+                        class="form-control form-select"
+                        name=""
+                        id=""
+                        [formControlName]="item.formControlName"
+                        [class.is-invalid]="
+                          form.get(item.formControlName)?.invalid &&
+                          form.get(item.formControlName)?.touched
+                        "
+                      >
+                        <option [ngValue]="null">Seleccione</option>
+                        @for (item of documentTypes; track $index) {
+                          <option [ngValue]="item.tip_id">{{ item.tip_nom }}</option>
+                        }
+                      </select>
+                      <app-validation-messages
+                        [form]="form"
+                        [controlName]="item.formControlName"
+                        [messages]="messages"
+                      ></app-validation-messages>
+                    }
+                    @default {
+                      <input
+                        class="form-control"
+                        type="text"
+                        name=""
+                        id=""
+                        [formControlName]="item.formControlName"
+                        [class.is-invalid]="
+                          form.get(item.formControlName)?.invalid &&
+                          form.get(item.formControlName)?.touched
+                        "
+                      />
+                      <app-validation-messages
+                        [form]="form"
+                        [controlName]="item.formControlName"
+                        [messages]="messages"
+                      ></app-validation-messages>
+                    }
                   }
-                </select>
-                }@default {
-                <input
-                  class="form-control"
-                  type="text"
-                  name=""
-                  id=""
-                  [formControlName]="item.formControlName"
-                />
-                } }
-              </c-col>
+                </c-col>
               }
             </c-row>
           </c-card-body>
@@ -80,10 +105,17 @@ import { DocumentTypeService } from 'src/app/document-type/core/services/documen
               <svg cIcon name="cilX"></svg>
               Cancelar
             </button>
-            <button cButton color="success" (click)="onSubmit()">
-              <svg cIcon name="cilSave"></svg>
-              Guardar
-            </button>
+            @if (isLoading()) {
+              <button cButton color="success" class="m-1" disabled>
+                <c-spinner aria-hidden="true" size="sm" />
+                Cargando...
+              </button>
+            } @else {
+              <button cButton color="success" (click)="onSubmit()">
+                <svg cIcon name="cilSave"></svg>
+                Guardar
+              </button>
+            }
           </c-col>
         </c-row>
       </c-modal-body>
@@ -96,13 +128,14 @@ export class CustomerNewEditModalComponent extends BaseComponent implements OnIn
   visible = false;
   structure = customerStructure;
   documentTypes: GetDocumentTypeModel[] = [];
-  #documentTypeService = inject(DocumentTypeService);
-  #globalNotification = inject(GlobalNotification);
-  #customerService = inject(CustomerService);
-  #formBuilder = inject(FormBuilder);
+  readonly #documentTypeService = inject(DocumentTypeService);
+  readonly #globalNotification = inject(GlobalNotification);
+  readonly #customerService = inject(CustomerService);
+  readonly #formBuilder = inject(FormBuilder);
   title = signal('Crear Cliente');
   callback: any;
-
+  messages = customerErrorMessages;
+  isLoading = signal(false);
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.CUSTOMER, viewContainerRef);
   }
@@ -152,11 +185,16 @@ export class CustomerNewEditModalComponent extends BaseComponent implements OnIn
         this.create();
       }
     } else {
-      this.form.markAllAsTouched();
+      Object.keys(this.form.controls).forEach((field) => {
+        const control = this.form.get(field);
+        control?.markAsTouched({ onlySelf: true });
+      });
+      //this.form.markAllAsTouched();
     }
   }
 
   create() {
+    this.isLoading.set(true);
     const { cli_id, ...body } = this.form.value;
     const subscription = this.#customerService.create(body as CreateCustomerModel).subscribe({
       next: (response) => {
@@ -164,18 +202,22 @@ export class CustomerNewEditModalComponent extends BaseComponent implements OnIn
           this.#globalNotification.openAlert(response);
           this.callback(response.data);
           this.onClose();
+          this.isLoading.set(false);
         } else {
           this.#globalNotification.openAlert(response);
+          this.isLoading.set(false);
         }
       },
       error: (error) => {
         this.#globalNotification.openAlert(error.message);
+        this.isLoading.set(false);
       },
     });
     this.subscriptions.push(subscription);
   }
 
   update() {
+    this.isLoading.set(true);
     const subscription = this.#customerService
       .update(this.form.value as UpdateCustomerModel)
       .subscribe({
@@ -184,12 +226,15 @@ export class CustomerNewEditModalComponent extends BaseComponent implements OnIn
             this.#globalNotification.openAlert(response);
             this.callback(response.data);
             this.onClose();
+            this.isLoading.set(false);
           } else {
             this.#globalNotification.openAlert(response);
+            this.isLoading.set(false);
           }
         },
         error: (error) => {
           this.#globalNotification.openAlert(error.message);
+          this.isLoading.set(false);
         },
       });
     this.subscriptions.push(subscription);

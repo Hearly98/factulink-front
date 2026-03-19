@@ -4,7 +4,7 @@ export interface GetKardexModel {
     kar_doc: string;
     kar_tip: 'INGRESO' | 'SALIDA' | 'TRANSFERENCIA' | 'AJUSTE';
     alm_id: number;
-    alm_nom: string;
+nombre: string;
     kar_cant: number;
     kar_sal: number;
     usu_id: number;

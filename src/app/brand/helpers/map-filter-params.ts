@@ -4,7 +4,6 @@ export const mapParams = (value: Partial<FilterForm>): Record<string, any> => {
   const params: Record<string, any> = {};
   if (value.marca_nom) params['marca_nom'] = value.marca_nom;
   if (value.marca_codigo) params['marca_codigo'] = value.marca_codigo;
-  if (value.suc_id) params['suc_id'] = value.suc_id;
   if (value.est !== null) params['est'] = value.est;
   return params;
 };

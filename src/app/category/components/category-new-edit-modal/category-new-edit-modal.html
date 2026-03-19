@@ -11,16 +11,7 @@
           @for(item of structure; track $index){
           <c-col [md]="item.col">
             <label for="" class="form-label">{{ item.label }}</label>
-            @switch (item.type) { @case ('select') {
-            <select class="form-control form-select" name="" id="" [formControlName]="item.formControlName">
-              <option [ngValue]="null">Seleccione</option>
-              @for(item of sucursales; track $index){
-              <option [ngValue]="item.suc_id">{{item.suc_nom}}</option>
-              }
-            </select>
-            }@default {
             <input class="form-control" type="text" name="" id="" [formControlName]="item.formControlName" />
-            } }
           </c-col>
           }
         </c-row>

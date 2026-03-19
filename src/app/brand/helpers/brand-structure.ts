@@ -10,5 +10,4 @@ export interface StructureItem {
 export const brandStructure: StructureItem[] = [
   { label: 'Código', formControlName: 'marca_codigo', type: 'text', col: '6', placeholder: 'Ej: MRC-001' },
   { label: 'Nombre', formControlName: 'marca_nom', type: 'text', col: '6', placeholder: 'Ej: Samsung' },
-  { label: 'Sucursal', formControlName: 'suc_id', type: 'select', col: '12', dataSource: 'sucursales' },
 ];

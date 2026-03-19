@@ -122,7 +122,7 @@ export class AlmacenComponent extends BaseSearchComponent {
     }
 
     onClean() {
-        this.form.reset({ est: true, order: 'desc' });
+        this.form.reset({ activo: true, order: 'desc' });
         this.onSearch();
     }
 

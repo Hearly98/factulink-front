@@ -5,10 +5,4 @@ export const categoryStructure = [
     type: 'text',
     col: '12',
   },
-  {
-    label: 'Sucursal',
-    formControlName: 'suc_id',
-    type: 'select',
-    col: '12',
-  },
 ];

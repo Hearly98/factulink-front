@@ -4,7 +4,6 @@ import {
   inject,
   OnInit,
   signal,
-  ViewChild,
   ViewContainerRef,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -16,18 +15,12 @@ import {
   ModalBodyComponent,
   ModalComponent,
   RowComponent,
-  TableDirective,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { TypedFormGroup } from '@shared/types/types-form';
 import { MODULES } from 'src/app/core/config/permissions/modules';
-import { PaginatorComponent } from 'src/app/paginator/paginator.component';
-import { PageParamsModel } from '@shared/models/query/page-params.model';
-import { BaseSearchComponent } from '@shared/base/search-base.component';
-import { GetSupplierModel } from '../core/models/get-supplier.model';
 import { SupplierService } from '../core/services/supplier.service';
-import { FilterForm } from '../core/types/filter-form';
-import { buildFilterForm, buildSupplierForm, supplierStructure } from '../helpers';
+import { buildSupplierForm, supplierStructure } from '../helpers';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 import { BaseComponent } from '@shared/base/base.component';
 import { SupplierForm } from '../core/types/supplier-form';
@@ -52,7 +45,7 @@ import { GetDocumentTypeModel } from 'src/app/document-type/core/models';
     <c-modal-body class="modal-body">
       <c-row class="mb-2">
         <c-col [sm]="6" class="space-between">
-          <h5>{{ title }}</h5>
+          <h5>{{ title() }}</h5>
         </c-col>
       </c-row>
       <c-card>
@@ -108,11 +101,11 @@ export class SupplierNewEditModalComponent extends BaseComponent implements OnIn
   visible = false;
   structure = supplierStructure;
   documentTypes: GetDocumentTypeModel[] = [];
-  #globalNotification = inject(GlobalNotification);
-  #supplierService = inject(SupplierService);
-  #documentTypeService = inject(DocumentTypeService);
-  #formBuilder = inject(FormBuilder);
-  title = 'Crear Categoria';
+  readonly #globalNotification = inject(GlobalNotification);
+  readonly #supplierService = inject(SupplierService);
+  readonly #documentTypeService = inject(DocumentTypeService);
+  readonly #formBuilder = inject(FormBuilder);
+  title = signal('Crear Proveedor');
   callback: any;
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
@@ -142,6 +135,7 @@ export class SupplierNewEditModalComponent extends BaseComponent implements OnIn
       next: (response) => {
         if (response.isValid) {
           this.form.patchValue(response.data);
+          this.title.set("Editar Proveedor")
         }
       },
     });

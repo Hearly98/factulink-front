@@ -13,18 +13,9 @@
 <c-card class="mb-3">
   <c-card-body>
     <c-row class="g-3 align-items-end" [formGroup]="form">
-      <c-col sm="12" md="4" lg="3">
+      <c-col sm="12" md="6" lg="4">
         <label for="">Nombre</label>
         <input formControlName="marca_nom" type="text" class="form-control" placeholder="Buscar por nombre..." />
-      </c-col>
-      <c-col sm="12" md="4" lg="3">
-        <label for="">Sucursal</label>
-        <select formControlName="suc_id" class="form-control form-select">
-          <option [ngValue]="null">Todas</option>
-          @for (sucursal of sucursales; track $index) {
-            <option [ngValue]="sucursal.suc_id">{{ sucursal.suc_nom }}</option>
-          }
-        </select>
       </c-col>
       <c-col>
         <button cButton color="primary" (click)="onSearch()" class="me-2">
@@ -48,7 +39,7 @@
           <th>Acciones</th>
           <th>Código</th>
           <th>Nombre</th>
-          <th>Sucursal</th>
+          <th>Empresa</th>
         </tr>
       </thead>
       <tbody>
@@ -64,7 +55,7 @@
             </td>
             <td>{{ marca.marca_codigo }}</td>
             <td>{{ marca.marca_nom }}</td>
-            <td>{{ marca.sucursal?.suc_nom || '-' }}</td>
+            <td>{{ marca.empresa?.emp_nom || '-' }}</td>
           </tr>
         }
         @if (marcas.length === 0) {

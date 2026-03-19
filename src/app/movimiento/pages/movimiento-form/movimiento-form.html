@@ -38,8 +38,8 @@
                             <label cLabel>Almacén Origen <span class="text-danger">*</span></label>
                             <select cSelect formControlName="alm_id_ori">
                                 <option [value]="null">Seleccione origen</option>
-                                <option *ngFor="let alm of almacenes" [value]="alm.alm_id">
-                                    {{ alm.alm_nom }}
+                                <option *ngFor="let alm of almacenes" [value]="alm.almacen_id">
+                                    {{ alm.nombre }}
                                 </option>
                             </select>
                         </c-col>
@@ -48,8 +48,8 @@
                             <label cLabel>Almacén Destino <span class="text-danger">*</span></label>
                             <select cSelect formControlName="alm_id_des">
                                 <option [value]="null">Seleccione destino</option>
-                                <option *ngFor="let alm of almacenes" [value]="alm.alm_id">
-                                    {{ alm.alm_nom }}
+                                <option *ngFor="let alm of almacenes" [value]="alm.almacen_id">
+                                    {{ alm.nombre}}
                                 </option>
                             </select>
                         </c-col>

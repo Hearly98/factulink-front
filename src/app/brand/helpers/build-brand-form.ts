@@ -6,7 +6,6 @@ export const buildBrandForm = (): {
 } => {
   return {
     marca_id: new FormControl<number | null>(null),
-    suc_id: new FormControl<number | null>(null, [Validators.required]),
     marca_codigo: new FormControl<string | null>(null, [Validators.required]),
     marca_nom: new FormControl<string | null>(null, [Validators.required]),
     est: new FormControl<boolean>(true),

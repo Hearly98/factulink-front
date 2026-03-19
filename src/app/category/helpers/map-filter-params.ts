@@ -6,6 +6,5 @@ export function mapParams(
     return {
         cat_nom: form.cat_nom?.trim() ?? null,
         est: form.est ?? null,
-        suc_id: form.suc_id ?? null,
     };
 }
