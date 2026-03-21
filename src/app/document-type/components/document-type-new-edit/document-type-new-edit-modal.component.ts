@@ -1,4 +1,4 @@
-import { Component, Inject, inject, OnInit, ViewContainerRef } from '@angular/core';
+import { Component, Inject, inject, OnInit, signal, ViewContainerRef } from '@angular/core';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -7,6 +7,7 @@ import {
   ModalBodyComponent,
   ModalComponent,
   RowComponent,
+  SpinnerComponent,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -15,9 +16,14 @@ import { MODULES } from '../../../core/config/permissions/modules';
 import { GlobalNotification } from '../../../shared/alerts/global-notification/global-notification';
 import { BaseComponent } from '@shared/base/base.component';
 import { DocumentTypeForm } from '../../core/types/document-type-form';
-import { buildDocumentTypeForm, documentTypeStructure } from '../../helpers';
+import {
+  buildDocumentTypeForm,
+  documentTypeErrorMessages,
+  documentTypeStructure,
+} from '../../helpers';
 import { DocumentTypeService } from '../../core/services/document-type.service';
 import { CreateDocumentTypeModel, UpdateDocumentTypeModel } from '../../core/models';
+import { ValidationMessagesComponent } from '@shared/components/error-messages/validation-messages.component';
 
 @Component({
   selector: 'app-document-type-new-edit-modal',
@@ -31,69 +37,21 @@ import { CreateDocumentTypeModel, UpdateDocumentTypeModel } from '../../core/mod
     ButtonDirective,
     IconDirective,
     ReactiveFormsModule,
+    ValidationMessagesComponent,
+    SpinnerComponent,
   ],
-  template: `
-    <c-modal alignment="center" [visible]="visible" backdrop="static">
-      <c-modal-body class="modal-body">
-        <c-row class="mb-2">
-          <c-col [sm]="12" class="space-between">
-            <h5>{{ title }}</h5>
-          </c-col>
-        </c-row>
-        <c-card>
-          <c-card-body [formGroup]="form">
-            <c-row>
-              @for(item of structure; track $index){
-              <c-col [md]="item.col">
-                <label for="" class="form-label">{{ item.label }}</label>
-                @switch (item.type) { @case ('select') {
-                <select
-                  class="form-control form-select"
-                  name=""
-                  id=""
-                  [formControlName]="item.formControlName"
-                >
-                  <option [ngValue]="null">Seleccione</option>
-                </select>
-                }@default {
-                <input
-                  class="form-control"
-                  type="text"
-                  name=""
-                  id=""
-                  [formControlName]="item.formControlName"
-                />
-                } }
-              </c-col>
-              }
-            </c-row>
-          </c-card-body>
-        </c-card>
-        <c-row class="mt-4">
-          <c-col class="text-end">
-            <button cButton color="secondary" class="me-2" (click)="onClose()">
-              <svg cIcon name="cilX"></svg>
-              Cancelar
-            </button>
-            <button cButton color="success" (click)="onSubmit()">
-              <svg cIcon name="cilSave"></svg>
-              Guardar
-            </button>
-          </c-col>
-        </c-row>
-      </c-modal-body>
-    </c-modal>
-  `,
-  styles: ``,
+  templateUrl: './document-type-new-edit-modal.component.html',
 })
-export class DocumentTypeNewEditModalComponent extends BaseComponent {
+export class DocumentTypeNewEditModalComponent extends BaseComponent implements OnInit {
   form!: TypedFormGroup<DocumentTypeForm>;
   visible = false;
+  isLoading = signal(false);
   structure = documentTypeStructure;
-  #globalNotification = inject(GlobalNotification);
-  #documentTypeService = inject(DocumentTypeService);
-  #formBuilder = inject(FormBuilder);
-  title = 'Crear Tipo de Documento';
+  messages = documentTypeErrorMessages();
+  readonly #globalNotification = inject(GlobalNotification);
+  readonly #documentTypeService = inject(DocumentTypeService);
+  readonly #formBuilder = inject(FormBuilder);
+  title = signal('Crear Tipo de Documento');
   callback: any;
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
@@ -113,6 +71,7 @@ export class DocumentTypeNewEditModalComponent extends BaseComponent {
     this.visible = true;
     this.callback = callback;
     if (idDocumentType) {
+      this.title.set('Editar Tipo de Documento');
       this.loadData(idDocumentType);
     }
   }
@@ -133,6 +92,7 @@ export class DocumentTypeNewEditModalComponent extends BaseComponent {
 
   onSubmit() {
     if (this.form.valid) {
+      this.isLoading.set(true);
       if (this.form.value.tip_id) {
         this.update();
       } else {
@@ -153,8 +113,10 @@ export class DocumentTypeNewEditModalComponent extends BaseComponent {
             this.#globalNotification.openAlert(response);
             this.callback(response.data);
             this.onClose();
+            this.isLoading.set(false);
           } else {
             this.#globalNotification.openAlert(response);
+            this.isLoading.set(false);
           }
         },
         error: (error) => {
@@ -173,8 +135,10 @@ export class DocumentTypeNewEditModalComponent extends BaseComponent {
             this.#globalNotification.openAlert(response);
             this.callback(response.data);
             this.onClose();
+            this.isLoading.set(false);
           } else {
             this.#globalNotification.openAlert(response);
+            this.isLoading.set(false);
           }
         },
         error: (error) => {
