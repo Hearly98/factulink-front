@@ -1,4 +1,4 @@
-import { Component, Inject, inject, OnInit, ViewContainerRef } from '@angular/core';
+import { Component, Inject, inject, OnInit, signal, ViewContainerRef } from '@angular/core';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -10,7 +10,7 @@ import {
 } from '@coreui/angular';
 import { RolService } from '../../core/services/rol.service';
 import { IconDirective } from '@coreui/icons-angular';
-import { buildRolForm, rolStructure } from '../../helpers';
+import { buildRolForm, rolErrorMessages, rolStructure } from '../../helpers';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { TypedFormGroup } from '../../../shared/types/types-form';
 import { RolForm } from '../../core/types/rol-form';
@@ -18,8 +18,8 @@ import { BaseComponent } from '../../../shared/base/base.component';
 import { MODULES } from '../../../core/config/permissions/modules';
 import { CreateRolModel, UpdateRolModel } from '../../core/models';
 import { GlobalNotification } from '../../../shared/alerts/global-notification/global-notification';
-import { SucursalService } from '../../../sucursal/core/services/sucursal.service';
 import { GetSucursalModel } from '../../../sucursal/core/models';
+import { ValidationMessagesComponent } from '@shared/components/error-messages/validation-messages.component';
 
 @Component({
   selector: 'app-rol-new-edit-modal',
@@ -33,6 +33,7 @@ import { GetSucursalModel } from '../../../sucursal/core/models';
     ButtonDirective,
     IconDirective,
     ReactiveFormsModule,
+    ValidationMessagesComponent,
   ],
   templateUrl: './rol-new-edit-modal.html',
   styleUrl: './rol-new-edit-modal.scss',
@@ -41,12 +42,13 @@ export class RolNewEditModal extends BaseComponent implements OnInit {
   form!: TypedFormGroup<RolForm>;
   visible = false;
   structure = rolStructure;
-  sucursales: GetSucursalModel[] = []
-  #sucursalService = inject(SucursalService);
-  #globalNotification = inject(GlobalNotification);
-  #rolService = inject(RolService);
-  #formBuilder = inject(FormBuilder);
-  title = 'Crear Categoria';
+  sucursales: GetSucursalModel[] = [];
+  messages = rolErrorMessages();
+  isLoading = signal(false);
+  readonly #globalNotification = inject(GlobalNotification);
+  readonly #rolService = inject(RolService);
+  readonly #formBuilder = inject(FormBuilder);
+  title = signal('Crear Rol');
   callback: any;
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
@@ -64,7 +66,7 @@ export class RolNewEditModal extends BaseComponent implements OnInit {
   openModal(idRol?: number, callback: any = null) {
     this.createForm();
     this.visible = true;
-    this.callback = callback
+    this.callback = callback;
     if (idRol) {
       this.loadData(idRol);
     }
@@ -97,6 +99,7 @@ export class RolNewEditModal extends BaseComponent implements OnInit {
   }
 
   create() {
+    this.isLoading.set(true);
     const { rol_id, ...body } = this.form.value;
     const subscription = this.#rolService.create(body as CreateRolModel).subscribe({
       next: (response) => {
@@ -104,32 +107,39 @@ export class RolNewEditModal extends BaseComponent implements OnInit {
           this.#globalNotification.openAlert(response);
           this.callback(response.data);
           this.onClose();
+          this.isLoading.set(false);
         } else {
           this.#globalNotification.openAlert(response);
+          this.isLoading.set(false);
         }
       },
       error: (error) => {
         this.#globalNotification.openAlert(error.message);
+        this.isLoading.set(false);
       },
     });
-    this.subscriptions.push(subscription)
+    this.subscriptions.push(subscription);
   }
 
   update() {
+    this.isLoading.set(true);
     const subscription = this.#rolService.update(this.form.value as UpdateRolModel).subscribe({
       next: (response) => {
         if (response.isValid) {
           this.#globalNotification.openAlert(response);
           this.callback(response.data);
           this.onClose();
+          this.isLoading.set(false);
         } else {
           this.#globalNotification.openAlert(response);
+          this.isLoading.set(false);
         }
       },
       error: (error) => {
         this.#globalNotification.openAlert(error.message);
+        this.isLoading.set(false);
       },
     });
-    this.subscriptions.push(subscription)
+    this.subscriptions.push(subscription);
   }
 }
