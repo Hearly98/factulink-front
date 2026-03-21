@@ -19,15 +19,6 @@
                 <label for="">Nombre</label>
                 <input formControlName="und_nom" type="text" class="form-control" />
               </c-col>
-              <c-col sm="12" md="3" lg="3">
-                <label for="">Sucursal</label>
-                <select formControlName="suc_id" class="form-control form-select">
-                  <option [ngValue]="null">Todas</option>
-                  @for(sucursal of sucursales; track $index){
-                  <option [ngValue]="sucursal.suc_id">{{ sucursal.suc_nom }}</option>
-                  }
-                </select>
-              </c-col>
               <c-col>
                 <button cButton color="primary" (click)="onSearch()" class="me-2">
                   <svg cIcon name="cilSearch"></svg>
@@ -44,7 +35,6 @@
                     <tr>
                       <th>Acciones</th>
                       <th>Nombre</th>
-                      <th>Sucursal</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -65,7 +55,6 @@
                         </button>
                       </td>
                       <td>{{ unit.und_nom }}</td>
-                      <td>{{ unit.sucursal?.suc_nom }}</td>
                     </tr>
                     }}@else{
                     <tr>

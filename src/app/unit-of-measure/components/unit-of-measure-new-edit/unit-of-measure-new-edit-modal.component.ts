@@ -1,4 +1,4 @@
-import { Component, Inject, inject, OnInit, signal, ViewContainerRef } from '@angular/core';
+import { Component, Inject, inject, signal, ViewContainerRef } from '@angular/core';
 import { BaseComponent } from '@shared/base/base.component';
 import { UnitOfMeasureService } from '../../core/services/unit-of-measure.service';
 import { MODULES } from 'src/app/core/config/permissions/modules';
@@ -6,7 +6,11 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
 import { TypedFormGroup } from '@shared/types/types-form';
 import { UnitOfMeasureForm } from '../../core/types';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { buildUnitOfMeasureForm, unitOfMeasureStructure } from '../../helpers';
+import {
+  buildUnitOfMeasureForm,
+  unitOfMeasureErrorMessages,
+  unitOfMeasureStructure,
+} from '../../helpers';
 import {
   ButtonModule,
   CardBodyComponent,
@@ -19,7 +23,7 @@ import {
 import { IconDirective } from '@coreui/icons-angular';
 import { CreateUnitOfMeasureModel, UpdateUnitOfMeasureModel } from '../../core/models';
 import { GetSucursalModel } from 'src/app/sucursal/core/models';
-import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service';
+import { ValidationMessagesComponent } from '@shared/components/error-messages/validation-messages.component';
 
 @Component({
   selector: 'app-unit-of-measure-new-edit-modal',
@@ -34,80 +38,25 @@ import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service
     ModalBodyComponent,
     ButtonModule,
     CardBodyComponent,
+    ValidationMessagesComponent,
   ],
-  template: ` <c-modal alignment="center" [visible]="visible()" backdrop="static">
-    <c-modal-body>
-      <c-row class="mb-2">
-        <c-col [sm]="12">
-          <h5>{{ title() }}</h5>
-        </c-col>
-      </c-row>
-      <c-card>
-        <c-card-body [formGroup]="form">
-          <c-row>
-            @for(item of structure; track $index){
-            <c-col [md]="item.col">
-              <label for="" class="form-label">{{ item.label }}</label>
-              @switch (item.type) { @case ('select') {
-              <select
-                class="form-control form-select"
-                name=""
-                id=""
-                [formControlName]="item.formControlName"
-              >
-                <option [ngValue]="null">Seleccione</option>
-                @for(item of sucursales; track $index){
-                <option [ngValue]="item.suc_id">{{ item.suc_nom }}</option>
-                }
-              </select>
-              }@default {
-              <input
-                class="form-control"
-                type="text"
-                name=""
-                id=""
-                [formControlName]="item.formControlName"
-              />
-              } }
-            </c-col>
-            }
-          </c-row>
-        </c-card-body>
-      </c-card>
-      <c-row class="mt-4">
-        <c-col class="text-end">
-          <button cButton color="secondary" class="me-2" (click)="onClose()">
-            <svg cIcon name="cilX"></svg>
-            Cancelar
-          </button>
-          <button cButton color="success" (click)="onSubmit()">
-            <svg cIcon name="cilSave"></svg>
-            Guardar
-          </button>
-        </c-col>
-      </c-row>
-    </c-modal-body>
-  </c-modal>`,
-  styles: ``,
+  templateUrl: './unit-of-measure-new-edit-modal.component.html',
 })
-export class UnitOfMeasureNewEditModalComponent extends BaseComponent implements OnInit {
+export class UnitOfMeasureNewEditModalComponent extends BaseComponent {
   visible = signal<boolean>(false);
   title = signal<string>('Crear Unidad de Medida');
   callback: any;
+  isLoading = signal(false);
+  messages = unitOfMeasureErrorMessages();
   structure = unitOfMeasureStructure;
   form!: TypedFormGroup<UnitOfMeasureForm>;
   sucursales: GetSucursalModel[] = [];
-  #globalNotification = inject(GlobalNotification);
-  #formBuilder = inject(FormBuilder);
-  #unitOfMeasureService = inject(UnitOfMeasureService);
-  #sucursalService = inject(SucursalService);
+  readonly #globalNotification = inject(GlobalNotification);
+  readonly #formBuilder = inject(FormBuilder);
+  readonly #unitOfMeasureService = inject(UnitOfMeasureService);
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.UNIT_OF_MEASURE, viewContainerRef);
     this.createForm();
-  }
-
-  ngOnInit(): void {
-    this.sucursalSelectCombo();
   }
 
   createForm() {
@@ -125,10 +74,6 @@ export class UnitOfMeasureNewEditModalComponent extends BaseComponent implements
       this.loadData(id);
     }
     this.callback = callback;
-  }
-
-  sucursalSelectCombo() {
-    this.fetchData(this.#sucursalService.getAll(), this.sucursales);
   }
 
   loadData(id: number) {
@@ -184,6 +129,7 @@ export class UnitOfMeasureNewEditModalComponent extends BaseComponent implements
   }
 
   update() {
+    this.isLoading.set(true);
     const subscription = this.#unitOfMeasureService
       .update(this.form.value as UpdateUnitOfMeasureModel)
       .subscribe({

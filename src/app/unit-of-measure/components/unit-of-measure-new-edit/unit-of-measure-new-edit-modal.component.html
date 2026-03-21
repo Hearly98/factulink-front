@@ -1,0 +1,47 @@
+<c-modal alignment="center" [visible]="visible()" backdrop="static">
+  <c-modal-body>
+    <c-row class="mb-2">
+      <c-col [sm]="12">
+        <h5>{{ title() }}</h5>
+      </c-col>
+    </c-row>
+    <c-card>
+      <c-card-body [formGroup]="form">
+        <c-row>
+          @for (item of structure; track $index) {
+            <c-col [md]="item.col">
+              <label for="" class="form-label">{{ item.label }}</label>
+              <input
+                class="form-control"
+                type="text"
+                [class.is-invalid]="
+                  form.get(item.formControlName)?.invalid && form.get(item.formControlName)?.touched
+                "
+                [name]="item.label"
+                [id]="item.formControlName + 'id'"
+                [formControlName]="item.formControlName"
+              />
+              <app-validation-messages
+                [form]="form"
+                [messages]="messages"
+                [controlName]="item.formControlName"
+              ></app-validation-messages>
+            </c-col>
+          }
+        </c-row>
+      </c-card-body>
+    </c-card>
+    <c-row class="mt-4">
+      <c-col class="text-end">
+        <button cButton color="secondary" class="me-2" (click)="onClose()">
+          <svg cIcon name="cilX"></svg>
+          Cancelar
+        </button>
+        <button cButton color="success" (click)="onSubmit()">
+          <svg cIcon name="cilSave"></svg>
+          Guardar
+        </button>
+      </c-col>
+    </c-row>
+  </c-modal-body>
+</c-modal>
