@@ -46,13 +46,13 @@ import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-moda
 export class Products extends BaseSearchComponent implements OnInit {
   @ViewChild('productNewEditModal') productNewEditModal!: ProductNewEditModal;
   public form!: TypedFormGroup<FilterForm>;
-  #formBuilder = inject(FormBuilder);
+  readonly #formBuilder = inject(FormBuilder);
   public title = 'Productos';
-  #productService = inject(ProductService);
-  #categoryService = inject(CategoryService);
-  #sucursalService = inject(SucursalService);
-  #confirmService = inject(ConfirmService);
-  #globalNotification = inject(GlobalNotification);
+  readonly #productService = inject(ProductService);
+  readonly #categoryService = inject(CategoryService);
+  readonly #sucursalService = inject(SucursalService);
+  readonly #confirmService = inject(ConfirmService);
+  readonly #globalNotification = inject(GlobalNotification);
   public products: GetProductModel[] = [];
   public categorias: GetCategoryModel[] = [];
   public sucursales: GetSucursalModel[] = [];
@@ -78,7 +78,7 @@ export class Products extends BaseSearchComponent implements OnInit {
 
   onSearch(filter = null, page = 1) {
     const sort = filterSort(this.form.value);
-    const filterToUse = filter || mapParams(this.form.value);
+    const filterToUse = filter ?? mapParams(this.form.value);
     const pageSize = 10;
     const pageParams = new PageParamsModel(page, pageSize);
     this.updateFilter(filterToUse);

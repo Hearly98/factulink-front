@@ -20,3 +20,16 @@
 .modal-background {
   background-color: rgba(0, 0, 0, 0.5);
 }
+
+.is-invalid {
+    border-color: red;
+}
+
+.ng-select.is-invalid .ng-select-container {
+    border-color: red !important;
+}
+
+.invalid-feedback {
+    color: red;
+    display: block;
+}

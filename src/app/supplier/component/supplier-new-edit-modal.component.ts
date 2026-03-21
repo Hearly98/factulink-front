@@ -1,17 +1,13 @@
-import {
-  Component,
-  Inject,
-  inject,
-  OnInit,
-  signal,
-  ViewContainerRef,
-} from '@angular/core';
+import { supplierErrorMessages } from './../helpers/supplier-error-messages';
+import { Component, Inject, inject, OnInit, signal, ViewContainerRef } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import {
   ButtonDirective,
   CardBodyComponent,
   CardComponent,
   ColComponent,
+  FormControlDirective,
+  FormSelectDirective,
   ModalBodyComponent,
   ModalComponent,
   RowComponent,
@@ -28,72 +24,24 @@ import { CreateSupplierModel } from '../core/models';
 import { UpdateSupplierModel } from '../core/models/update-supplier.model';
 import { DocumentTypeService } from 'src/app/document-type/core/services/document-type.service';
 import { GetDocumentTypeModel } from 'src/app/document-type/core/models';
+import { ValidationMessagesComponent } from '@shared/components/error-messages/validation-messages.component';
 @Component({
   selector: 'app-supplier-new-edit-modal',
   imports: [
     CardComponent,
     CardBodyComponent,
     ModalBodyComponent,
+    FormControlDirective,
+    FormSelectDirective,
     ModalComponent,
     RowComponent,
     ColComponent,
     ButtonDirective,
     IconDirective,
     ReactiveFormsModule,
+    ValidationMessagesComponent
   ],
-  template: `<c-modal alignment="center" [visible]="visible" backdrop="static">
-    <c-modal-body class="modal-body">
-      <c-row class="mb-2">
-        <c-col [sm]="6" class="space-between">
-          <h5>{{ title() }}</h5>
-        </c-col>
-      </c-row>
-      <c-card>
-        <c-card-body [formGroup]="form">
-          <c-row>
-            @for(item of structure; track $index){
-            <c-col [md]="item.col">
-              <label for="" class="form-label">{{ item.label }}</label>
-              @switch (item.type) { @case ('select') {
-              <select
-                class="form-control form-select"
-                name=""
-                id=""
-                [formControlName]="item.formControlName"
-              >
-                <option [ngValue]="null">Seleccione</option>
-                @for(item of documentTypes; track $index){
-                <option [ngValue]="item.tip_id">{{ item.tip_nom }}</option>
-                }
-              </select>
-              }@default {
-              <input
-                class="form-control"
-                type="text"
-                name=""
-                id=""
-                [formControlName]="item.formControlName"
-              />
-              } }
-            </c-col>
-            }
-          </c-row>
-        </c-card-body>
-      </c-card>
-      <c-row class="mt-4">
-        <c-col class="text-end">
-          <button cButton color="secondary" class="me-2" (click)="onClose()">
-            <svg cIcon name="cilX"></svg>
-            Cancelar
-          </button>
-          <button cButton color="success" (click)="onSubmit()">
-            <svg cIcon name="cilSave"></svg>
-            Guardar
-          </button>
-        </c-col>
-      </c-row>
-    </c-modal-body>
-  </c-modal> `,
+  templateUrl: "./supplier-new-edit-modal.component.html",
   styles: ``,
 })
 export class SupplierNewEditModalComponent extends BaseComponent implements OnInit {
@@ -107,7 +55,8 @@ export class SupplierNewEditModalComponent extends BaseComponent implements OnIn
   readonly #formBuilder = inject(FormBuilder);
   title = signal('Crear Proveedor');
   callback: any;
-
+  messages = supplierErrorMessages();
+  submitted = false;
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.CATEGORY, viewContainerRef);
   }
@@ -135,7 +84,7 @@ export class SupplierNewEditModalComponent extends BaseComponent implements OnIn
       next: (response) => {
         if (response.isValid) {
           this.form.patchValue(response.data);
-          this.title.set("Editar Proveedor")
+          this.title.set('Editar Proveedor');
         }
       },
     });
@@ -150,6 +99,7 @@ export class SupplierNewEditModalComponent extends BaseComponent implements OnIn
   }
 
   onSubmit() {
+    this.submitted = true;
     if (this.form.valid) {
       if (this.form.value.prov_id) {
         this.update();

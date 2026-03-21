@@ -1,0 +1,83 @@
+<c-modal alignment="center" [visible]="visible" backdrop="static">
+  <c-modal-body class="modal-body">
+    <c-row class="mb-2">
+      <c-col [sm]="6" class="space-between">
+        <h5>{{ title() }}</h5>
+      </c-col>
+    </c-row>
+    <c-card>
+      <c-card-body [formGroup]="form">
+        <c-row>
+          @for (item of structure; track $index) {
+            <c-col [md]="item.col">
+              <label for="" class="form-label">{{ item.label }}</label>
+              @switch (item.type) {
+                @case ('select') {
+                  <select
+                    cSelect
+                    class="form-control form-select"
+                    name=""
+                    id=""
+                    [formControlName]="item.formControlName"
+                    [class.is-invalid]="
+                      form.get(item.formControlName)?.invalid &&
+                      form.get(item.formControlName)?.touched
+                    "
+                  >
+                    <option [ngValue]="null">Seleccione</option>
+                    @for (item of documentTypes; track $index) {
+                      <option [ngValue]="item.tip_id">{{ item.tip_nom }}</option>
+                    }
+                  </select>
+                  <app-validation-messages
+                    [form]="form"
+                    [controlName]="item.formControlName"
+                    [messages]="messages"
+                  ></app-validation-messages>
+                }
+                @default {
+                  <input
+                    cFormControl
+                    class="form-control"
+                    type="text"
+                    name=""
+                    id=""
+                    [formControlName]="item.formControlName"
+                    [class.is-invalid]="
+                      form.get(item.formControlName)?.invalid &&
+                      form.get(item.formControlName)?.touched
+                    "
+                  />
+                  <app-validation-messages
+                    [form]="form"
+                    [controlName]="item.formControlName"
+                    [messages]="messages"
+                  ></app-validation-messages>
+                }
+              }
+            </c-col>
+          }
+        </c-row>
+      </c-card-body>
+    </c-card>
+    <c-row class="mt-4">
+      <c-col class="text-end">
+        <button cButton color="secondary" class="me-2" (click)="onClose()">
+          <svg cIcon name="cilX"></svg>
+          Cancelar
+        </button>
+        @if (isLoading()) {
+          <button cButton color="success" class="m-1" disabled>
+            <c-spinner aria-hidden="true" size="sm" />
+            Cargando...
+          </button>
+        } @else {
+          <button cButton color="success" (click)="onSubmit()">
+            <svg cIcon name="cilSave"></svg>
+            Guardar
+          </button>
+        }
+      </c-col>
+    </c-row>
+  </c-modal-body>
+</c-modal>
