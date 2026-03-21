@@ -37,7 +37,6 @@ import { ValidationMessagesComponent } from '@shared/components/error-messages/v
     SpinnerComponent
   ],
   templateUrl: './category-new-edit-modal.html',
-  styleUrl: './category-new-edit-modal.scss',
 })
 export class CategoryNewEditModal extends BaseComponent implements OnInit {
   form!: TypedFormGroup<CategoryForm>;
