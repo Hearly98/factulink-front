@@ -1,5 +1,5 @@
 import { CategoryForm } from "../core/types/cat-form";
-import { FormControl } from "@angular/forms";
+import { FormControl, Validators } from "@angular/forms";
 
 export const buildCategoryForm = (): {
     [K in keyof CategoryForm]: FormControl<CategoryForm[K]>
@@ -7,7 +7,7 @@ export const buildCategoryForm = (): {
 {
   return {
     cat_id: new FormControl(null),
-    cat_nom: new FormControl(null),
+    cat_nom: new FormControl(null, Validators.required),
     est: new FormControl(true)
   };
 }

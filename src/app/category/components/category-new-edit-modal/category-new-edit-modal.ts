@@ -1,4 +1,4 @@
-import { Component, Inject, inject, OnInit, ViewContainerRef } from '@angular/core';
+import { Component, Inject, inject, OnInit, signal, ViewContainerRef } from '@angular/core';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -10,7 +10,7 @@ import {
 } from '@coreui/angular';
 import { CategoryService } from '../../core/services/category.service';
 import { IconDirective } from '@coreui/icons-angular';
-import { buildCategoryForm, categoryStructure } from '../../helpers';
+import { buildCategoryForm, categoryErrorMessages, categoryStructure } from '../../helpers';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { TypedFormGroup } from '../../../shared/types/types-form';
 import { CategoryForm } from '../../core/types/cat-form';
@@ -18,6 +18,7 @@ import { BaseComponent } from '../../../shared/base/base.component';
 import { MODULES } from '../../../core/config/permissions/modules';
 import { CreateCategoryModel, UpdateCategoryModel } from '../../core/models';
 import { GlobalNotification } from '../../../shared/alerts/global-notification/global-notification';
+import { ValidationMessagesComponent } from '@shared/components/error-messages/validation-messages.component';
 
 @Component({
   selector: 'app-category-new-edit-modal',
@@ -31,6 +32,7 @@ import { GlobalNotification } from '../../../shared/alerts/global-notification/g
     ButtonDirective,
     IconDirective,
     ReactiveFormsModule,
+    ValidationMessagesComponent
   ],
   templateUrl: './category-new-edit-modal.html',
   styleUrl: './category-new-edit-modal.scss',
@@ -39,10 +41,11 @@ export class CategoryNewEditModal extends BaseComponent implements OnInit {
   form!: TypedFormGroup<CategoryForm>;
   visible = false;
   structure = categoryStructure;
-  #globalNotification = inject(GlobalNotification);
-  #categoryService = inject(CategoryService);
-  #formBuilder = inject(FormBuilder);
-  title = 'Crear Categoria';
+  readonly messages = categoryErrorMessages();
+  readonly #globalNotification = inject(GlobalNotification);
+  readonly #categoryService = inject(CategoryService);
+  readonly #formBuilder = inject(FormBuilder);
+  title = signal('Crear Categoria');
   callback: any;
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
@@ -60,8 +63,9 @@ export class CategoryNewEditModal extends BaseComponent implements OnInit {
   openModal(idCategory?: number, callback: any = null) {
     this.createForm();
     this.visible = true;
-    this.callback = callback
+    this.callback = callback;
     if (idCategory) {
+      this.title.set('Editar Categoría');
       this.loadData(idCategory);
     }
   }
@@ -108,24 +112,26 @@ export class CategoryNewEditModal extends BaseComponent implements OnInit {
         this.#globalNotification.openAlert(error.message);
       },
     });
-    this.subscriptions.push(subscription)
+    this.subscriptions.push(subscription);
   }
 
   update() {
-    const subscription = this.#categoryService.update(this.form.value as UpdateCategoryModel).subscribe({
-      next: (response) => {
-        if (response.isValid) {
-          this.#globalNotification.openAlert(response);
-          this.callback(response.data);
-          this.onClose();
-        } else {
-          this.#globalNotification.openAlert(response);
-        }
-      },
-      error: (error) => {
-        this.#globalNotification.openAlert(error.message);
-      },
-    });
-    this.subscriptions.push(subscription)
+    const subscription = this.#categoryService
+      .update(this.form.value as UpdateCategoryModel)
+      .subscribe({
+        next: (response) => {
+          if (response.isValid) {
+            this.#globalNotification.openAlert(response);
+            this.callback(response.data);
+            this.onClose();
+          } else {
+            this.#globalNotification.openAlert(response);
+          }
+        },
+        error: (error) => {
+          this.#globalNotification.openAlert(error.message);
+        },
+      });
+    this.subscriptions.push(subscription);
   }
 }

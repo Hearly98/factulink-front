@@ -2,17 +2,31 @@
   <c-modal-body class="modal-body">
     <c-row class="mb-2">
       <c-col [sm]="6" class="space-between">
-        <h5>{{ title }}</h5>
+        <h5>{{ title() }}</h5>
       </c-col>
     </c-row>
     <c-card>
       <c-card-body [formGroup]="form">
         <c-row>
-          @for(item of structure; track $index){
-          <c-col [md]="item.col">
-            <label for="" class="form-label">{{ item.label }}</label>
-            <input class="form-control" type="text" name="" id="" [formControlName]="item.formControlName" />
-          </c-col>
+          @for (item of structure; track $index) {
+            <c-col [md]="item.col">
+              <label for="" class="form-label">{{ item.label }}</label>
+              <input
+                [class.is-invalid]="
+                  form.get(item.formControlName)?.invalid && form.get(item.formControlName)?.touched
+                "
+                class="form-control"
+                type="text"
+                name=""
+                id=""
+                [formControlName]="item.formControlName"
+              />
+              <app-validation-messages
+              [form]="form"
+              [controlName]="item.formControlName"
+              [messages]="messages"
+              ></app-validation-messages>
+            </c-col>
           }
         </c-row>
       </c-card-body>
