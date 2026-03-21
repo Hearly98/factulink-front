@@ -124,7 +124,7 @@ export class SupplierNewEditModalComponent extends BaseComponent implements OnIn
         }
       },
       error: (error) => {
-        this.#globalNotification.openAlert(error.message);
+        this.#globalNotification.openAlert(error.error);
       },
     });
     this.subscriptions.push(subscription);
@@ -144,7 +144,7 @@ export class SupplierNewEditModalComponent extends BaseComponent implements OnIn
           }
         },
         error: (error) => {
-          this.#globalNotification.openAlert(error.message);
+          this.#globalNotification.openAlert(error.error);
         },
       });
     this.subscriptions.push(subscription);

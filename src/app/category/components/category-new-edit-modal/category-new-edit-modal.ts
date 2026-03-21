@@ -32,7 +32,7 @@ import { ValidationMessagesComponent } from '@shared/components/error-messages/v
     ButtonDirective,
     IconDirective,
     ReactiveFormsModule,
-    ValidationMessagesComponent
+    ValidationMessagesComponent,
   ],
   templateUrl: './category-new-edit-modal.html',
   styleUrl: './category-new-edit-modal.scss',
@@ -46,6 +46,7 @@ export class CategoryNewEditModal extends BaseComponent implements OnInit {
   readonly #categoryService = inject(CategoryService);
   readonly #formBuilder = inject(FormBuilder);
   title = signal('Crear Categoria');
+  isLoading = signal(false);
   callback: any;
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
@@ -86,6 +87,7 @@ export class CategoryNewEditModal extends BaseComponent implements OnInit {
 
   onSubmit() {
     if (this.form.valid) {
+      this.isLoading.set(true);
       if (this.form.value.cat_id) {
         this.update();
       } else {
@@ -104,12 +106,15 @@ export class CategoryNewEditModal extends BaseComponent implements OnInit {
           this.#globalNotification.openAlert(response);
           this.callback(response.data);
           this.onClose();
+          this.isLoading.set(false);
         } else {
           this.#globalNotification.openAlert(response);
+          this.isLoading.set(false);
         }
       },
       error: (error) => {
         this.#globalNotification.openAlert(error.message);
+        this.isLoading.set(false);
       },
     });
     this.subscriptions.push(subscription);
@@ -124,12 +129,15 @@ export class CategoryNewEditModal extends BaseComponent implements OnInit {
             this.#globalNotification.openAlert(response);
             this.callback(response.data);
             this.onClose();
+            this.isLoading.set(false);
           } else {
             this.#globalNotification.openAlert(response);
+            this.isLoading.set(false);
           }
         },
         error: (error) => {
-          this.#globalNotification.openAlert(error.message);
+          this.#globalNotification.openAlert(error.error);
+          this.isLoading.set(false);
         },
       });
     this.subscriptions.push(subscription);

@@ -126,7 +126,7 @@ export class CustomerNewEditModalComponent extends BaseComponent implements OnIn
         }
       },
       error: (error) => {
-        this.#globalNotification.openAlert(error.message);
+        this.#globalNotification.openAlert(error.error);
         this.isLoading.set(false);
       },
     });
@@ -150,7 +150,7 @@ export class CustomerNewEditModalComponent extends BaseComponent implements OnIn
           }
         },
         error: (error) => {
-          this.#globalNotification.openAlert(error.message);
+          this.#globalNotification.openAlert(error.error);
           this.isLoading.set(false);
         },
       });

@@ -1,49 +1,55 @@
-import { Component, Inject, inject, OnInit, ViewContainerRef } from '@angular/core';
+import { Component, Inject, inject, OnInit, signal, ViewContainerRef } from '@angular/core';
 import {
   ButtonDirective,
   CardBodyComponent,
   CardComponent,
   ColComponent,
+  ModalBodyComponent,
   ModalComponent,
   RowComponent,
+  SpinnerComponent,
 } from '@coreui/angular';
 import { BrandService } from '../../core/services/brand.service';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { buildBrandForm, brandStructure } from '../../helpers';
+import { buildBrandForm, brandStructure, brandErrorMessages } from '../../helpers';
 import { TypedFormGroup } from '../../../shared/types/types-form';
 import { BrandForm } from '../../core/types/brand.form';
 import { BaseComponent } from '../../../shared/base/base.component';
 import { MODULES } from '../../../core/config/permissions/modules';
 import { CreateMarcaModel, UpdateMarcaModel } from '../../core/models';
 import { GlobalNotification } from '../../../shared/alerts/global-notification/global-notification';
-import { StructureItem } from '../../helpers/brand-structure';
 import { CommonModule } from '@angular/common';
-
+import { ValidationMessagesComponent } from '@shared/components/error-messages/validation-messages.component';
+import { IconDirective } from '@coreui/icons-angular';
 @Component({
   selector: 'app-brand-new-edit-modal',
   imports: [
     CardComponent,
     CardBodyComponent,
     ModalComponent,
+    ModalBodyComponent,
     RowComponent,
     ColComponent,
     ButtonDirective,
     CommonModule,
     ReactiveFormsModule,
+    IconDirective,
+    SpinnerComponent,
+    ValidationMessagesComponent,
   ],
   templateUrl: './brand-new-edit-modal.html',
-  styleUrl: './brand-new-edit-modal.scss',
 })
 export class BrandNewEditModal extends BaseComponent implements OnInit {
   form!: TypedFormGroup<BrandForm>;
   visible = false;
-  structure: StructureItem[] = brandStructure;
+  structure = brandStructure;
   readonly #globalNotification = inject(GlobalNotification);
   readonly #brandService = inject(BrandService);
   readonly #formBuilder = inject(FormBuilder);
-  title = 'Crear Marca';
+  title = signal('Crear Marca');
+  isLoading = signal(false);
   callback: any;
-  isEditMode = false;
+  messages = brandErrorMessages();
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.MARCA, viewContainerRef);
@@ -61,12 +67,9 @@ export class BrandNewEditModal extends BaseComponent implements OnInit {
     this.createForm();
     this.visible = true;
     this.callback = callback;
-    this.isEditMode = !!idBrand;
     if (idBrand) {
-      this.title = 'Editar Marca';
+      this.title.set('Editar Marca');
       this.loadData(idBrand);
-    } else {
-      this.title = 'Crear Marca';
     }
   }
 
@@ -86,6 +89,7 @@ export class BrandNewEditModal extends BaseComponent implements OnInit {
 
   onSubmit() {
     if (this.form.valid) {
+      this.isLoading.set(true);
       if (this.form.value.marca_id) {
         this.update();
       } else {
@@ -103,12 +107,15 @@ export class BrandNewEditModal extends BaseComponent implements OnInit {
           this.#globalNotification.openAlert(response);
           this.callback(response.data);
           this.onClose();
+          this.isLoading.set(false);
         } else {
           this.#globalNotification.openAlert(response);
+          this.isLoading.set(false);
         }
       },
       error: (error) => {
         this.#globalNotification.openAlert(error.error);
+        this.isLoading.set(false);
       },
     });
     this.subscriptions.push(subscription);
@@ -121,19 +128,17 @@ export class BrandNewEditModal extends BaseComponent implements OnInit {
           this.#globalNotification.openAlert(response);
           this.callback(response.data);
           this.onClose();
+          this.isLoading.set(false);
         } else {
           this.#globalNotification.openAlert(response);
+          this.isLoading.set(false);
         }
       },
       error: (error) => {
         this.#globalNotification.openAlert(error.error);
+        this.isLoading.set(false);
       },
     });
     this.subscriptions.push(subscription);
-  }
-
-  isFieldInvalid(fieldName: string): boolean {
-    const field = this.form.get(fieldName);
-    return field ? field.invalid && field.touched : false;
   }
 }

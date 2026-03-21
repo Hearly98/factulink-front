@@ -1,35 +1,52 @@
-<c-modal [visible]="visible" (visibleChange)="onClose()" size="lg">
-  <ng-template #header cTemplateRegion="dialog-header">
-    <h5 cModalTitle>{{ title }}</h5>
-    <button cButtonClose (click)="onClose()"></button>
-  </ng-template>
-  <ng-template #body cTemplateRegion="dialog-body">
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <c-card>
-        <c-card-body>
-          <c-row class="g-3">
-            @for (field of structure; track field.formControlName) {
-              <c-col [md]="field.col">
-                <div class="mb-3">
-                  <label cLabel>{{ field.label }}</label>
-                  @if (field.type === 'text') {
-                    <input
-                      [formControlName]="field.formControlName"
-                      [placeholder]="field.placeholder || ''"
-                      cFormControl
-                      [ngClass]="{ 'is-invalid': isFieldInvalid(field.formControlName) }"
-                    />
-                  }
-                </div>
-              </c-col>
-            }
-          </c-row>
-        </c-card-body>
-      </c-card>
-    </form>
-  </ng-template>
-  <ng-template #footer cTemplateRegion="dialog-footer">
-    <button cButton color="secondary" (click)="onClose()">Cancelar</button>
-    <button cButton color="primary" (click)="onSubmit()">Guardar</button>
-  </ng-template>
+<c-modal [visible]="visible" alignment="center" backdrop="static">
+  <c-modal-body>
+    <c-row class="mb-2">
+      <c-col [sm]="12" class="space-between">
+        <h5>{{ title() }}</h5>
+      </c-col>
+    </c-row>
+    <c-card>
+      <c-card-body [formGroup]="form">
+        <c-row>
+          @for (item of structure; track $index) {
+            <c-col [md]="item.col">
+              <label for="" class="form-label">{{ item.label }}</label>
+              <input
+                class="form-control"
+                type="text"
+                [class.is-invalid]="
+                  form.get(item.formControlName)?.invalid && form.get(item.formControlName)?.touched
+                "
+                [name]="item.label"
+                [id]="item.formControlName + 'id'"
+                [formControlName]="item.formControlName"
+              />
+              <app-validation-messages
+                [messages]="messages"
+                [form]="form"
+                [controlName]="item.formControlName"
+              ></app-validation-messages>
+            </c-col>
+          }
+        </c-row>
+      </c-card-body>
+    </c-card>
+    <c-row class="mt-4">
+      <c-col class="text-end">
+        <button cButton color="secondary" class="me-2" (click)="onClose()">
+          <svg cIcon name="cilX"></svg>
+          Cancelar
+        </button>
+        <button cButton color="success" (click)="onSubmit()">
+          @if (isLoading()) {
+            <c-spinner size="sm" class="me-2"></c-spinner>
+            Cargando...
+          } @else {
+            <svg cIcon name="cilSave"></svg>
+            Guardar
+          }
+        </button>
+      </c-col>
+    </c-row>
+  </c-modal-body>
 </c-modal>

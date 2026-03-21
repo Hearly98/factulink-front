@@ -19,6 +19,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
                 isClientError: error.status >= 400 && error.status < 500,
                 message: humanizeMessage(error),
                 serverBody: error.error,
+                error: error.error,
                 raw: error,
             };
 

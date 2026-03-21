@@ -120,7 +120,7 @@ export class DocumentTypeNewEditModalComponent extends BaseComponent implements 
           }
         },
         error: (error) => {
-          this.#globalNotification.openAlert(error.message);
+          this.#globalNotification.openAlert(error.error);
         },
       });
     this.subscriptions.push(subscription);
@@ -142,7 +142,7 @@ export class DocumentTypeNewEditModalComponent extends BaseComponent implements 
           }
         },
         error: (error) => {
-          this.#globalNotification.openAlert(error.message);
+          this.#globalNotification.openAlert(error.error);
         },
       });
     this.subscriptions.push(subscription);

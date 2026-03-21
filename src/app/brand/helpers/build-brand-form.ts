@@ -6,8 +6,14 @@ export const buildBrandForm = (): {
 } => {
   return {
     marca_id: new FormControl<number | null>(null),
-    marca_codigo: new FormControl<string | null>(null, [Validators.required]),
-    marca_nom: new FormControl<string | null>(null, [Validators.required]),
+    marca_codigo: new FormControl<string | null>(
+      null,
+      Validators.compose([Validators.required, Validators.minLength(2)]),
+    ),
+    marca_nom: new FormControl<string | null>(
+      null,
+      Validators.compose([Validators.required, Validators.minLength(3)]),
+    ),
     est: new FormControl<boolean>(true),
   };
 };
