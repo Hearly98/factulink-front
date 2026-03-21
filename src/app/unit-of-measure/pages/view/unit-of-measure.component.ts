@@ -1,4 +1,12 @@
-import { Component, Inject, inject, ViewChild, ViewContainerRef } from '@angular/core';
+import {
+  Component,
+  Inject,
+  inject,
+  OnInit,
+  signal,
+  ViewChild,
+  ViewContainerRef,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { TypedFormGroup } from '@shared/types/types-form';
 import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service';
@@ -40,113 +48,20 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
     TableDirective,
     UnitOfMeasureNewEditModalComponent,
   ],
-  template: `
-    <c-row>
-      <c-col>
-        <h4>{{ title }}</h4>
-      </c-col>
-      <c-col class="text-end">
-        <button cButton color="primary" (click)="openModal()">
-          <svg cIcon name="cilPlus"></svg>
-          Nuevo Registro
-        </button>
-      </c-col>
-    </c-row>
-
-    <c-row class="mt-4">
-      <c-col>
-        <c-card>
-          <c-card-body>
-            <c-row class="g-3 align-items-end" [formGroup]="form">
-              <c-col sm="12" md="3" lg="3">
-                <label for="">Nombre</label>
-                <input formControlName="und_nom" type="text" class="form-control" />
-              </c-col>
-              <c-col sm="12" md="3" lg="3">
-                <label for="">Sucursal</label>
-                <select formControlName="suc_id" class="form-control form-select">
-                  <option [ngValue]="null">Todas</option>
-                  @for(sucursal of sucursales; track $index){
-                  <option [ngValue]="sucursal.suc_id">{{ sucursal.suc_nom }}</option>
-                  }
-                </select>
-              </c-col>
-              <c-col>
-                <button cButton color="primary" (click)="onSearch()" class="me-2">
-                  <svg cIcon name="cilSearch"></svg>
-                  Buscar
-                </button>
-                <button cButton color="danger" (click)="onClean()">
-                  <svg cIcon name="cilTrash"></svg>
-                  Limpiar
-                </button>
-              </c-col>
-              <c-col sm="12" md="12" lg="12">
-                <table cTable striped="true">
-                  <thead>
-                    <tr>
-                      <th>Acciones</th>
-                      <th>Nombre</th>
-                      <th>Sucursal</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @if(units.length > 0){ @for (unit of units; track $index) {
-                    <tr>
-                      <td>
-                        <button
-                          (click)="openModal(unit.und_id)"
-                          size="sm"
-                          class="me-2"
-                          cButton
-                          color="info"
-                        >
-                          <svg cIcon name="cilPencil"></svg>
-                        </button>
-                        <button (click)="onDelete(unit.und_id)" size="sm" cButton color="danger">
-                          <svg cIcon name="cilTrash"></svg>
-                        </button>
-                      </td>
-                      <td>{{ unit.und_nom }}</td>
-                      <td>{{ unit.sucursal?.suc_nom }}</td>
-                    </tr>
-                    }}@else{
-                    <tr>
-                      <td colspan="3">No hay datos</td>
-                    </tr>
-                    }
-                  </tbody>
-                </table>
-                <app-paginator
-                  [(page)]="page.page"
-                  [pageSize]="page.pageSize"
-                  [total]="total"
-                  (pageChange)="onPageChange($event)"
-                ></app-paginator>
-              </c-col>
-            </c-row>
-          </c-card-body>
-        </c-card>
-      </c-col>
-    </c-row>
-    <app-unit-of-measure-new-edit-modal
-      #unitOfMeasureNewEditModal
-    ></app-unit-of-measure-new-edit-modal>
-  `,
-  styles: ``,
+  templateUrl: './unit-of-measure.component.html',
 })
-export class UnitOfMeasurePage extends BaseSearchComponent {
+export class UnitOfMeasurePage extends BaseSearchComponent implements OnInit {
   @ViewChild('unitOfMeasureNewEditModal')
   unitOfMeasureNewEditModal!: UnitOfMeasureNewEditModalComponent;
   public form!: TypedFormGroup<FilterForm>;
-  #formBuilder = inject(FormBuilder);
-  public title = 'Unidad Medida';
-  #unitOfMeasureService = inject(UnitOfMeasureService);
-  #sucursalService = inject(SucursalService);
+  readonly #formBuilder = inject(FormBuilder);
+  title = signal('Unidad Medida');
+  readonly #unitOfMeasureService = inject(UnitOfMeasureService);
+  readonly #sucursalService = inject(SucursalService);
   public units: GetUnitOfMeasureModel[] = [];
   public sucursales: GetSucursalModel[] = [];
-  #confirmService = inject(ConfirmService);
-  #globalNotification = inject(GlobalNotification);
+  readonly #confirmService = inject(ConfirmService);
+  readonly #globalNotification = inject(GlobalNotification);
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.UNIT_OF_MEASURE, viewContainerRef);
@@ -168,7 +83,7 @@ export class UnitOfMeasurePage extends BaseSearchComponent {
 
   onSearch(filter = null, page = 1) {
     const sort = filterSort(this.form.value);
-    const filterToUse = filter || mapParams(this.form.value);
+    const filterToUse = filter ?? mapParams(this.form.value);
     const pageSize = 10;
     const pageParams = new PageParamsModel(page, pageSize);
     this.updateFilter(filterToUse);
