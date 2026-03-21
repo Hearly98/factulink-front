@@ -7,6 +7,7 @@ import {
   ModalBodyComponent,
   ModalComponent,
   RowComponent,
+  SpinnerComponent,
 } from '@coreui/angular';
 import { CategoryService } from '../../core/services/category.service';
 import { IconDirective } from '@coreui/icons-angular';
@@ -33,6 +34,7 @@ import { ValidationMessagesComponent } from '@shared/components/error-messages/v
     IconDirective,
     ReactiveFormsModule,
     ValidationMessagesComponent,
+    SpinnerComponent
   ],
   templateUrl: './category-new-edit-modal.html',
   styleUrl: './category-new-edit-modal.scss',

@@ -67,8 +67,13 @@
           Cancelar
         </button>
         <button cButton color="success" (click)="onSubmit()">
-          <svg cIcon name="cilSave"></svg>
-          Guardar
+          @if (isLoading()) {
+            <c-spinner size="sm" class="me-2"></c-spinner>
+            Cargando...
+          } @else {
+            <svg cIcon name="cilSave"></svg>
+            Guardar
+          }
         </button>
       </c-col>
     </c-row>
