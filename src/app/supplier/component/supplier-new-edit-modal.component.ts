@@ -11,6 +11,7 @@ import {
   ModalBodyComponent,
   ModalComponent,
   RowComponent,
+  SpinnerComponent,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { TypedFormGroup } from '@shared/types/types-form';
@@ -39,9 +40,10 @@ import { ValidationMessagesComponent } from '@shared/components/error-messages/v
     ButtonDirective,
     IconDirective,
     ReactiveFormsModule,
-    ValidationMessagesComponent
+    ValidationMessagesComponent,
+    SpinnerComponent,
   ],
-  templateUrl: "./supplier-new-edit-modal.component.html",
+  templateUrl: './supplier-new-edit-modal.component.html',
   styles: ``,
 })
 export class SupplierNewEditModalComponent extends BaseComponent implements OnInit {
@@ -55,6 +57,7 @@ export class SupplierNewEditModalComponent extends BaseComponent implements OnIn
   readonly #formBuilder = inject(FormBuilder);
   title = signal('Crear Proveedor');
   callback: any;
+  isLoading = signal(false);
   messages = supplierErrorMessages();
   submitted = false;
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
@@ -101,6 +104,7 @@ export class SupplierNewEditModalComponent extends BaseComponent implements OnIn
   onSubmit() {
     this.submitted = true;
     if (this.form.valid) {
+      this.isLoading.set(true);
       if (this.form.value.prov_id) {
         this.update();
       } else {
@@ -119,12 +123,15 @@ export class SupplierNewEditModalComponent extends BaseComponent implements OnIn
           this.#globalNotification.openAlert(response);
           this.callback(response.data);
           this.onClose();
+          this.isLoading.set(false);
         } else {
           this.#globalNotification.openAlert(response);
+          this.isLoading.set(false);
         }
       },
       error: (error) => {
         this.#globalNotification.openAlert(error.error);
+        this.isLoading.set(false);
       },
     });
     this.subscriptions.push(subscription);
@@ -139,12 +146,15 @@ export class SupplierNewEditModalComponent extends BaseComponent implements OnIn
             this.#globalNotification.openAlert(response);
             this.callback(response.data);
             this.onClose();
+            this.isLoading.set(false);
           } else {
             this.#globalNotification.openAlert(response);
+            this.isLoading.set(false);
           }
         },
         error: (error) => {
           this.#globalNotification.openAlert(error.error);
+          this.isLoading.set(false);
         },
       });
     this.subscriptions.push(subscription);
