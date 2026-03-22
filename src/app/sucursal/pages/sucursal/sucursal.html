@@ -44,23 +44,28 @@
           </thead>
           <tbody>
             @for (sucursal of sucursals; track $index) {
-            <tr>
-              <td>
-                <button
-                  (click)="openModal(sucursal.suc_id)"
-                  size="sm"
-                  class="me-2"
-                  cButton
-                  color="info"
-                >
-                  <svg cIcon name="cilPencil"></svg>
-                </button>
-                <button (click)="onDelete(sucursal.suc_id)" size="sm" cButton color="danger">
-                  <svg cIcon name="cilTrash"></svg>
-                </button>
-              </td>
-              <td>{{ sucursal.suc_nom }}</td>
-            </tr>
+              <tr>
+                <td>
+                  <button
+                    (click)="openModal(sucursal.suc_id)"
+                    size="sm"
+                    class="me-2"
+                    cButton
+                    color="info"
+                  >
+                    <svg cIcon name="cilPencil"></svg>
+                  </button>
+                  <button (click)="onDelete(sucursal.suc_id)" size="sm" cButton color="danger">
+                    <svg cIcon name="cilTrash"></svg>
+                  </button>
+                </td>
+                <td>{{ sucursal.suc_nom }}</td>
+              </tr>
+            }
+            @if (sucursals.length === 0) {
+              <tr>
+                <td colspan="4">No se encontraron datos</td>
+              </tr>
             }
           </tbody>
         </table>

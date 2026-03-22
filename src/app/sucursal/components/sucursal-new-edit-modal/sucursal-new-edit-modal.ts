@@ -1,4 +1,4 @@
-import { Component, Inject, inject, OnInit, ViewContainerRef } from '@angular/core';
+import { Component, Inject, inject, OnInit, signal, ViewContainerRef } from '@angular/core';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -7,6 +7,7 @@ import {
   ModalBodyComponent,
   ModalComponent,
   RowComponent,
+  SpinnerComponent,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -15,9 +16,10 @@ import { BaseComponent } from '../../../shared/base/base.component';
 import { MODULES } from '../../../core/config/permissions/modules';
 import { SucursalForm } from '../../core/types';
 import { SucursalService } from '../../core/services/sucursal.service';
-import { buildSucursalForm, SucursalStructure } from '../../helpers';
+import { buildSucursalForm, sucursalErrorMessages, SucursalStructure } from '../../helpers';
 import { CreateSucursalModel, UpdateSucursalModel } from '../../core/models';
 import { GlobalNotification } from '../../../shared/alerts/global-notification/global-notification';
+import { ValidationMessagesComponent } from '@shared/components/error-messages/validation-messages.component';
 
 @Component({
   selector: 'app-sucursal-new-edit-modal',
@@ -31,6 +33,8 @@ import { GlobalNotification } from '../../../shared/alerts/global-notification/g
     ButtonDirective,
     IconDirective,
     ReactiveFormsModule,
+    SpinnerComponent,
+    ValidationMessagesComponent,
   ],
   templateUrl: './sucursal-new-edit-modal.html',
   styleUrl: './sucursal-new-edit-modal.scss',
@@ -42,9 +46,10 @@ export class SucursalNewEditModal extends BaseComponent implements OnInit {
   #sucursalService = inject(SucursalService);
   #globalNotification = inject(GlobalNotification);
   #formBuilder = inject(FormBuilder);
-  title = 'Crear Sucursal';
+  title = signal('');
+  isLoading = signal(false);
   callback: any;
-
+  messages = sucursalErrorMessages();
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.SUCURSAL, viewContainerRef);
   }
@@ -58,10 +63,12 @@ export class SucursalNewEditModal extends BaseComponent implements OnInit {
   }
 
   openModal(idSucursal?: number, callback: any = null) {
+    this.title.set('Crear Sucursal');
     this.createForm();
     this.callback = callback;
     this.visible = true;
     if (idSucursal) {
+      this.title.set('Editar Sucursal');
       this.loadData(idSucursal);
     }
   }
@@ -82,6 +89,7 @@ export class SucursalNewEditModal extends BaseComponent implements OnInit {
 
   onSubmit() {
     if (this.form.valid) {
+      this.isLoading.set(true);
       if (this.form.value.suc_id) {
         this.update();
       } else {
@@ -100,12 +108,15 @@ export class SucursalNewEditModal extends BaseComponent implements OnInit {
           this.#globalNotification.openAlert(response);
           this.callback(response.data);
           this.onClose();
+          this.isLoading.set(false);
         } else {
           this.#globalNotification.openAlert(response);
+          this.isLoading.set(false);
         }
       },
       error: (error) => {
-        this.#globalNotification.openToastAlert('Error', error.message, 'danger');
+        this.#globalNotification.openAlert(error.error);
+        this.isLoading.set(false);
       },
     });
     this.subscriptions.push(subscription);
@@ -120,12 +131,15 @@ export class SucursalNewEditModal extends BaseComponent implements OnInit {
             this.#globalNotification.openAlert(response);
             this.callback(response.data);
             this.onClose();
+            this.isLoading.set(false);
           } else {
             this.#globalNotification.openAlert(response);
+            this.isLoading.set(false);
           }
         },
         error: (error) => {
-          this.#globalNotification.openToastAlert('Error', error.message, 'danger');
+          this.#globalNotification.openAlert(error.error);
+          this.isLoading.set(false);
         },
       });
     this.subscriptions.push(subscription);

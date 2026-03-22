@@ -34,7 +34,7 @@ import { ValidationMessagesComponent } from '@shared/components/error-messages/v
     IconDirective,
     ReactiveFormsModule,
     ValidationMessagesComponent,
-    SpinnerComponent
+    SpinnerComponent,
   ],
   templateUrl: './category-new-edit-modal.html',
 })
@@ -63,7 +63,7 @@ export class CategoryNewEditModal extends BaseComponent implements OnInit {
   }
 
   openModal(idCategory?: number, callback: any = null) {
-    this.title.set('Crear Categoria')
+    this.title.set('Crear Categoria');
     this.createForm();
     this.visible = true;
     this.callback = callback;

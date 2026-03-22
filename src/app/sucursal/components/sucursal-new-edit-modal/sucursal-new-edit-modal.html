@@ -2,34 +2,31 @@
   <c-modal-body class="modal-body">
     <c-row class="mb-2">
       <c-col [sm]="6" class="space-between">
-        <h5>{{ title }}</h5>
+        <h5>{{ title() }}</h5>
       </c-col>
     </c-row>
     <c-card>
       <c-card-body [formGroup]="form">
         <c-row>
-          @for(item of structure; track $index){
-          <c-col [md]="item.col">
-            <label for="" class="form-label">{{ item.label }}</label>
-            @switch (item.type) { @case ('select') {
-            <select
-              class="form-control form-select"
-              name=""
-              id=""
-              [formControlName]="item.formControlName"
-            >
-              <option value="null">Seleccione</option>
-            </select>
-            }@default {
-            <input
-              class="form-control"
-              type="text"
-              name=""
-              id=""
-              [formControlName]="item.formControlName"
-            />
-            } }
-          </c-col>
+          @for (item of structure; track $index) {
+            <c-col [md]="item.col">
+              <label for="" class="form-label">{{ item.label }}</label>
+              <input
+                class="form-control"
+                type="text"
+                [class.is-invalid]="
+                  form.get(item.formControlName)?.invalid && form.get(item.formControlName)?.touched
+                "
+                [name]="item.label"
+                [id]="item.formControlName + 'id'"
+                [formControlName]="item.formControlName"
+              />
+              <app-validation-messages
+                [form]="form"
+                [controlName]="item.formControlName"
+                [messages]="messages"
+              ></app-validation-messages>
+            </c-col>
           }
         </c-row>
       </c-card-body>
@@ -41,8 +38,13 @@
           Cancelar
         </button>
         <button cButton color="success" (click)="onSubmit()">
-          <svg cIcon name="cilSave"></svg>
-          Guardar
+          @if (isLoading()) {
+            <c-spinner size="sm" class="me-2"></c-spinner>
+            Cargando...
+          } @else {
+            <svg cIcon name="cilSave"></svg>
+            Guardar
+          }
         </button>
       </c-col>
     </c-row>
