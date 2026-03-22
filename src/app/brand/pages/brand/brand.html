@@ -39,7 +39,6 @@
           <th>Acciones</th>
           <th>Código</th>
           <th>Nombre</th>
-          <th>Empresa</th>
         </tr>
       </thead>
       <tbody>
@@ -55,7 +54,6 @@
             </td>
             <td>{{ marca.marca_codigo }}</td>
             <td>{{ marca.marca_nom }}</td>
-            <td>{{ marca.empresa?.emp_nom || '-' }}</td>
           </tr>
         }
         @if (marcas.length === 0) {

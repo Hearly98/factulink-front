@@ -85,24 +85,29 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
               </thead>
               <tbody>
                 @for (item of currencies; track $index) {
-                <tr>
-                  <td>
-                    <button
-                      (click)="openModal(item.mon_id)"
-                      size="sm"
-                      class="me-2"
-                      cButton
-                      color="info"
-                    >
-                      <svg cIcon name="cilPencil"></svg>
-                    </button>
-                    <button (click)="onDelete(item.mon_id)" size="sm" cButton color="danger">
-                      <svg cIcon name="cilTrash"></svg>
-                    </button>
-                  </td>
-                  <td>{{ item.mon_cod }}</td>
-                  <td>{{ item.mon_nom }}</td>
-                </tr>
+                  <tr>
+                    <td>
+                      <button
+                        (click)="openModal(item.mon_id)"
+                        size="sm"
+                        class="me-2"
+                        cButton
+                        color="info"
+                      >
+                        <svg cIcon name="cilPencil"></svg>
+                      </button>
+                      <button (click)="onDelete(item.mon_id)" size="sm" cButton color="danger">
+                        <svg cIcon name="cilTrash"></svg>
+                      </button>
+                    </td>
+                    <td>{{ item.mon_cod }}</td>
+                    <td>{{ item.mon_nom }}</td>
+                  </tr>
+                }
+                @if (currencies.length === 0) {
+                  <tr>
+                    <td colspan="3">No se encontraron datos</td>
+                  </tr>
                 }
               </tbody>
             </table>
