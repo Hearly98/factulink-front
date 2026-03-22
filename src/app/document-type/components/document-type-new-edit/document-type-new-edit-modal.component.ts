@@ -121,6 +121,7 @@ export class DocumentTypeNewEditModalComponent extends BaseComponent implements 
         },
         error: (error) => {
           this.#globalNotification.openAlert(error.error);
+          this.isLoading.set(false);
         },
       });
     this.subscriptions.push(subscription);
@@ -143,6 +144,7 @@ export class DocumentTypeNewEditModalComponent extends BaseComponent implements 
         },
         error: (error) => {
           this.#globalNotification.openAlert(error.error);
+          this.isLoading.set(false);
         },
       });
     this.subscriptions.push(subscription);
