@@ -9,37 +9,41 @@ import { environment } from '../../../../environments/environment';
 import { CreateAlmacenModel, GetAlmacenModel, UpdateAlmacenModel } from '../models';
 
 @Injectable({
-    providedIn: 'root',
+  providedIn: 'root',
 })
 export class AlmacenService extends BaseService {
-    constructor(http: HttpClient) {
-        super(http, `${environment.apiUrl}/almacenes`);
-    }
+  constructor(http: HttpClient) {
+    super(http, `${environment.apiUrl}/almacenes`);
+  }
 
-    getAll(): Observable<ResponseDto<GetAlmacenModel[]>> {
-        return this.getRequest<ResponseDto<GetAlmacenModel[]>>('');
-    }
+  getAll(): Observable<ResponseDto<GetAlmacenModel[]>> {
+    return this.getRequest<ResponseDto<GetAlmacenModel[]>>('');
+  }
 
-    getById(id: number): Observable<ResponseDto<GetAlmacenModel>> {
-        return this.getRequest<ResponseDto<GetAlmacenModel>>(`/${id}`);
-    }
+  getById(id: number): Observable<ResponseDto<GetAlmacenModel>> {
+    return this.getRequest<ResponseDto<GetAlmacenModel>>(`/${id}`);
+  }
 
-    create(body: CreateAlmacenModel): Observable<ResponseDto<GetAlmacenModel>> {
-        return this.postRequest<CreateAlmacenModel, ResponseDto<GetAlmacenModel>>(`/`, body);
-    }
+  create(body: CreateAlmacenModel): Observable<ResponseDto<GetAlmacenModel>> {
+    return this.postRequest<CreateAlmacenModel, ResponseDto<GetAlmacenModel>>(`/`, body);
+  }
 
-    delete(id: number): Observable<ResponseDto<GetAlmacenModel>> {
-        return this.deleteRequest<ResponseDto<GetAlmacenModel>>(`/${id}`);
-    }
+  deactivate(id: number): Observable<ResponseDto<GetAlmacenModel>> {
+    return this.postRequest<number, ResponseDto<GetAlmacenModel>>(`/${id}/desactivar`, id);
+  }
 
-    update(body: UpdateAlmacenModel): Observable<ResponseDto<GetAlmacenModel>> {
-        return this.putRequest<UpdateAlmacenModel, ResponseDto<GetAlmacenModel>>(`/`, body);
-    }
+  activate(id: number): Observable<ResponseDto<GetAlmacenModel>> {
+    return this.postRequest<number, ResponseDto<GetAlmacenModel>>(`/${id}/activar`, id);
+  }
 
-    search(body: QueryParamsModel): Observable<ResponseDto<QueryResultsModel<GetAlmacenModel>>> {
-        return this.postRequest<QueryParamsModel, ResponseDto<QueryResultsModel<GetAlmacenModel>>>(
-            `/search`,
-            body
-        );
-    }
+  update(body: UpdateAlmacenModel, id: number): Observable<ResponseDto<GetAlmacenModel>> {
+    return this.putRequest<UpdateAlmacenModel, ResponseDto<GetAlmacenModel>>(`/${id}`, body);
+  }
+
+  search(body: QueryParamsModel): Observable<ResponseDto<QueryResultsModel<GetAlmacenModel>>> {
+    return this.postRequest<QueryParamsModel, ResponseDto<QueryResultsModel<GetAlmacenModel>>>(
+      `/search`,
+      body,
+    );
+  }
 }

@@ -1,5 +1,6 @@
 export interface AlmacenForm {
-    alm_id: number | null;
+    almacen_id: number | null;
+    codigo: string | null;
     nombre: string | null;
     descripcion: string | null;
     suc_id: number | null;

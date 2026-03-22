@@ -1,20 +1,35 @@
-export const AlmacenStructure = [
+import { GetSucursalModel } from 'src/app/sucursal/core/models';
+
+export const AlmacenStructure = (sucursales?: GetSucursalModel[]) => {
+  let sucursalOptions = null;
+  if (sucursales) {
+    sucursalOptions = sucursales.map((s) => ({ label: s.suc_nom, value: s.suc_id }));
+  }
+  return [
     {
-        label: 'Nombre de Almacén',
-        formControlName: 'nombre',
-        type: 'text',
-        col: '12',
+      label: 'Código',
+      formControlName: 'codigo',
+      type: 'text',
+      col: '12',
     },
     {
-        label: 'Descripción',
-        formControlName: 'descripcion',
-        type: 'text',
-        col: '12'
+      label: 'Nombre de Almacén',
+      formControlName: 'nombre',
+      type: 'text',
+      col: '12',
     },
     {
-        label: 'Sucursal',
-        formControlName: 'suc_id',
-        type: 'select',
-        col: '12',
+      label: 'Descripción',
+      formControlName: 'descripcion',
+      type: 'text',
+      col: '12',
     },
-];
+    {
+      label: 'Sucursal',
+      formControlName: 'suc_id',
+      type: 'select',
+      col: '12',
+      options: sucursalOptions,
+    },
+  ];
+};
