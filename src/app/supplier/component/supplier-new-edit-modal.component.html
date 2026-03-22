@@ -20,8 +20,8 @@
                       form.get(item.formControlName)?.touched
                     "
                     class="form-control form-select"
-                    name=""
-                    id=""
+                    [name]="item.label"
+                    [id]="item.formControlName + 'id'"
                     [formControlName]="item.formControlName"
                   >
                     <option [ngValue]="null">Seleccione</option>

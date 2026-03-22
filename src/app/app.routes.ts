@@ -235,16 +235,6 @@ export const routes: Routes = [
         },
       },
       {
-        path: 'productos-sucursal',
-        loadComponent: () =>
-          import('./product-sucursal/pages/product-sucursal/product-sucursal').then(
-            (m) => m.ProductoSucursal,
-          ),
-        data: {
-          title: 'Stock por Sucursal',
-        },
-      },
-      {
         path: 'almacenes',
         loadComponent: () =>
           import('./almacen/pages/almacen/almacen').then((m) => m.AlmacenComponent),

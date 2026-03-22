@@ -46,7 +46,7 @@ export class BrandNewEditModal extends BaseComponent implements OnInit {
   readonly #globalNotification = inject(GlobalNotification);
   readonly #brandService = inject(BrandService);
   readonly #formBuilder = inject(FormBuilder);
-  title = signal('Crear Marca');
+  title = signal('');
   isLoading = signal(false);
   callback: any;
   messages = brandErrorMessages();
@@ -64,6 +64,7 @@ export class BrandNewEditModal extends BaseComponent implements OnInit {
   }
 
   openModal(idBrand?: number, callback: any = null) {
+    this.title.set('Crear Marca');
     this.createForm();
     this.visible = true;
     this.callback = callback;

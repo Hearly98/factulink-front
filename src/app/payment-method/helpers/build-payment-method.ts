@@ -1,4 +1,4 @@
-import { FormControl } from '@angular/forms';
+import { FormControl, Validators } from '@angular/forms';
 import { PaymentMethodForm } from '../core/types';
 
 export const buildPaymentMethodForm = (): {
@@ -6,8 +6,14 @@ export const buildPaymentMethodForm = (): {
 } => {
   return {
     mp_id: new FormControl(0),
-    mp_nom: new FormControl(null),
-    mp_cod: new FormControl(null),
+    mp_nom: new FormControl(
+      null,
+      Validators.compose([Validators.required, Validators.minLength(3)]),
+    ),
+    mp_cod: new FormControl(
+      null,
+      Validators.compose([Validators.required, Validators.minLength(2)]),
+    ),
     est: new FormControl(true),
   };
 };

@@ -19,6 +19,7 @@ import {
   ModalBodyComponent,
   ModalComponent,
   RowComponent,
+  SpinnerComponent,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { CreateUnitOfMeasureModel, UpdateUnitOfMeasureModel } from '../../core/models';
@@ -39,12 +40,13 @@ import { ValidationMessagesComponent } from '@shared/components/error-messages/v
     ButtonModule,
     CardBodyComponent,
     ValidationMessagesComponent,
+    SpinnerComponent
   ],
   templateUrl: './unit-of-measure-new-edit-modal.component.html',
 })
 export class UnitOfMeasureNewEditModalComponent extends BaseComponent {
   visible = signal<boolean>(false);
-  title = signal<string>('Crear Unidad de Medida');
+  title = signal<string>('');
   callback: any;
   isLoading = signal(false);
   messages = unitOfMeasureErrorMessages();
@@ -64,13 +66,12 @@ export class UnitOfMeasureNewEditModalComponent extends BaseComponent {
   }
 
   openModal(id?: number, callback?: () => void) {
+    this.title.set('Crear Unidad de Medida');
     this.createForm();
     this.visible.set(true);
     if (id) {
       this.title.set('Editar Unidad de Medida');
-      this.form.patchValue({
-        und_id: id,
-      });
+      this.form.patchValue({ und_id: id });
       this.loadData(id);
     }
     this.callback = callback;
@@ -85,8 +86,8 @@ export class UnitOfMeasureNewEditModalComponent extends BaseComponent {
           this.#globalNotification.openAlert(response);
         }
       },
-      error: (response) => {
-        this.#globalNotification.openToastAlert('Error', response, 'danger');
+      error: (error) => {
+        this.#globalNotification.openAlert(error.error);
       },
     });
   }
@@ -98,6 +99,7 @@ export class UnitOfMeasureNewEditModalComponent extends BaseComponent {
   onSubmit() {
     if (this.form.valid) {
       if (this.form.value.und_id) {
+        this.isLoading.set(true);
         this.update();
       } else {
         this.create();
@@ -117,12 +119,15 @@ export class UnitOfMeasureNewEditModalComponent extends BaseComponent {
             this.#globalNotification.openAlert(response);
             this.callback(response.data);
             this.onClose();
+            this.isLoading.set(false);
           } else {
             this.#globalNotification.openAlert(response);
+            this.isLoading.set(false);
           }
         },
         error: (error) => {
-          this.#globalNotification.openAlert(error.message);
+          this.#globalNotification.openAlert(error.error);
+          this.isLoading.set(false);
         },
       });
     this.subscriptions.push(subscription);
@@ -138,12 +143,15 @@ export class UnitOfMeasureNewEditModalComponent extends BaseComponent {
             this.#globalNotification.openAlert(response);
             this.callback(response.data);
             this.onClose();
+            this.isLoading.set(false);
           } else {
             this.#globalNotification.openAlert(response);
+            this.isLoading.set(false);
           }
         },
         error: (error) => {
-          this.#globalNotification.openAlert(error.message);
+          this.#globalNotification.openAlert(error.error);
+          this.isLoading.set(false);
         },
       });
     this.subscriptions.push(subscription);

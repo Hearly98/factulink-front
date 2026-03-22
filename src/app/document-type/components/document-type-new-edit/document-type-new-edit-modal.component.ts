@@ -51,7 +51,7 @@ export class DocumentTypeNewEditModalComponent extends BaseComponent implements 
   readonly #globalNotification = inject(GlobalNotification);
   readonly #documentTypeService = inject(DocumentTypeService);
   readonly #formBuilder = inject(FormBuilder);
-  title = signal('Crear Tipo de Documento');
+  title = signal('');
   callback: any;
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
@@ -67,6 +67,7 @@ export class DocumentTypeNewEditModalComponent extends BaseComponent implements 
   }
 
   openModal(idDocumentType?: number, callback: any = null) {
+    this.title.set('Crear Tipo Documento');
     this.createForm();
     this.visible = true;
     this.callback = callback;

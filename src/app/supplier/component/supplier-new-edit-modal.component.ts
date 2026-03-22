@@ -55,7 +55,7 @@ export class SupplierNewEditModalComponent extends BaseComponent implements OnIn
   readonly #supplierService = inject(SupplierService);
   readonly #documentTypeService = inject(DocumentTypeService);
   readonly #formBuilder = inject(FormBuilder);
-  title = signal('Crear Proveedor');
+  title = signal('');
   callback: any;
   isLoading = signal(false);
   messages = supplierErrorMessages();
@@ -74,10 +74,12 @@ export class SupplierNewEditModalComponent extends BaseComponent implements OnIn
   }
 
   openModal(idSupplier?: number, callback: any = null) {
+    this.title.set('Crear Proveedor');
     this.createForm();
     this.visible = true;
     this.callback = callback;
     if (idSupplier) {
+      this.title.set('Editar Proveedor');
       this.loadData(idSupplier);
     }
   }

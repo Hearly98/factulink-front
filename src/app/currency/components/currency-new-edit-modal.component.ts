@@ -38,11 +38,6 @@ import { ValidationMessagesComponent } from '@shared/components/error-messages/v
     SpinnerComponent,
   ],
   templateUrl: './currency-new-edit-modal.component.html',
-  styles: `
-    :host {
-      display: block;
-    }
-  `,
 })
 export class CurrencyNewEditModalComponent extends BaseComponent implements OnInit {
   form!: TypedFormGroup<CurrencyForm>;
@@ -51,7 +46,7 @@ export class CurrencyNewEditModalComponent extends BaseComponent implements OnIn
   readonly #currencyService = inject(CurrencyService);
   readonly #globalNotification = inject(GlobalNotification);
   readonly #formBuilder = inject(FormBuilder);
-  title = signal('Crear Moneda');
+  title = signal('');
   callback: any;
   messages = currencyErrorMessages();
   isLoading = signal(false);
@@ -69,6 +64,7 @@ export class CurrencyNewEditModalComponent extends BaseComponent implements OnIn
   }
 
   openModal(idCurrency?: number, callback: any = null) {
+    this.title.set('Crear Moneda');
     this.createForm();
     this.callback = callback;
     this.visible = true;

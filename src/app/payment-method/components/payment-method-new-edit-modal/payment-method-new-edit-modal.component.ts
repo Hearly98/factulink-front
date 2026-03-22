@@ -1,4 +1,4 @@
-import { Component, Inject, inject, ViewContainerRef } from '@angular/core';
+import { Component, Inject, inject, signal, ViewContainerRef } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import {
   ButtonDirective,
@@ -8,16 +8,22 @@ import {
   ModalBodyComponent,
   ModalComponent,
   RowComponent,
+  SpinnerComponent,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { BaseComponent } from '@shared/base/base.component';
 import { TypedFormGroup } from '@shared/types/types-form';
 import { PaymentMethodForm } from '../../core/types';
-import { buildPaymentMethodForm, paymentMethodStructure } from '../../helpers';
+import {
+  buildPaymentMethodForm,
+  paymentMethodErrorMessages,
+  paymentMethodStructure,
+} from '../../helpers';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 import { PaymentMethodService } from '../../core/services/payment-method.service';
 import { MODULES } from 'src/app/core/config/permissions/modules';
 import { CreatePaymentMethodModel, UpdatePaymentMethodModel } from '../../core/models';
+import { ValidationMessagesComponent } from '@shared/components/error-messages/validation-messages.component';
 
 @Component({
   selector: 'app-payment-method-new-edit-modal',
@@ -31,46 +37,10 @@ import { CreatePaymentMethodModel, UpdatePaymentMethodModel } from '../../core/m
     ButtonDirective,
     IconDirective,
     ReactiveFormsModule,
+    SpinnerComponent,
+    ValidationMessagesComponent,
   ],
-  template: `<c-modal alignment="center" [visible]="visible" backdrop="static">
-    <c-modal-body class="modal-body">
-      <c-row class="mb-2">
-        <c-col [sm]="6" class="space-between">
-          <h5>{{ title }}</h5>
-        </c-col>
-      </c-row>
-      <c-card>
-        <c-card-body [formGroup]="form">
-          <c-row>
-            @for(item of structure; track $index){
-            <c-col [md]="item.col">
-              <label for="" class="form-label">{{ item.label }}</label>
-              <input
-                class="form-control"
-                type="text"
-                name=""
-                id=""
-                [formControlName]="item.formControlName"
-              />
-            </c-col>
-            }
-          </c-row>
-        </c-card-body>
-      </c-card>
-      <c-row class="mt-4">
-        <c-col class="text-end">
-          <button cButton color="secondary" class="me-2" (click)="onClose()">
-            <svg cIcon name="cilX"></svg>
-            Cancelar
-          </button>
-          <button cButton color="success" (click)="onSubmit()">
-            <svg cIcon name="cilSave"></svg>
-            Guardar
-          </button>
-        </c-col>
-      </c-row>
-    </c-modal-body>
-  </c-modal>`,
+  templateUrl: './payment-method-new-edit-modal.component.html',
   styles: ``,
 })
 export class PaymentMethodNewEditModalComponent extends BaseComponent {
@@ -80,8 +50,10 @@ export class PaymentMethodNewEditModalComponent extends BaseComponent {
   #globalNotification = inject(GlobalNotification);
   #paymentMethodService = inject(PaymentMethodService);
   #formBuilder = inject(FormBuilder);
-  title = 'Crear Categoria';
+  title = signal('');
   callback: any;
+  isLoading = signal(false);
+  messages = paymentMethodErrorMessages();
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.PAYMENT_METHOD, viewContainerRef);
@@ -96,10 +68,12 @@ export class PaymentMethodNewEditModalComponent extends BaseComponent {
   }
 
   openModal(idCategory?: number, callback: any = null) {
+    this.title.set('Crear Método Pago');
     this.createForm();
     this.visible = true;
     this.callback = callback;
     if (idCategory) {
+      this.title.set('Editar Método Pago');
       this.loadData(idCategory);
     }
   }
@@ -120,6 +94,7 @@ export class PaymentMethodNewEditModalComponent extends BaseComponent {
 
   onSubmit() {
     if (this.form.valid) {
+      this.isLoading.set(true);
       if (this.form.value.mp_id) {
         this.update();
       } else {
@@ -140,12 +115,15 @@ export class PaymentMethodNewEditModalComponent extends BaseComponent {
             this.#globalNotification.openAlert(response);
             this.callback(response.data);
             this.onClose();
+            this.isLoading.set(false);
           } else {
             this.#globalNotification.openAlert(response);
+            this.isLoading.set(false);
           }
         },
         error: (error) => {
-          this.#globalNotification.openAlert(error.message);
+          this.#globalNotification.openAlert(error.error);
+          this.isLoading.set(false);
         },
       });
     this.subscriptions.push(subscription);
@@ -160,12 +138,15 @@ export class PaymentMethodNewEditModalComponent extends BaseComponent {
             this.#globalNotification.openAlert(response);
             this.callback(response.data);
             this.onClose();
+            this.isLoading.set(false);
           } else {
             this.#globalNotification.openAlert(response);
+            this.isLoading.set(false);
           }
         },
         error: (error) => {
-          this.#globalNotification.openAlert(error.message);
+          this.#globalNotification.openAlert(error.error);
+          this.isLoading.set(false);
         },
       });
     this.subscriptions.push(subscription);

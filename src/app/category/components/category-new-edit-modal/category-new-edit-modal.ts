@@ -46,7 +46,7 @@ export class CategoryNewEditModal extends BaseComponent implements OnInit {
   readonly #globalNotification = inject(GlobalNotification);
   readonly #categoryService = inject(CategoryService);
   readonly #formBuilder = inject(FormBuilder);
-  title = signal('Crear Categoria');
+  title = signal('');
   isLoading = signal(false);
   callback: any;
 
@@ -63,6 +63,7 @@ export class CategoryNewEditModal extends BaseComponent implements OnInit {
   }
 
   openModal(idCategory?: number, callback: any = null) {
+    this.title.set('Crear Categoria')
     this.createForm();
     this.visible = true;
     this.callback = callback;

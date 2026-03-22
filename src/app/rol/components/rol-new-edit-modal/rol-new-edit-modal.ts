@@ -48,7 +48,7 @@ export class RolNewEditModal extends BaseComponent implements OnInit {
   readonly #globalNotification = inject(GlobalNotification);
   readonly #rolService = inject(RolService);
   readonly #formBuilder = inject(FormBuilder);
-  title = signal('Crear Rol');
+  title = signal('');
   callback: any;
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
@@ -64,10 +64,12 @@ export class RolNewEditModal extends BaseComponent implements OnInit {
   }
 
   openModal(idRol?: number, callback: any = null) {
+    this.title.set('Crear Rol');
     this.createForm();
     this.visible = true;
     this.callback = callback;
     if (idRol) {
+      this.title.set('Editar Rol');
       this.loadData(idRol);
     }
   }

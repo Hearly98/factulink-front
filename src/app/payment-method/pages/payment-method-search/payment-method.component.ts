@@ -78,33 +78,40 @@ import { PaymentMethodNewEditModalComponent } from '../../components/payment-met
               <thead>
                 <tr>
                   <th>Acciones</th>
+                  <th>Código</th>
                   <th>Nombre</th>
                 </tr>
               </thead>
               <tbody>
                 @for (paymentMethod of paymentMethods; track $index) {
-                <tr>
-                  <td>
-                    <button
-                      (click)="openModal(paymentMethod.mp_id)"
-                      size="sm"
-                      class="me-2"
-                      cButton
-                      color="info"
-                    >
-                      <svg cIcon name="cilPencil"></svg>
-                    </button>
-                    <button
-                      (click)="onDelete(paymentMethod.mp_id)"
-                      size="sm"
-                      cButton
-                      color="danger"
-                    >
-                      <svg cIcon name="cilTrash"></svg>
-                    </button>
-                  </td>
-                  <td>{{ paymentMethod.mp_nom }}</td>
-                </tr>
+                  <tr>
+                    <td>
+                      <button
+                        (click)="openModal(paymentMethod.mp_id)"
+                        size="sm"
+                        class="me-2"
+                        cButton
+                        color="info"
+                      >
+                        <svg cIcon name="cilPencil"></svg>
+                      </button>
+                      <button
+                        (click)="onDelete(paymentMethod.mp_id)"
+                        size="sm"
+                        cButton
+                        color="danger"
+                      >
+                        <svg cIcon name="cilTrash"></svg>
+                      </button>
+                    </td>
+                    <td>{{ paymentMethod.mp_cod }}</td>
+                    <td>{{ paymentMethod.mp_nom }}</td>
+                  </tr>
+                }
+                @if (paymentMethods.length === 0) {
+                  <tr>
+                    <td colspan="3">No se encontraron datos</td>
+                  </tr>
                 }
               </tbody>
             </table>

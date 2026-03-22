@@ -53,7 +53,7 @@ export class CustomerNewEditModalComponent extends BaseComponent implements OnIn
   readonly #globalNotification = inject(GlobalNotification);
   readonly #customerService = inject(CustomerService);
   readonly #formBuilder = inject(FormBuilder);
-  title = signal('Crear Cliente');
+  title = signal('');
   callback: any;
   messages = customerErrorMessages();
   isLoading = signal(false);
@@ -71,6 +71,7 @@ export class CustomerNewEditModalComponent extends BaseComponent implements OnIn
   }
 
   openModal(idCustomer?: number, callback: any = null) {
+    this.title.set('Crear Cliente');
     this.createForm();
     this.visible = true;
     this.callback = callback;
