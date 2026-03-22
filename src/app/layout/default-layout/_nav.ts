@@ -66,12 +66,7 @@ export const navItems: INavData[] = [
       },
       {
         name: 'Empresa',
-        url: '/empresas',
-        icon: 'nav-icon-bullet',
-      },
-      {
-        name: 'Compania',
-        url: '/companias',
+        url: '/empresa',
         icon: 'nav-icon-bullet',
       },
       {

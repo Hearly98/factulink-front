@@ -47,4 +47,8 @@ export class OrganizationService extends BaseService {
       body
     );
   }
+
+  getMe(): Observable<ResponseDto<GetOrganizationModel>> {
+    return this.getRequest<ResponseDto<GetOrganizationModel>>('/me');
+  }
 }

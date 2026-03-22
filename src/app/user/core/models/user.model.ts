@@ -7,4 +7,5 @@ export class UserModel {
   est: boolean = true;
   email: string = '';
   password: string = '';
+  usu_img: string = '';
 }

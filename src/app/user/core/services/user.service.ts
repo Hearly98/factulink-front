@@ -41,4 +41,8 @@ export class UserService extends BaseService {
       body
     );
   }
+
+  getMe(): Observable<ResponseDto<GetUserModel>> {
+    return this.getRequest<ResponseDto<GetUserModel>>('/me');
+  }
 }

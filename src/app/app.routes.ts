@@ -38,11 +38,11 @@ export const routes: Routes = [
         },
       },
       {
-        path: 'empresas',
+        path: 'empresa',
         loadComponent: () =>
-          import('./organization/pages/organization.page').then((m) => m.OrganizationPage),
+          import('./organization/pages/organization-profile.component').then((m) => m.OrganizationProfileComponent),
         data: {
-          title: 'Empresa',
+          title: 'Mi Empresa',
         },
       },
       {
@@ -98,6 +98,14 @@ export const routes: Routes = [
         loadComponent: () => import('./user/pages/user/user.page').then((m) => m.UserPage),
         data: {
           title: 'Usuario',
+        },
+      },
+      {
+        path: 'perfil',
+        loadComponent: () =>
+          import('./user/pages/user-profile/user-profile.component').then((m) => m.UserProfileComponent),
+        data: {
+          title: 'Mi Perfil',
         },
       },
       {
