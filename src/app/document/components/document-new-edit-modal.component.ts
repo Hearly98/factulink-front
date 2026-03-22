@@ -47,7 +47,7 @@ export class DocumentNewEditModalComponent extends BaseComponent implements OnIn
   readonly #documentService = inject(DocumentService);
   readonly #formBuilder = inject(FormBuilder);
   readonly #globalNotification = inject(GlobalNotification);
-  title = signal('Crear Categoria');
+  title = signal('');
   callback: any;
   messages = documentErrorMessages();
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
@@ -63,10 +63,12 @@ export class DocumentNewEditModalComponent extends BaseComponent implements OnIn
   }
 
   openModal(idDocument?: number, callback: any = null) {
+    this.title.set('Crear Documento');
     this.createForm();
     this.visible.set(true);
     this.callback = callback;
     if (idDocument) {
+      this.title.set('Editar Documento');
       this.loadData(idDocument);
     }
   }
