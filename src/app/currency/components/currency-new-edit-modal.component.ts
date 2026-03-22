@@ -1,8 +1,8 @@
-import { Component, Inject, inject, ViewContainerRef } from '@angular/core';
+import { Component, Inject, inject, OnInit, signal, ViewContainerRef } from '@angular/core';
 import { BaseComponent } from '../../shared/base/base.component';
 import { TypedFormGroup } from '../../shared/types/types-form';
 import { CurrencyForm } from '../core/types';
-import { buildCurrencyForm, currencyStructure } from '../helpers';
+import { buildCurrencyForm, currencyErrorMessages, currencyStructure } from '../helpers';
 import { CurrencyService } from '../core/services/currency.service';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MODULES } from '../../core/config/permissions/modules';
@@ -14,13 +14,13 @@ import {
   RowComponent,
   ColComponent,
   ButtonDirective,
+  SpinnerComponent,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
-import { GetSucursalModel } from '../../sucursal/core/models';
-import { SucursalService } from '../../sucursal/core/services/sucursal.service';
 import { GlobalNotification } from '../../shared/alerts/global-notification/global-notification';
 import { CreateCurrencyModel } from '../core/models/create-currency.model';
 import { UpdateCurrencyModel } from '../core/models/update-currency.model';
+import { ValidationMessagesComponent } from '@shared/components/error-messages/validation-messages.component';
 
 @Component({
   selector: 'app-currency-new-edit-modal',
@@ -34,79 +34,27 @@ import { UpdateCurrencyModel } from '../core/models/update-currency.model';
     ButtonDirective,
     IconDirective,
     ReactiveFormsModule,
+    ValidationMessagesComponent,
+    SpinnerComponent,
   ],
-  template: `
-    <c-modal alignment="center" [visible]="visible" backdrop="static">
-      <c-modal-body class="modal-body">
-        <c-row class="mb-2">
-          <c-col [sm]="6" class="space-between">
-            <h5>{{ title }}</h5>
-          </c-col>
-        </c-row>
-        <c-card>
-          <c-card-body [formGroup]="form">
-            <c-row>
-              @for(item of structure; track $index){
-              <c-col [md]="item.col">
-                <label for="" class="form-label">{{ item.label }}</label>
-                @switch (item.type) { @case ('select') {
-                <select
-                  class="form-control form-select"
-                  name=""
-                  id=""
-                  [formControlName]="item.formControlName"
-                >
-                  <option [ngValue]="null">Seleccione</option>
-                  @for(item of sucursales; track $index){
-                  <option [ngValue]="item.suc_id">{{ item.suc_nom }}</option>
-                  }
-                </select>
-                }@default {
-                <input
-                  class="form-control"
-                  type="text"
-                  name=""
-                  id=""
-                  [formControlName]="item.formControlName"
-                />
-                } }
-              </c-col>
-              }
-            </c-row>
-          </c-card-body>
-        </c-card>
-        <c-row class="mt-2">
-          <c-col class="text-end">
-            <button cButton color="secondary" class="me-2" (click)="onClose()">
-              <svg cIcon name="cilX"></svg>
-              Cancelar
-            </button>
-            <button cButton color="success" (click)="onSubmit()">
-              <svg cIcon name="cilSave"></svg>
-              Guardar
-            </button>
-          </c-col>
-        </c-row>
-      </c-modal-body>
-    </c-modal>
-  `,
+  templateUrl: './currency-new-edit-modal.component.html',
   styles: `
     :host {
       display: block;
     }
   `,
 })
-export class CurrencyNewEditModalComponent extends BaseComponent {
+export class CurrencyNewEditModalComponent extends BaseComponent implements OnInit {
   form!: TypedFormGroup<CurrencyForm>;
   visible = false;
   structure = currencyStructure;
-  sucursales: GetSucursalModel[] = [];
-  #currencyService = inject(CurrencyService);
-  #sucursalService = inject(SucursalService);
-  #globalNotification = inject(GlobalNotification);
-  #formBuilder = inject(FormBuilder);
-  title = 'Crear Moneda';
+  readonly #currencyService = inject(CurrencyService);
+  readonly #globalNotification = inject(GlobalNotification);
+  readonly #formBuilder = inject(FormBuilder);
+  title = signal('Crear Moneda');
   callback: any;
+  messages = currencyErrorMessages();
+  isLoading = signal(false);
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.CURRENCY, viewContainerRef);
@@ -114,7 +62,6 @@ export class CurrencyNewEditModalComponent extends BaseComponent {
 
   ngOnInit(): void {
     this.createForm();
-    this.sucursalesSelectCombo();
   }
 
   createForm() {
@@ -126,6 +73,7 @@ export class CurrencyNewEditModalComponent extends BaseComponent {
     this.callback = callback;
     this.visible = true;
     if (idCurrency) {
+      this.title.set('Editar Moneda');
       this.loadData(idCurrency);
     }
   }
@@ -144,12 +92,9 @@ export class CurrencyNewEditModalComponent extends BaseComponent {
     this.visible = false;
   }
 
-  sucursalesSelectCombo() {
-    this.fetchData(this.#sucursalService.getAll(), this.sucursales);
-  }
-
   onSubmit() {
     if (this.form.valid) {
+      this.isLoading.set(true);
       if (this.form.value.mon_id) {
         this.update();
       } else {
@@ -168,12 +113,15 @@ export class CurrencyNewEditModalComponent extends BaseComponent {
           this.#globalNotification.openAlert(response);
           this.callback(response.data);
           this.onClose();
+          this.isLoading.set(false);
         } else {
           this.#globalNotification.openAlert(response);
+          this.isLoading.set(false);
         }
       },
       error: (error) => {
-        this.#globalNotification.openAlert(error.message);
+        this.#globalNotification.openAlert(error.error);
+        this.isLoading.set(false);
       },
     });
     this.subscriptions.push(subscription);
@@ -188,12 +136,14 @@ export class CurrencyNewEditModalComponent extends BaseComponent {
             this.#globalNotification.openAlert(response);
             this.callback(response.data);
             this.onClose();
+            this.isLoading.set(false);
           } else {
             this.#globalNotification.openAlert(response);
           }
         },
         error: (error) => {
-          this.#globalNotification.openAlert(error.message);
+          this.#globalNotification.openAlert(error.error);
+          this.isLoading.set(false);
         },
       });
     this.subscriptions.push(subscription);

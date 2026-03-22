@@ -22,13 +22,8 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { buildOrganizationForm, organizationStructure } from '../helpers';
 import { BaseComponent } from '../../shared/base/base.component';
 import { MODULES } from '../../core/config/permissions/modules';
-import { GetCompanyModel } from '../../company/core/models/get-company.model';
-import { CompanyService } from '../../company/core/services/company.service';
-import { CreateOrganizationModel } from '../core/models/create-organization.model';
-import { UpdateOrganizationModel } from '../core/models/update-organization.model';
 import { OrganizationService } from '../core/services/organization.service';
 import { GlobalNotification } from '../../shared/alerts/global-notification/global-notification';
-import { environment } from '../../../environments/environment';
 import { ImageCompressionService } from '../../shared/services/image-compression.service';
 
 @Component({
@@ -55,74 +50,76 @@ import { ImageCompressionService } from '../../shared/services/image-compression
         <c-card class="mt-3">
           <c-card-body [formGroup]="form">
             <c-row>
-              @for(item of structure; track $index){
-              <c-col [md]="item.col">
-                <label for="" class="form-label">{{ item.label }}</label>
-                @switch (item.type) { @case ('select') {
-                <select
-                  class="form-control form-select"
-                  name=""
-                  id=""
-                  [formControlName]="item.formControlName"
-                >
-                  <option [ngValue]="null">Seleccione</option>
-                  @for(item of companias; track $index){
-                  <option [ngValue]="item.com_id">{{ item.com_nom }}</option>
-                  }
-                </select>
-                }@case ('file') {
-                <div class="d-flex flex-column align-items-start gap-2">
-                  <label class="btn btn-outline-primary btn-sm mt-1" [class.disabled]="isCompressing()">
-                    <svg cIcon name="cilCloudUpload" class="me-1"></svg>
-                    @if (isCompressing()) {
-                      <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                      Comprimiendo...
-                    } @else {
-                      {{ selectedFile ? 'Cambiar Logo' : 'Seleccionar Logo' }}
-                    }
-                    <input
-                      type="file"
-                      class="d-none"
-                      (change)="onFileChange($event)"
-                      accept="image/jpeg,image/png,image/jpg,image/webp"
-                      [disabled]="isCompressing()"
-                    />
-                  </label>
-                  
-                  @if (imagePreview()) {
-                    <div class="position-relative mt-2">
-                      <img [src]="imagePreview()" alt="Logo Preview" 
-                           class="img-thumbnail shadow-sm" 
-                           style="width: 100px; height: 100px; object-fit: contain; background: #f8f9fa;" />
-                      <button (click)="removeImage()" 
+              @for (item of structure; track $index) {
+                <c-col [md]="item.col">
+                  <label for="" class="form-label">{{ item.label }}</label>
+                  @switch (item.type) {
+                    @case ('file') {
+                      <div class="d-flex flex-column align-items-start gap-2">
+                        <label
+                          class="btn btn-outline-primary btn-sm mt-1"
+                          [class.disabled]="isCompressing()"
+                        >
+                          <svg cIcon name="cilCloudUpload" class="me-1"></svg>
+                          @if (isCompressing()) {
+                            <span
+                              class="spinner-border spinner-border-sm me-1"
+                              role="status"
+                            ></span>
+                            Comprimiendo...
+                          } @else {
+                            {{ selectedFile ? 'Cambiar Logo' : 'Seleccionar Logo' }}
+                          }
+                          <input
+                            type="file"
+                            class="d-none"
+                            (change)="onFileChange($event)"
+                            accept="image/jpeg,image/png,image/jpg,image/webp"
+                            [disabled]="isCompressing()"
+                          />
+                        </label>
+
+                        @if (imagePreview()) {
+                          <div class="position-relative mt-2">
+                            <img
+                              [src]="imagePreview()"
+                              alt="Logo Preview"
+                              class="img-thumbnail shadow-sm"
+                              style="width: 100px; height: 100px; object-fit: contain; background: #f8f9fa;"
+                            />
+                            <button
+                              (click)="removeImage()"
                               class="btn btn-danger btn-sm position-absolute top-0 start-100 translate-middle rounded-circle p-1"
                               style="line-height: 1;"
                               type="button"
-                              [disabled]="isCompressing()">
-                        <svg cIcon name="cilX" size="sm"></svg>
-                      </button>
-                    </div>
+                              [disabled]="isCompressing()"
+                            >
+                              <svg cIcon name="cilX" size="sm"></svg>
+                            </button>
+                          </div>
+                        }
+
+                        <small class="text-muted" style="font-size: 0.75rem;">
+                          Límite: <strong class="text-primary">50KB</strong> (JPG, PNG, WebP)
+                          <br />
+                          <span class="text-info">
+                            <svg cIcon name="cilInfo" size="sm" class="me-1"></svg>
+                            Las imágenes se optimizan automáticamente
+                          </span>
+                        </small>
+                      </div>
+                    }
+                    @default {
+                      <input
+                        class="form-control"
+                        type="text"
+                        name=""
+                        id=""
+                        [formControlName]="item.formControlName"
+                      />
+                    }
                   }
-                  
-                  <small class="text-muted" style="font-size: 0.75rem;">
-                    Límite: <strong class="text-primary">50KB</strong> (JPG, PNG, WebP)
-                    <br>
-                    <span class="text-info">
-                      <svg cIcon name="cilInfo" size="sm" class="me-1"></svg>
-                      Las imágenes se optimizan automáticamente
-                    </span>
-                  </small>
-                </div>
-                }@default {
-                <input
-                  class="form-control"
-                  type="text"
-                  name=""
-                  id=""
-                  [formControlName]="item.formControlName"
-                />
-                } }
-              </c-col>
+                </c-col>
               }
             </c-row>
           </c-card-body>
@@ -156,25 +153,15 @@ export class OrganizationNewEditModalComponent extends BaseComponent {
   form!: TypedFormGroup<OrganizationForm>;
   #formBuilder = inject(FormBuilder);
   structure = organizationStructure;
-  companias: GetCompanyModel[] = [];
   selectedFile: File | null = null;
   imagePreview = signal<string | null>(null);
   isCompressing = signal<boolean>(false);
-  #companyService = inject(CompanyService);
   #organizationService = inject(OrganizationService);
   #globalNotification = inject(GlobalNotification);
   #imageCompressionService = inject(ImageCompressionService);
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.ORGANIZATION, viewContainerRef);
     this.createForm();
-  }
-
-  ngOnInit(): void {
-    this.companiasSelectCombo();
-  }
-
-  companiasSelectCombo() {
-    this.fetchData(this.#companyService.getAll(), this.companias);
   }
 
   openModal(id?: number, callback?: any) {
@@ -218,9 +205,9 @@ export class OrganizationNewEditModalComponent extends BaseComponent {
     // Validar tipo de archivo
     if (!this.#imageCompressionService.isValidImageFile(file)) {
       this.#globalNotification.openToastAlert(
-        'Tipo de archivo no permitido', 
-        'Solo se permiten imágenes JPG, PNG o WebP', 
-        'danger'
+        'Tipo de archivo no permitido',
+        'Solo se permiten imágenes JPG, PNG o WebP',
+        'danger',
       );
       event.target.value = '';
       return;
@@ -239,9 +226,9 @@ export class OrganizationNewEditModalComponent extends BaseComponent {
     // Mostrar indicador de compresión
     this.isCompressing.set(true);
     this.#globalNotification.openToastAlert(
-      'Comprimiendo logo', 
-      `Optimizando logo de ${originalSizeKB.toFixed(0)} KB...`, 
-      'info'
+      'Comprimiendo logo',
+      `Optimizando logo de ${originalSizeKB.toFixed(0)} KB...`,
+      'info',
     );
 
     try {
@@ -250,13 +237,13 @@ export class OrganizationNewEditModalComponent extends BaseComponent {
 
       if (result.success && result.file) {
         const finalSizeKB = result.compressedSize / 1024;
-        
+
         // Si después de la compresión sigue siendo muy grande
         if (result.compressedSize > 50 * 1024) {
           this.#globalNotification.openToastAlert(
-            'Logo demasiado grande', 
-            `El logo no pudo comprimirse a menos de 50KB. Tamaño final: ${finalSizeKB.toFixed(2)} KB. Por favor, selecciona un logo más pequeño.`, 
-            'danger'
+            'Logo demasiado grande',
+            `El logo no pudo comprimirse a menos de 50KB. Tamaño final: ${finalSizeKB.toFixed(2)} KB. Por favor, selecciona un logo más pequeño.`,
+            'danger',
           );
           event.target.value = '';
           this.isCompressing.set(false);
@@ -264,11 +251,14 @@ export class OrganizationNewEditModalComponent extends BaseComponent {
         }
 
         // Éxito en la compresión
-        const compressionRatio = ((result.originalSize - result.compressedSize) / result.originalSize * 100).toFixed(1);
+        const compressionRatio = (
+          ((result.originalSize - result.compressedSize) / result.originalSize) *
+          100
+        ).toFixed(1);
         this.#globalNotification.openToastAlert(
-          'Logo optimizado', 
-          `Logo comprimido exitosamente: ${originalSizeKB.toFixed(0)} KB → ${finalSizeKB.toFixed(2)} KB (${compressionRatio}% reducción)`, 
-          'success'
+          'Logo optimizado',
+          `Logo comprimido exitosamente: ${originalSizeKB.toFixed(0)} KB → ${finalSizeKB.toFixed(2)} KB (${compressionRatio}% reducción)`,
+          'success',
         );
 
         this.processValidFile(result.file);
@@ -278,9 +268,9 @@ export class OrganizationNewEditModalComponent extends BaseComponent {
     } catch (error) {
       console.error('Error al comprimir logo:', error);
       this.#globalNotification.openToastAlert(
-        'Error de compresión', 
-        'No se pudo comprimir el logo. Por favor, intenta con otra imagen.', 
-        'danger'
+        'Error de compresión',
+        'No se pudo comprimir el logo. Por favor, intenta con otra imagen.',
+        'danger',
       );
       event.target.value = '';
     } finally {
@@ -301,7 +291,7 @@ export class OrganizationNewEditModalComponent extends BaseComponent {
 
   removeImage() {
     if (this.isCompressing()) return; // No permitir remover mientras se comprime
-    
+
     this.selectedFile = null;
     this.imagePreview.set(null);
     this.form.patchValue({ emp_logo: null });
@@ -311,7 +301,7 @@ export class OrganizationNewEditModalComponent extends BaseComponent {
     const formData = new FormData();
     const formValues = this.form.value as any;
 
-    Object.keys(formValues).forEach(key => {
+    Object.keys(formValues).forEach((key) => {
       if (key !== 'emp_logo' && formValues[key] !== null && formValues[key] !== undefined) {
         formData.append(key, formValues[key]);
       }
@@ -338,22 +328,20 @@ export class OrganizationNewEditModalComponent extends BaseComponent {
 
   create() {
     const body = this.buildFormData();
-    const subscription = this.#organizationService
-      .create(body)
-      .subscribe({
-        next: (response) => {
-          if (response.isValid) {
-            this.#globalNotification.openAlert(response);
-            this.callback(response.data);
-            this.onClose();
-          } else {
-            this.#globalNotification.openAlert(response);
-          }
-        },
-        error: (error) => {
-          this.#globalNotification.openAlert(error.message);
-        },
-      });
+    const subscription = this.#organizationService.create(body).subscribe({
+      next: (response) => {
+        if (response.isValid) {
+          this.#globalNotification.openAlert(response);
+          this.callback(response.data);
+          this.onClose();
+        } else {
+          this.#globalNotification.openAlert(response);
+        }
+      },
+      error: (error) => {
+        this.#globalNotification.openAlert(error.message);
+      },
+    });
     this.subscriptions.push(subscription);
   }
 

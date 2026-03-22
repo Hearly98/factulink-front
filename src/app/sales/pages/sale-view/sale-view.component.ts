@@ -28,7 +28,6 @@ import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service
 import { SaleService } from '../../core/services/sale.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { buildSaleDetailForm } from 'src/app/sale-detail/helpers/build-sale-detail-form';
-import { CompanyService } from 'src/app/company/core/services/company.service';
 import { OrganizationService } from 'src/app/organization/core/services/organization.service';
 
 @Component({

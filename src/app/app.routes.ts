@@ -49,18 +49,10 @@ export const routes: Routes = [
         path: 'tipo-documento',
         loadComponent: () =>
           import('./document-type/pages/document-type/document-type.component').then(
-            (m) => m.DocumentTypeComponent
+            (m) => m.DocumentTypeComponent,
           ),
         data: {
           title: 'Tipo Documentos',
-        },
-      },
-      {
-        path: 'companias',
-        loadComponent: () =>
-          import('./company/pages/company/company.page').then((m) => m.CompanyPage),
-        data: {
-          title: 'Compania',
         },
       },
       {
@@ -95,7 +87,7 @@ export const routes: Routes = [
         path: 'unidad-medida',
         loadComponent: () =>
           import('./unit-of-measure/pages/view/unit-of-measure.component').then(
-            (m) => m.UnitOfMeasurePage
+            (m) => m.UnitOfMeasurePage,
           ),
         data: {
           title: 'Unidad de Medida',
@@ -133,7 +125,7 @@ export const routes: Routes = [
         path: 'metodo-pago',
         loadComponent: () =>
           import('./payment-method/pages/payment-method-search/payment-method.component').then(
-            (m) => m.PaymentMethodComponent
+            (m) => m.PaymentMethodComponent,
           ),
         data: {
           title: 'Metodo de Pago',
@@ -143,7 +135,7 @@ export const routes: Routes = [
         path: 'compras',
         loadComponent: () =>
           import('./purchase/pages/new-purchase/new-purchase.component').then(
-            (m) => m.NewPurchaseComponent
+            (m) => m.NewPurchaseComponent,
           ),
         data: {
           title: 'Compra',
@@ -153,7 +145,7 @@ export const routes: Routes = [
         path: 'ver-compra/:id',
         loadComponent: () =>
           import('./purchase/pages/purchase-view/purchase-view.component').then(
-            (m) => m.PurchaseViewComponent
+            (m) => m.PurchaseViewComponent,
           ),
         data: {
           title: 'Ver Compra',
@@ -163,7 +155,7 @@ export const routes: Routes = [
         path: 'listado-compras',
         loadComponent: () =>
           import('./purchase/pages/purchase-search/purchase-search.page').then(
-            (m) => m.PurchaseSearchPage
+            (m) => m.PurchaseSearchPage,
           ),
         data: {
           title: 'Listado de Compras',
@@ -221,7 +213,7 @@ export const routes: Routes = [
         path: 'historial-guias-remision',
         loadComponent: () =>
           import('./shipping-guide/pages/shipping-guide-list.page').then(
-            (m) => m.ShippingGuideListPage
+            (m) => m.ShippingGuideListPage,
           ),
         data: {
           title: 'Guías de Remisión',
@@ -236,49 +228,66 @@ export const routes: Routes = [
       },
       {
         path: 'productos-sucursal',
-        loadComponent: () => import('./product-sucursal/pages/product-sucursal/product-sucursal').then((m) => m.ProductoSucursal),
+        loadComponent: () =>
+          import('./product-sucursal/pages/product-sucursal/product-sucursal').then(
+            (m) => m.ProductoSucursal,
+          ),
         data: {
           title: 'Stock por Sucursal',
         },
       },
       {
         path: 'almacenes',
-        loadComponent: () => import('./almacen/pages/almacen/almacen').then((m) => m.AlmacenComponent),
+        loadComponent: () =>
+          import('./almacen/pages/almacen/almacen').then((m) => m.AlmacenComponent),
         data: {
           title: 'Almacenes',
         },
       },
       {
         path: 'almacen-stock/:id',
-        loadComponent: () => import('./almacen/pages/almacen-stock/almacen-stock').then((m) => m.AlmacenStockComponent),
+        loadComponent: () =>
+          import('./almacen/pages/almacen-stock/almacen-stock').then(
+            (m) => m.AlmacenStockComponent,
+          ),
         data: {
           title: 'Stock del Almacén',
         },
       },
       {
         path: 'kardex',
-        loadComponent: () => import('./kardex/pages/kardex-report/kardex-report').then((m) => m.KardexReportComponent),
+        loadComponent: () =>
+          import('./kardex/pages/kardex-report/kardex-report').then((m) => m.KardexReportComponent),
         data: {
           title: 'Kardex de Inventario',
         },
       },
       {
         path: 'movimientos',
-        loadComponent: () => import('./movimiento/pages/movimiento-list/movimiento-list').then((m) => m.MovimientoListComponent),
+        loadComponent: () =>
+          import('./movimiento/pages/movimiento-list/movimiento-list').then(
+            (m) => m.MovimientoListComponent,
+          ),
         data: {
           title: 'Movimientos',
         },
       },
       {
         path: 'nuevo-movimiento',
-        loadComponent: () => import('./movimiento/pages/movimiento-form/movimiento-form').then((m) => m.MovimientoFormComponent),
+        loadComponent: () =>
+          import('./movimiento/pages/movimiento-form/movimiento-form').then(
+            (m) => m.MovimientoFormComponent,
+          ),
         data: {
           title: 'Nuevo Movimiento',
         },
       },
       {
         path: 'editar-movimiento/:id',
-        loadComponent: () => import('./movimiento/pages/movimiento-form/movimiento-form').then((m) => m.MovimientoFormComponent),
+        loadComponent: () =>
+          import('./movimiento/pages/movimiento-form/movimiento-form').then(
+            (m) => m.MovimientoFormComponent,
+          ),
         data: {
           title: 'Editar Movimiento',
         },

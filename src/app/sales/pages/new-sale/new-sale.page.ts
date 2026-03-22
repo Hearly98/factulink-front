@@ -33,7 +33,6 @@ import { SaleDetailTableComponent } from 'src/app/sale-detail/components/sale-de
 import { mapSaleCreateDto } from '../../helpers/map-sale-create-dto';
 import { CurrencyService } from 'src/app/currency/core/services/currency.service';
 import { DocumentTypeService } from 'src/app/document-type/core/services/document-type.service';
-import { CompanyService } from 'src/app/company/core/services/company.service';
 import { OrganizationService } from 'src/app/organization/core/services/organization.service';
 
 @Component({
