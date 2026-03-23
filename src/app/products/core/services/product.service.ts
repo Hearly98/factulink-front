@@ -27,6 +27,13 @@ export class ProductService extends BaseService {
     return this.postRequest<CreateProductModel, ResponseDto<GetProductModel>>('/', body);
   }
 
+  createBulk(body: CreateProductModel | FormData): Observable<ResponseDto<GetProductModel>> {
+    if (body instanceof FormData) {
+      return this.postRequestForm<ResponseDto<GetProductModel>>('/bulk', body);
+    }
+    return this.postRequest<CreateProductModel, ResponseDto<GetProductModel>>('/bulk', body);
+  }
+
   update(body: UpdateProductModel | FormData): Observable<ResponseDto<GetProductModel>> {
     if (body instanceof FormData) {
       return this.putRequestForm<ResponseDto<GetProductModel>>('/', body);

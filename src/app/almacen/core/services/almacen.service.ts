@@ -46,4 +46,8 @@ export class AlmacenService extends BaseService {
       body,
     );
   }
+
+  getBySucursal(sucId: number, activo: boolean = true): Observable<ResponseDto<GetAlmacenModel[]>> {
+    return this.getRequest<ResponseDto<GetAlmacenModel[]>>(`?suc_id=${sucId}&activo=${activo}`);
+  }
 }

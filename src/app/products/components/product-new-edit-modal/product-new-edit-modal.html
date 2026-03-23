@@ -2,90 +2,110 @@
   <c-modal-body class="modal-body">
     <c-row class="mb-2">
       <c-col [sm]="6" class="space-between">
-        <h5>{{ title }}</h5>
+        <h5>{{ title() }}</h5>
       </c-col>
     </c-row>
     <c-card>
       <c-card-body [formGroup]="form">
         <c-row>
-          @for(item of structure; track $index){
-          <c-col [md]="item.col" class="mb-2">
-            <label for="" class="form-label">{{ item.label }}</label>
-            @switch (item.type) { @case ('select') {
-            <select class="form-control form-select" name="" id="" [formControlName]="item.formControlName">
-              <option [ngValue]="null">Seleccione</option>
-              @for(dataItem of getDataSource(item); track $index){
-              <option [ngValue]="getIdField(item, dataItem)">
-                {{ getDisplayField(item, dataItem) }}
-              </option>
-              }
-            </select>
-            } @case ('number') {
-            <input class="form-control" type="number" name="" id="" [formControlName]="item.formControlName" />
-            } @case ('date') {
-            <input class="form-control" type="date" name="" id="" [formControlName]="item.formControlName" />
-            } @case ('file') {
-            <div class="d-flex flex-column align-items-start gap-2">
-              <label class="btn btn-outline-primary btn-sm mt-1" [class.disabled]="isCompressing()">
-                <svg cIcon name="cilCloudUpload" class="me-1"></svg>
-                @if (isCompressing()) {
-                  <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                  Comprimiendo...
-                } @else {
-                  {{ selectedFile ? 'Cambiar Imagen' : 'Seleccionar Imagen' }}
+          @for (item of structure; track $index) {
+            <c-col [md]="item.col" class="mb-2">
+              <label for="" class="form-label">{{ item.label }}</label>
+              @switch (item.type) {
+                @case ('select') {
+                  <select
+                    class="form-control form-select"
+                    name=""
+                    id=""
+                    [formControlName]="item.formControlName"
+                  >
+                    <option [ngValue]="null">Seleccione</option>
+                    @for (dataItem of getDataSource(item); track $index) {
+                      <option [ngValue]="getIdField(item, dataItem)">
+                        {{ getDisplayField(item, dataItem) }}
+                      </option>
+                    }
+                  </select>
                 }
-                <input
-                  type="file"
-                  class="d-none"
-                  (change)="onChange($event)"
-                  accept="image/jpeg,image/png,image/jpg,image/webp"
-                  [disabled]="isCompressing()"
-                />
-              </label>
-              
-              @if (imagePreview()) {
-                <div class="position-relative mt-2">
-                  <img [src]="imagePreview()" alt="Imagen Preview" 
-                       class="img-thumbnail shadow-sm" 
-                       style="width: 100px; height: 100px; object-fit: contain; background: #f8f9fa;" />
-                  <button (click)="removeImage()" 
+                @case ('file') {
+                  <div class="d-flex flex-column align-items-start gap-2">
+                    <label
+                      class="btn btn-outline-primary btn-sm mt-1"
+                      [class.disabled]="isCompressing()"
+                    >
+                      <svg cIcon name="cilCloudUpload" class="me-1"></svg>
+                      @if (isCompressing()) {
+                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                        Comprimiendo...
+                      } @else {
+                        {{ selectedFile ? 'Cambiar Imagen' : 'Seleccionar Imagen' }}
+                      }
+                      <input
+                        type="file"
+                        class="d-none"
+                        (change)="onChange($event)"
+                        accept="image/jpeg,image/png,image/jpg,image/webp"
+                        [disabled]="isCompressing()"
+                      />
+                    </label>
+
+                    @if (imagePreview()) {
+                      <div class="position-relative mt-2">
+                        <img
+                          [src]="imagePreview()"
+                          alt="Imagen Preview"
+                          class="img-thumbnail shadow-sm"
+                          style="
+                            width: 100px;
+                            height: 100px;
+                            object-fit: contain;
+                            background: #f8f9fa;
+                          "
+                        />
+                        <button
+                          (click)="removeImage()"
                           class="btn btn-danger btn-sm position-absolute top-0 start-100 translate-middle rounded-circle p-1"
-                          style="line-height: 1;"
+                          style="line-height: 1"
                           type="button"
-                          [disabled]="isCompressing()">
-                    <svg cIcon name="cilX" size="sm"></svg>
-                  </button>
-                </div>
+                          [disabled]="isCompressing()"
+                        >
+                          <svg cIcon name="cilX" size="sm"></svg>
+                        </button>
+                      </div>
+                    }
+
+                    <small class="text-muted" style="font-size: 0.75rem">
+                      Límite: <strong class="text-primary">50KB</strong> (JPG, PNG, WebP)
+                      <br />
+                      <span class="text-info">
+                        <svg cIcon name="cilInfo" size="sm" class="me-1"></svg>
+                        Las imágenes se optimizan automáticamente
+                      </span>
+                    </small>
+                  </div>
+                }
+                @case ('number') {
+                  <input
+                    class="form-control"
+                    type="number"
+                    name=""
+                    id=""
+                    min="0"
+                    step="0.01"
+                    [formControlName]="item.formControlName"
+                  />
+                }
+                @default {
+                  <input
+                    class="form-control"
+                    [type]="item.type"
+                    name=""
+                    id=""
+                    [formControlName]="item.formControlName"
+                  />
+                }
               }
-              
-              <small class="text-muted" style="font-size: 0.75rem;">
-                Límite: <strong class="text-primary">50KB</strong> (JPG, PNG, WebP)
-                <br>
-                <span class="text-info">
-                  <svg cIcon name="cilInfo" size="sm" class="me-1"></svg>
-                  Las imágenes se optimizan automáticamente
-                </span>
-              </small>
-            </div>
-            } @default {
-            <input class="form-control" type="text" name="" id="" [formControlName]="item.formControlName" />
-            } }
-          </c-col>
-          }
-          @if (!isEditMode) {
-          <c-col md="12" class="mb-2">
-            <label class="form-label">Sucursales</label>
-            <div class="d-flex gap-2 align-items-center">
-              <button type="button" cButton color="primary" variant="outline" (click)="openSucursalSelector()"
-                class="flex-grow-1">
-                <svg cIcon name="cilBuilding"></svg>
-                Seleccionar Sucursales
-              </button>
-            </div>
-            <small class="text-muted d-block mt-1">
-              {{ getSucursalNames() }}
-            </small>
-          </c-col>
+            </c-col>
           }
         </c-row>
       </c-card-body>
@@ -97,10 +117,13 @@
       Cancelar
     </button>
     <button cButton color="success" (click)="onSubmit()">
-      <svg cIcon name="cilSave"></svg>
-      Guardar
+      @if (isLoading()) {
+        <c-spinner size="sm" class="me-2"></c-spinner>
+        Cargando...
+      } @else {
+        <svg cIcon name="cilSave"></svg>
+        Guardar
+      }
     </button>
   </c-modal-footer>
-
-  <app-sucursal-selector-modal></app-sucursal-selector-modal>
 </c-modal>

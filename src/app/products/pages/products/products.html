@@ -21,8 +21,8 @@
         <label for="">Categoría</label>
         <select formControlName="cat_id" class="form-control form-select">
           <option [ngValue]="null">Todas</option>
-          @for(categoria of categorias; track $index){
-          <option [ngValue]="categoria.cat_id">{{ categoria.cat_nom }}</option>
+          @for (categoria of categorias; track $index) {
+            <option [ngValue]="categoria.cat_id">{{ categoria.cat_nom }}</option>
           }
         </select>
       </c-col>
@@ -36,11 +36,9 @@
           Limpiar
         </button>
       </c-col>
-
     </c-row>
   </c-card-body>
 </c-card>
-
 
 <c-card>
   <c-card-body>
@@ -57,32 +55,40 @@
           </thead>
           <tbody>
             @if (products.length == 0) {
-            <tr>
-              <td colspan="4">
-                <p>No hay datos</p>
-              </td>
-            </tr>
-            }@else {
-            @for (product of products; track $index) {
-            <tr>
-              <td>
-                <button (click)="openModal(product.prod_id)" size="sm" class="me-2" cButton color="info">
-                  <svg cIcon name="cilPencil"></svg>
-                </button>
-                <button (click)="onDelete(product.prod_id)" size="sm" cButton color="danger">
-                  <svg cIcon name="cilTrash"></svg>
-                </button>
-              </td>
-              <td>{{ product.prod_cod_interno }}</td>
-              <td>{{ product.prod_nom }}</td>
-              <td>{{ product.categoria?.cat_nom }}</td>
-            </tr>
-            }
+              <tr>
+                <td colspan="4">No hay datos</td>
+              </tr>
+            } @else {
+              @for (product of products; track $index) {
+                <tr>
+                  <td>
+                    <button
+                      (click)="openModal(product.prod_id)"
+                      size="sm"
+                      class="me-2"
+                      cButton
+                      color="info"
+                    >
+                      <svg cIcon name="cilPencil"></svg>
+                    </button>
+                    <button (click)="onDelete(product.prod_id)" size="sm" cButton color="danger">
+                      <svg cIcon name="cilTrash"></svg>
+                    </button>
+                  </td>
+                  <td>{{ product.prod_cod_interno }}</td>
+                  <td>{{ product.prod_nom }}</td>
+                  <td>{{ product.categoria?.cat_nom }}</td>
+                </tr>
+              }
             }
           </tbody>
         </table>
-        <app-paginator [(page)]="page.page" [pageSize]="page.pageSize" [total]="total"
-          (pageChange)="onPageChange($event)"></app-paginator>
+        <app-paginator
+          [(page)]="page.page"
+          [pageSize]="page.pageSize"
+          [total]="total"
+          (pageChange)="onPageChange($event)"
+        ></app-paginator>
       </c-col>
     </c-row>
   </c-card-body>
