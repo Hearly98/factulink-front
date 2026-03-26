@@ -22,6 +22,7 @@ export const buildPurchaseForm = (): {
     prov_id: new FormControl<number | null>(null),
     mp_id: new FormControl<number | null>(null),
     suc_id: new FormControl<number | null>(null),
+    alm_id: new FormControl<number | null>(null),
     doc_id: new FormControl<number | null>(null),
     afecta_stock: new FormControl<boolean | null>(false),
     detalles: new FormArray<

@@ -31,6 +31,7 @@ import { ValidationMessagesComponent } from '@shared/components/error-messages/v
 import { QuotationDetailCreateDto, QuotationForm } from '../core/types';
 import { TypedFormGroup } from '@shared/types/types-form';
 import { PaymentMethodService } from 'src/app/payment-method/core/services/payment-method.service';
+import { AlmacenService } from 'src/app/almacen/core/services/almacen.service';
 
 @Component({
   selector: 'app-quotation-new-edit',
@@ -77,6 +78,10 @@ import { PaymentMethodService } from 'src/app/payment-method/core/services/payme
                     [bindLabel]="control.bindLabel || ''"
                     [bindValue]="control.bindValue || ''"
                     [serviceFn]="control.serviceFnName ? serviceMap[control.serviceFnName] : undefined"
+                    [disabled]="control.formControlName === 'prod_id' && !form.value.suc_id"
+                    [showError]="control.formControlName === 'prod_id' && sucursalError()"
+                    [errorMessage]="sucursalError() ? 'Seleccione una sucursal primero' : ''"
+                    (onFocus)="onProductSearchFocus()"
                     (itemSelected)="onSelectItem(control.formControlName, $event)"
                     [initialValue]="control.formControlName ? searchSelectLabels[control.formControlName] : ''"
                   ></app-search-select>
@@ -84,15 +89,19 @@ import { PaymentMethodService } from 'src/app/payment-method/core/services/payme
                 @case('select') {
                   <select class="form-control form-select" [formControlName]="control.formControlName"
                    [class.is-invalid]="
-                      form.get(control.formControlName)?.invalid &&
-                      form.get(control.formControlName)?.touched
+                      (control.formControlName === 'prod_id' && sucursalError()) ||
+                      (form.get(control.formControlName)?.invalid && form.get(control.formControlName)?.touched)
                     "
+                    (change)="onSelectChange(control.formControlName, $event)"
                   >
                     <option [ngValue]="null">Seleccione</option>
-                    @for (option of control.options; track $index) {
+                    @for (option of control.formControlName === 'alm_id' ? almacenOptions : control.options; track $index) {
                     <option [ngValue]="option.value">{{ option.label }}</option>
                     }
                   </select>
+                  @if (control.formControlName === 'prod_id' && sucursalError()) {
+                    <div class="invalid-feedback d-block">Seleccione una sucursal primero</div>
+                  }
                   <app-validation-messages [controlName]="control.formControlName" [form]="form" [messages]="errorMessages"></app-validation-messages>
                 } 
                 @case('textarea') {
@@ -193,6 +202,8 @@ export class QuotationNewEditPage extends BaseComponent implements OnInit {
   quotaId = signal<number | null>(null);
   searchSelectLabels: Record<string, string> = {};
   errorMessages = messages;
+  almacenOptions: SelectOption[] = [];
+  sucursalError = signal(false);
   #formBuilder = inject(FormBuilder);
   #paymentMethodService = inject(PaymentMethodService);
   #quotationService = inject(QuotationService);
@@ -200,6 +211,7 @@ export class QuotationNewEditPage extends BaseComponent implements OnInit {
   #productService = inject(ProductService);
   #sucursalService = inject(SucursalService);
   #currencyService = inject(CurrencyService);
+  #almacenService = inject(AlmacenService);
   #globalNotification = inject(GlobalNotification);
   #route = inject(ActivatedRoute);
   #router = inject(Router);
@@ -273,12 +285,64 @@ export class QuotationNewEditPage extends BaseComponent implements OnInit {
 
   serviceMap: Record<string, any> = {
     customerSearch: (term: string) => this.#customerService.getAll(),
-    productSearch: (term: string) =>
-      this.#productService.searchQuick({
+    productSearch: (term: string) => {
+      if (!this.form.value.suc_id) {
+        this.sucursalError.set(true);
+        return { data: [] };
+      }
+      this.sucursalError.set(false);
+      return this.#productService.searchQuick({
         term,
         suc_id: this.form.value.suc_id!,
-      }),
+        alm_id: this.form.value.alm_id || undefined,
+      });
+    },
   };
+
+  onProductSearchFocus() {
+    if (!this.form.value.suc_id) {
+      this.sucursalError.set(true);
+    }
+  }
+
+  onSelectChange(controlName: string | undefined, event: Event) {
+    if (!controlName) return;
+    
+    const value = (event.target as HTMLSelectElement).value;
+    
+    if (controlName === 'suc_id' && value) {
+      this.form.patchValue({ suc_id: parseInt(value), alm_id: null });
+      this.loadAlmacenesBySucursal(parseInt(value));
+      this.selectedProduct = null;
+    } else if (controlName === 'alm_id' && value) {
+      this.form.patchValue({ alm_id: parseInt(value) });
+    }
+  }
+
+  loadAlmacenesBySucursal(sucId: number) {
+    this.#almacenService.getAll().subscribe({
+      next: (response) => {
+        const filteredAlmacenes = response.data
+          .filter((a: any) => a.suc_id === sucId)
+          .map((item: any) => ({ value: item.almacen_id, label: item.nombre }));
+        this.almacenOptions = filteredAlmacenes;
+        
+        const currentStructure = this.structure();
+        const updatedControls = currentStructure[1].controls.map(control => {
+          if (control.formControlName === 'alm_id') {
+            return { ...control, options: filteredAlmacenes };
+          }
+          return control;
+        });
+        
+        this.structure.set([
+          currentStructure[0],
+          { ...currentStructure[1], controls: updatedControls },
+          ...currentStructure.slice(2)
+        ]);
+      },
+    });
+  }
 
   patchCustomer(item: any) {
     this.form.patchValue({

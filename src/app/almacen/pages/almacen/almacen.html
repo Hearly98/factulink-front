@@ -86,8 +86,13 @@
                     {{ item.sucursal?.suc_nom }}
                   </div>
                   <div class="d-flex gap-2 mt-3">
-                    <button (click)="viewStock(item)" cButton color="secondary" size="sm"
-                    title="Ver Stock">
+                    <button
+                      (click)="viewStock(item)"
+                      cButton
+                      color="secondary"
+                      size="sm"
+                      title="Ver Stock"
+                    >
                       <svg cIcon name="cil-list-numbered" class="me-1"></svg>
                       Stock
                     </button>
@@ -143,8 +148,8 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                @for (item of almacenes; track $index) {
+              @for (item of almacenes; track $index) {
+                <tr>
                   <td>
                     <button
                       (click)="viewStock(item)"
@@ -196,11 +201,13 @@
                       {{ item.activo ? 'Activo' : 'Inactivo' }}
                     </c-badge>
                   </td>
-                }
-                @if (almacenes.length === 0) {
+                </tr>
+              }
+              @if (almacenes.length === 0) {
+                <tr>
                   <td colspan="4">No se encontraron resultados</td>
-                }
-              </tr>
+                </tr>
+              }
             </tbody>
           </table>
         </div>

@@ -1,5 +1,5 @@
 import { AlmacenModalNewEdit } from './../../components/almacen-modal-new-edit/almacen-modal-new-edit';
-import { Component, Inject, inject, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, Inject, inject, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import {
   ButtonDirective,
   ButtonGroupModule,
@@ -55,7 +55,7 @@ import { Router } from '@angular/router';
   ],
   templateUrl: './almacen.html',
 })
-export class AlmacenComponent extends BaseSearchComponent {
+export class AlmacenComponent extends BaseSearchComponent implements OnInit{
   @ViewChild('almacenModal') almacenModal!: AlmacenModalNewEdit;
   public form!: TypedFormGroup<FilterForm>;
   readonly #formBuilder = inject(FormBuilder);
@@ -68,8 +68,8 @@ export class AlmacenComponent extends BaseSearchComponent {
   public sucursales: GetSucursalModel[] = [];
   public viewMode: 'cards' | 'table' = 'cards';
 
-  #confirmService = inject(ConfirmService);
-  #globalNotification = inject(GlobalNotification);
+  readonly #confirmService = inject(ConfirmService);
+  readonly #globalNotification = inject(GlobalNotification);
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.ALMACEN, viewContainerRef);
@@ -93,7 +93,7 @@ export class AlmacenComponent extends BaseSearchComponent {
 
   onSearch(filter = null, page = 1) {
     const sort = filterSort(this.form.value);
-    const filterToUse = filter || mapParams(this.form.value);
+    const filterToUse = filter ?? mapParams(this.form.value);
     const pageSize = 10;
     const pageParams = new PageParamsModel(page, pageSize);
     this.updateFilter(filterToUse);

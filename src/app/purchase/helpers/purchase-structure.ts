@@ -45,7 +45,8 @@ export const purchaseStructure = (
   PaymentTypeOptions: SelectOption[] = [],
   DocumentsOptions: SelectOption[] = [],
   DocumentTypesOptions: SelectOption[] = [],
-  SucursalOptions: SelectOption[] = []
+  SucursalOptions: SelectOption[] = [],
+  AlmacenOptions: SelectOption[] = []
 ): PurchaseStructure<NewPurchaseComponent['serviceMap']>[] => {
   return [
     {
@@ -141,15 +142,6 @@ export const purchaseStructure = (
       title: 'Agregar Producto',
       controls: [
         {
-          label: 'Producto',
-          col: '6',
-          type: 'search-select',
-          formControlName: 'prod_id',
-          bindLabel: 'label',
-          bindValue: 'prod_id',
-          serviceFnName: 'productSearch',
-        },
-        {
           label: 'Sucursal',
           col: '4',
           type: 'select',
@@ -157,8 +149,24 @@ export const purchaseStructure = (
           options: SucursalOptions,
         },
         {
+          label: 'Almacén',
+          col: '4',
+          type: 'select',
+          formControlName: 'alm_id',
+          options: AlmacenOptions,
+        },
+        {
+          label: 'Producto',
+          col: '4',
+          type: 'search-select',
+          formControlName: 'prod_id',
+          bindLabel: 'label',
+          bindValue: 'prod_id',
+          serviceFnName: 'productSearch',
+        },
+        {
           label: 'Afecta Stock',
-          col: '2',
+          col: '12',
           type: 'checkbox',
           formControlName: 'afecta_stock',
         },

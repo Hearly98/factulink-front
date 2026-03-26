@@ -43,6 +43,7 @@ export interface QuotationForm {
   cli_documento: string | null,
   cli_direcc: string | null,
   tip_id: number | null,
+  alm_id: number | null,
   prod_id: number | null,
   detalles: QuotationDetailForm[] | null;
 }

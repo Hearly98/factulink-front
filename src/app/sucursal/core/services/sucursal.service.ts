@@ -42,4 +42,30 @@ export class SucursalService extends BaseService {
       body
     );
   }
+
+  getStockBySucursal(sucId: number): Observable<ResponseDto<StockBySucursalModel>> {
+    return this.getRequest<ResponseDto<StockBySucursalModel>>(`/${sucId}/stock`);
+  }
+}
+
+export interface StockBySucursalModel {
+  suc_id: number;
+  suc_nom: string;
+  total_stock: number;
+  productos: StockProductoModel[];
+}
+
+export interface StockProductoModel {
+  prod_id: number;
+  prod_nom: string;
+  prod_cod_interno: string;
+  stock_total: number;
+  por_almacen: StockPorAlmacenModel[];
+}
+
+export interface StockPorAlmacenModel {
+  almacen_id: number;
+  almacen_nombre: string;
+  almacen_codigo: string;
+  stock_actual: number;
 }

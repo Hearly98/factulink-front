@@ -18,14 +18,12 @@ import { BaseComponent } from '../../../shared/base/base.component';
 import { MODULES } from '../../../core/config/permissions/modules';
 import { GlobalNotification } from '../../../shared/alerts/global-notification/global-notification';
 import { CategoryService } from '../../../category/core/services/category.service';
-import { GetCategoryModel } from '../../../category/core/models';
 import { CurrencyService } from '../../../currency/core/services/currency.service';
-import { GetCurrencyModel } from '../../../currency/core/models/get-currency.model';
 import { UnitOfMeasureService } from '../../../unit-of-measure/core/services/unit-of-measure.service';
-import { GetUnitOfMeasureModel } from '../../../unit-of-measure/core/models';
 import { ImageCompressionService } from '../../../shared/services/image-compression.service';
 import { BrandService } from '../../../brand/core/services/brand.service';
-import { GetMarcaModel } from '../../../brand/core/models';
+import { forkJoin } from 'rxjs';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-product-new-edit-modal',
@@ -38,6 +36,7 @@ import { GetMarcaModel } from '../../../brand/core/models';
     ColComponent,
     ButtonDirective,
     IconDirective,
+    CommonModule,
     ModalFooterComponent,
     ReactiveFormsModule,
     SpinnerComponent,
@@ -48,47 +47,67 @@ import { GetMarcaModel } from '../../../brand/core/models';
 export class ProductNewEditModal extends BaseComponent implements OnInit {
   form!: FormGroup;
   visible = false;
-  structure = productStructure;
-  categorias: GetCategoryModel[] = [];
-  monedas: GetCurrencyModel[] = [];
-  unidades: GetUnitOfMeasureModel[] = [];
-  marcas: GetMarcaModel[] = [];
+  structure = productStructure();
   selectedFile: File | null = null;
   imagePreview = signal<string | null>(null);
   isCompressing = signal<boolean>(false);
-  #categoryService = inject(CategoryService);
-  #currencyService = inject(CurrencyService);
-  #unidadService = inject(UnitOfMeasureService);
-  #brandService = inject(BrandService);
-  #globalNotification = inject(GlobalNotification);
-  #productService = inject(ProductService);
-  #formBuilder = inject(FormBuilder);
-  #imageCompressionService = inject(ImageCompressionService);
+  readonly #categoryService = inject(CategoryService);
+  readonly #currencyService = inject(CurrencyService);
+  readonly #unidadService = inject(UnitOfMeasureService);
+  readonly #brandService = inject(BrandService);
+  readonly #globalNotification = inject(GlobalNotification);
+  readonly #productService = inject(ProductService);
+  readonly #formBuilder = inject(FormBuilder);
+  readonly #imageCompressionService = inject(ImageCompressionService);
   title = signal('');
   isLoading = signal(false);
   callback: any;
   isEditMode = false;
+  private brandOptions: any[] = [];
+  private unitOfMeasureOptions: any[] = [];
+  private categoryOptions: any[] = [];
+  private currencyOptions: any[] = [];
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.PRODUCT, viewContainerRef);
   }
 
   ngOnInit(): void {
-    this.createForm();
-    this.loadSelectCombos();
+    forkJoin({
+      brand: this.#brandService.getAll(),
+      currency: this.#currencyService.getAll(),
+      unitOfMeasure: this.#unidadService.getAll(),
+      category: this.#categoryService.getAll()
+    }).subscribe(({brand, currency, unitOfMeasure, category}) => {
+      this.brandOptions = brand.data;
+      this.unitOfMeasureOptions = unitOfMeasure.data;
+      this.categoryOptions = category.data;
+      this.currencyOptions = currency.data;
+      this.structure = productStructure(brand.data, unitOfMeasure.data, category.data, currency.data);
+      this.createForm();
+    });
   }
 
   createForm() {
-    this.form = this.#formBuilder.group(buildProductForm());
+    this.form = this.#formBuilder.group(buildProductForm(this.isEditMode));
   }
 
   openModal(idProduct?: number, callback: any = null) {
-    this.createForm();
     this.selectedFile = null;
     this.imagePreview.set(null);
     this.visible = true;
     this.callback = callback;
     this.isEditMode = !!idProduct;
+    this.createForm();
+    if (this.isEditMode) {
+      this.structure = productStructure(
+        this.brandOptions, 
+        this.unitOfMeasureOptions, 
+        this.categoryOptions, 
+        this.currencyOptions, 
+        true
+      );
+    }
     if (idProduct) {
       this.title.set('Editar Producto');
       this.loadData(idProduct);
@@ -111,18 +130,12 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
     });
   }
 
-  loadSelectCombos() {
-    this.fetchData(this.#categoryService.getAll(), this.categorias);
-    this.fetchData(this.#currencyService.getAll(), this.monedas);
-    this.fetchData(this.#unidadService.getAll(), this.unidades);
-    this.fetchData(this.#brandService.getAll(), this.marcas);
-  }
-
   onClose() {
     this.visible = false;
   }
 
   onSubmit() {
+    debugger
     if (this.form.valid) {
       this.isLoading.set(true);
       if (this.form.value.prod_id) {
@@ -142,7 +155,7 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
 
   private buildFormData(): FormData {
     const formData = new FormData();
-    const formValues = this.form.value as any;
+    const formValues = this.form.value;
 
     Object.keys(formValues).forEach((key) => {
       const value = formValues[key];
@@ -207,51 +220,6 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
       },
     });
     this.subscriptions.push(subscription);
-  }
-
-  getDataSource(item: any): any[] {
-    switch (item.dataSource) {
-      case 'categorias':
-        return this.categorias;
-      case 'monedas':
-        return this.monedas;
-      case 'unidades':
-        return this.unidades;
-      case 'marcas':
-        return this.marcas;
-      default:
-        return [];
-    }
-  }
-
-  getDisplayField(item: any, dataItem: any): string {
-    switch (item.dataSource) {
-      case 'categorias':
-        return dataItem.cat_nom;
-      case 'monedas':
-        return dataItem.mon_nom;
-      case 'unidades':
-        return dataItem.und_nom;
-      case 'marcas':
-        return dataItem.marca_nom;
-      default:
-        return '';
-    }
-  }
-
-  getIdField(item: any, dataItem: any): number {
-    switch (item.dataSource) {
-      case 'categorias':
-        return dataItem.cat_id;
-      case 'monedas':
-        return dataItem.mon_id;
-      case 'unidades':
-        return dataItem.und_id;
-      case 'marcas':
-        return dataItem.marca_id;
-      default:
-        return 0;
-    }
   }
 
   async onChange(event: Event) {

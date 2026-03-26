@@ -11,5 +11,4 @@ export interface ProductForm {
   prod_img: string | File | null;
   precio_compra_base: number | null;
   precio_venta_base: number | null;
-  est: boolean | null;
 }

@@ -46,6 +46,7 @@ export function buildQuotationForm(): TypedFormControls<QuotationForm> {
     cli_documento: new FormControl<string | null>(null),
     cli_direcc: new FormControl<string | null>(null),
     tip_id: new FormControl<number | null>(null),
+    alm_id: new FormControl<number | null>(null),
     prod_id: new FormControl<number | null>(null),
     detalles: new FormArray<any>([]),
   };

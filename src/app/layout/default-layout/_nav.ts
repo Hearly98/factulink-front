@@ -95,13 +95,8 @@ export const navItems: INavData[] = [
     iconComponent: { name: 'cil-cart' },
     children: [
       {
-        name: 'Nueva Compra',
+        name: 'Compras',
         url: '/compras',
-        icon: 'nav-icon-bullet',
-      },
-      {
-        name: 'Listado de Compras',
-        url: '/listado-compras',
         icon: 'nav-icon-bullet',
       },
     ],
@@ -139,13 +134,8 @@ export const navItems: INavData[] = [
     iconComponent: { name: 'cil-cash' },
     children: [
       {
-        name: 'Nueva Venta',
+        name: 'Ventas',
         url: '/ventas',
-        icon: 'nav-icon-bullet',
-      },
-      {
-        name: 'Historial de Ventas',
-        url: '/listado-ventas',
         icon: 'nav-icon-bullet',
       },
     ],
@@ -155,31 +145,16 @@ export const navItems: INavData[] = [
     iconComponent: { name: 'cil-file' },
     children: [
       {
-        name: 'Nueva Cotización',
-        url: '/nueva-cotizacion',
-        icon: 'nav-icon-bullet',
-      },
-      {
-        name: 'Listado de Cotizaciones',
-        url: '/historial-cotizaciones',
+        name: 'Cotizaciones',
+        url: '/cotizaciones',
         icon: 'nav-icon-bullet',
       }
     ],
   },
   {
     name: 'Guías de Remisión',
+    url: '/guias-remision',
     iconComponent: { name: 'cil-truck' },
-    children: [
-      {
-        name: 'Nueva Guía Remisión',
-        url: '/guia-remision',
-        icon: 'nav-icon-bullet',
-      },
-      {
-        name: 'Listado de Guía Remisión',
-        url: '/historial-guias-remision',
-        icon: 'nav-icon-bullet',
-      }]
   },
   {
     title: true,

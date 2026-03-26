@@ -122,7 +122,7 @@ export class ShippingGuideListPage extends BaseSearchComponent {
     const pageParams = new PageParamsModel(page, pageSize);
     this.updatePage(pageParams);
 
-    this.#shippingGuideService.search(pageParams).subscribe({
+    this.#shippingGuideService.search(this.getPageParams()).subscribe({
       next: (response: any) => {
         if (response.isValid) {
           this.total = response.data.total;

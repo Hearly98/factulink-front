@@ -112,11 +112,18 @@ export function quotationStructure(
       title: 'Agregar Producto',
       controls: [
         {
+          label: 'Almacén',
+          formControlName: 'alm_id',
+          type: 'select',
+          col: 4,
+          options: [],
+        },
+        {
           label: 'Producto',
           formControlName: 'prod_id',
           type: 'search-select',
-          col: 6,
-          bindLabel: 'prod_nom',
+          col: 8,
+          bindLabel: 'label',
           bindValue: 'prod_id',
           serviceFnName: 'productSearch',
         },
@@ -124,7 +131,7 @@ export function quotationStructure(
           label: '¿Incluye I.G.V?',
           formControlName: 'igv_requerido',
           type: 'select',
-          col: 2,
+          col: 4,
           options: [
             { label: 'Sí', value: true },
             { label: 'No', value: false },
@@ -134,7 +141,7 @@ export function quotationStructure(
           label: '¿Mostrar Total?',
           formControlName: 'mostrar_total',
           type: 'select',
-          col: 2,
+          col: 4,
           options: [
             { label: 'Sí', value: true },
             { label: 'No', value: false },

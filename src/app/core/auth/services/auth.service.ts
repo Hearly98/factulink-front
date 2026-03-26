@@ -93,6 +93,7 @@ export class AuthService {
     localStorage.removeItem(this.USER_KEY);
     sessionStorage.removeItem('menuConfig');
     this._user.set(null);
+    document.body.classList.remove('dark');
     this.router.navigate(['/login']);
   }
 }

@@ -58,7 +58,8 @@ export class ProductService extends BaseService {
 
   searchQuick(body: {
     term: string;
-    suc_id: number;
+    suc_id?: number;
+    alm_id?: number;
   }): Observable<ResponseDto<GetProductModel[]>> {
     return this.postRequest(`/search-quick`, body);
   }

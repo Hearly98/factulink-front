@@ -2,6 +2,7 @@ import { PurchaseDetailForm } from 'src/app/purchase-detail/core/types';
 
 export interface PurchaseForm {
   suc_id: number | null;
+  alm_id: number | null;
   doc_id: number | null;
   usu_id: number | null;
   prov_id: number | null;

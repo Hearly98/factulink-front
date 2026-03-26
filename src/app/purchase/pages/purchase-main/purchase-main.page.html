@@ -1,0 +1,299 @@
+<c-row>
+  <c-col xs="12">
+    <c-card class="mb-4">
+      <c-card-body>
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              [class.active]="activeTab() === 'create'"
+              (click)="activeTab.set('create')"
+              style="cursor: pointer"
+            >
+              <svg cIcon name="cilPlus" class="me-2"></svg>
+              Nueva Compra
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              [class.active]="activeTab() === 'history'"
+              (click)="activeTab.set('history')"
+              style="cursor: pointer"
+            >
+              <svg cIcon name="cilList" class="me-2"></svg>
+              Historial
+            </a>
+          </li>
+        </ul>
+
+        @if (activeTab() === 'create') {
+          <c-container [formGroup]="form" class="mt-3">
+            @for (item of structure(); track $index) {
+            <c-card class="mb-4">
+              <c-card-body>
+                <c-row>
+                  <c-col [md]="12">
+                    <h5>{{ item.title }}</h5>
+                  </c-col>
+                </c-row>
+                <c-row>
+                  @for (control of item.controls; track $index) {
+                  <c-col [md]="control.col">
+                    <label [for]="control.formControlName">{{ control.label }}</label>
+                    @switch (control.type) { @case('search-select') {
+                    <app-search-select
+                      [placeholder]="control.label"
+                      [bindLabel]="control.bindLabel"
+                      [bindValue]="control.bindValue"
+                      [serviceFn]="getProductSearchFn()"
+                      [disabled]="false"
+                      [showError]="control.formControlName === 'prod_id' && almacenError()"
+                      [errorMessage]="almacenError() ? 'Seleccione un almacén primero' : ''"
+                      (onFocus)="onProductSearchFocus()"
+                      (itemSelected)="onSelectItem(control.formControlName, $event)"
+                    ></app-search-select>
+                    } @case('select'){
+                    <select 
+                      class="form-control form-select" 
+                      [class.is-invalid]="control.formControlName === 'alm_id' && almacenError()"
+                      [formControlName]="control.formControlName"
+                      (change)="onAlmacenChange($event)"
+                    >
+                      <option [ngValue]="null">Seleccione</option>
+                      @for (option of control.options; track $index) {
+                      <option [ngValue]="option.value">{{ option.label }}</option>
+                      }
+                    </select>
+                    @if (control.formControlName === 'alm_id' && almacenError()) {
+                      <div class="invalid-feedback d-block">Seleccione un almacén primero</div>
+                    }
+                    } 
+                    @case('checkbox') {
+                    <c-form-check class="mt-2">
+                      <input
+                        cFormCheckInput
+                        type="checkbox"
+                        [formControlName]="control.formControlName"
+                        [id]="control.formControlName"
+                      />
+                      <label cFormCheckLabel [for]="control.formControlName">{{ control.label }}</label>
+                    </c-form-check>
+                    } @default {
+                    <input
+                      [formControlName]="control.formControlName"
+                      [placeholder]="control.placeholder"
+                      [type]="control.type"
+                      class="form-control"
+                    />
+                    } }
+                  </c-col>
+                  }
+                  @if (item.title === 'Agregar Producto') {
+                  <c-col [md]="4" class="mt-4">
+                    <label for="" class="d-none"></label>
+                    <button
+                      type="button"
+                      cButton
+                      color="primary"
+                      (click)="addProductToDetail()"
+                      [disabled]="!form.value.prod_id || !selectedProduct"
+                    >
+                      <svg cIcon name="cilPlus" class="me-2"></svg>
+                      Agregar Producto
+                    </button>
+                  </c-col>
+                  @if (selectedProduct && selectedProductStock() !== null) {
+                  <c-col [md]="12" class="mt-2">
+                    <div class="alert alert-info mb-0 py-2">
+                      <strong>Stock actual:</strong> {{ selectedProductStock() }} unidades en el almacén seleccionado
+                    </div>
+                  </c-col>
+                  }
+                  }
+                </c-row>
+              </c-card-body>
+            </c-card>
+            }
+
+            <!-- Tabla de detalles -->
+            <app-purchase-detail-table
+              [detailsArray]="detailsArray"
+              (detailRemoved)="onDetailRemoved($event)"
+            ></app-purchase-detail-table>
+
+            <!-- Botones de acción -->
+            <c-card class="mb-4">
+              <c-card-body>
+                <c-row class="align-items-end">
+                  <c-col md="8" sm="12" class="mb-2">
+                    <label for="">Observaciones</label>
+                    <textarea class="form-control" formControlName="compr_coment" rows="3"></textarea>
+                  </c-col>
+                  <c-col md="4" sm="12" class="gap-2 text-end">
+                    <button class="me-2" type="button" cButton color="secondary" (click)="resetForm()">
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      cButton
+                      color="success"
+                      (click)="save()"
+                      [disabled]="!form.valid || detailsArray.length === 0"
+                    >
+                      <svg cIcon name="cilSave" class="me-2"></svg>
+                      Guardar Compra
+                    </button>
+                  </c-col>
+                </c-row>
+              </c-card-body>
+            </c-card>
+          </c-container>
+        }
+
+        @if (activeTab() === 'history') {
+          <c-card class="mt-3">
+            <c-card-body>
+              <c-row class="g-3 align-items-end" [formGroup]="formList">
+                <c-col sm="12" md="6" lg="2">
+                  <label for="fecha_inicio" class="form-label">Rango de Fechas</label>
+                  <input
+                    formControlName="fecha_inicio"
+                    type="date"
+                    class="form-control"
+                    id="fecha_inicio"
+                  />
+                </c-col>
+                <c-col sm="12" md="6" lg="2">
+                  <label for="fecha_fin" class="form-label">&nbsp;</label>
+                  <input formControlName="fecha_fin" type="date" class="form-control" id="fecha_fin" />
+                </c-col>
+                <c-col sm="12" md="6" lg="3">
+                  <label for="search" class="form-label">Filtro General</label>
+                  <input
+                    formControlName="search"
+                    type="text"
+                    class="form-control"
+                    id="search"
+                    placeholder="Buscar..."
+                  />
+                </c-col>
+                <c-col sm="12" md="6" lg="4">
+                  <label class="form-label">Filtro de Estados</label>
+                  <div class="form-control fs-7">
+                    <div class="d-flex gap-3 align-items-center">
+                      @for (state of availableStates; track state.id) {
+                        <c-form-check>
+                          <input
+                            cFormCheckInput
+                            type="checkbox"
+                            [checked]="isEstadoChecked(state.id)"
+                            (change)="toggleEstado(state.id)"
+                            [id]="'state_' + state.id"
+                          />
+                          <label cFormCheckLabel [for]="'state_' + state.id" [cTextColor]="state.color">
+                            {{ state.nombre }}
+                          </label>
+                        </c-form-check>
+                      }
+                    </div>
+                  </div>
+                </c-col>
+                <c-col sm="12" md="6" lg="3">
+                  <button cButton color="primary" (click)="onSearch()" class="me-2">
+                    <svg cIcon name="cilSearch"></svg>
+                    Buscar
+                  </button>
+                  <button cButton color="danger" (click)="onClean()">
+                    <svg cIcon name="cilTrash"></svg>
+                    Limpiar
+                  </button>
+                </c-col>
+              </c-row>
+            </c-card-body>
+          </c-card>
+
+          <c-card class="mt-3">
+            <c-card-body>
+              <c-row>
+                <c-col sm="12" md="12" lg="12">
+                  <table cTable [responsive]="true" striped="true">
+                    <thead>
+                      <tr>
+                        <th>Acciones</th>
+                        <th>Nro.</th>
+                        <th>Tipo</th>
+                        <th>Fecha Emisión</th>
+                        <th>Proveedor</th>
+                        <th>Precio Total</th>
+                        <th>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @if (purchases.length > 0) {
+                      @for (purchase of purchases; track $index) {
+                      <tr>
+                        <td>
+                            <button
+                            size="sm"
+                            class="me-2"
+                            cButton
+                            color="secondary"
+                            (click)="onPrint(purchase.compr_id, purchase.numero)"
+                          >
+                            <svg cIcon name="cilPrint"></svg>
+                          </button>
+                          <button
+                            (click)="onEdit(purchase.compr_id)"
+                            size="sm"
+                            class="me-2"
+                            cButton
+                            color="info"
+                          >
+                            <svg cIcon name="cilPencil"></svg>
+                          </button>
+                          <button (click)="onDelete(purchase.compr_id)" size="sm" cButton color="danger">
+                            <svg cIcon name="cilTrash"></svg>
+                          </button>
+                        </td>
+                        <td>{{purchase.numero}}</td>
+                        <td>{{purchase.documento?.doc_nom}}</td>
+                        <td>{{ purchase.fechaEmision | date: 'dd/MM/yyyy' }}</td>
+                        <td>{{ purchase.proveedor?.prov_nom }}</td>
+                        <td>{{ purchase.compr_total | currency: 'S/. ' }}</td>
+                        <td>
+                          <span
+                            class="badge"
+                            [class.bg-warning]="purchase.estado?.estado_cod === 'PEND'"
+                            [class.bg-success]="purchase.estado?.estado_cod === 'COMP'"
+                            [class.bg-danger]="purchase.estado?.estado_cod === 'eliminado'"
+                          >
+                            {{ purchase.estado?.estado_nom }}
+                          </span>
+                        </td>
+                      </tr>
+                      }}
+                      @else {
+                        <tr>
+                          <td colspan="7">
+                            No se encontraron resultados
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                  <app-paginator
+                    [(page)]="pageList.page"
+                    [pageSize]="pageList.pageSize"
+                    [total]="totalList"
+                    (pageChange)="onPageChange($event)"
+                  ></app-paginator>
+                </c-col>
+              </c-row>
+            </c-card-body>
+          </c-card>
+        }
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row>

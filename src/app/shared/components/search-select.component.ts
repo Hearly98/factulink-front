@@ -30,10 +30,16 @@ import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs';
       <input
         type="text"
         class="form-control"
+        [class.is-invalid]="showError"
         [placeholder]="placeholder"
         [formControl]="searchCtrl"
-        (focus)="openDropdown()"
+        (focus)="onInputFocus()"
       />
+
+      <!-- ERROR MESSAGE -->
+      @if (showError && errorMessage) {
+        <div class="invalid-feedback d-block">{{ errorMessage }}</div>
+      }
 
       <!-- DROPDOWN -->
       <c-dropdown [visible]="open" class="w-100 mt-1">
@@ -56,6 +62,11 @@ import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs';
             @for(item of data(); track $index){
               <li cDropdownItem (click)="selectItem(item)">
                 {{ item[bindLabel] }}
+                @if (item.stock_actual !== undefined) {
+                  <span class="text-muted small ms-2">
+                    Stock: {{ item.stock_actual }}
+                  </span>
+                }
               </li>
             }
           }
@@ -71,11 +82,14 @@ export class SearchSelectComponent implements OnInit, OnChanges {
   @Input() bindValue: string = 'value';
   @Input() serviceFn!: (term: string) => any;
   @Input() disabled: boolean = false;
+  @Input() showError: boolean = false;
+  @Input() errorMessage: string = '';
 
   @Input() initialValue: string = '';
 
   @Output() itemSelected = new EventEmitter<any>();
-  @Output() cleared = new EventEmitter<void>(); // opcional, útil
+  @Output() cleared = new EventEmitter<void>();
+  @Output() onFocus = new EventEmitter<void>();
 
   searchCtrl = new FormControl('');
   open = false;
@@ -136,6 +150,11 @@ export class SearchSelectComponent implements OnInit, OnChanges {
 
   closeDropdown() {
     this.open = false;
+  }
+
+  onInputFocus() {
+    this.openDropdown();
+    this.onFocus.emit();
   }
 
   // -----------------------------

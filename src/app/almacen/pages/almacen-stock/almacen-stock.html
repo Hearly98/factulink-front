@@ -16,13 +16,14 @@
                         <input cFormControl type="text" formControlName="prod_nom"
                             placeholder="Nombre o código del producto..." (input)="onSearch()" />
                     </c-col>
-                    <c-col md="2" class="d-flex align-items-end gap-2">
-                        <button (click)="onSearch()" cButton color="info">
+                    <c-col md="4" class="d-flex align-items-end gap-2">
+                        <button (click)="onSearch()" cButton color="primary">
                             <svg cIcon name="cil-search" class="me-2"></svg>
                             Buscar
                         </button>
-                        <button (click)="clearSearch()" cButton color="secondary" variant="ghost">
+                        <button (click)="clearSearch()" cButton color="danger">
                             <svg cIcon name="cil-trash"></svg>
+                            Limpiar
                         </button>
                     </c-col>
                 </div>

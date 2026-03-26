@@ -2,6 +2,7 @@ import { PurchaseDetailCreteDTOForm } from 'src/app/purchase-detail/core/types';
 
 export interface PurchaseCreateDto {
   suc_id: number;
+  alm_id: number;
   doc_id: number;
   prov_id: number;
   mp_id: number;

@@ -13,7 +13,7 @@ import { GetMovimientoModel, MovimientoModel } from '../models/movimiento.model'
 })
 export class MovimientoService extends BaseService {
     constructor(http: HttpClient) {
-        super(http, `${environment.apiUrl}/movimientos`);
+        super(http, `${environment.apiUrl}/kardex/movimientos`);
     }
 
     getAll(): Observable<ResponseDto<GetMovimientoModel[]>> {
@@ -29,7 +29,11 @@ export class MovimientoService extends BaseService {
     }
 
     update(body: MovimientoModel): Observable<ResponseDto<GetMovimientoModel>> {
-        return this.putRequest<MovimientoModel, ResponseDto<GetMovimientoModel>>(`/${body.mov_id}`, body);
+        return this.putRequest<MovimientoModel, ResponseDto<GetMovimientoModel>>('/', body);
+    }
+
+    delete(id: number): Observable<ResponseDto<GetMovimientoModel>> {
+        return this.deleteRequest(`/${id}`);
     }
 
     search(body: QueryParamsModel): Observable<ResponseDto<QueryResultsModel<GetMovimientoModel>>> {

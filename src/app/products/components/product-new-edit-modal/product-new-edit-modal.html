@@ -1,4 +1,5 @@
-<c-modal alignment="center" [visible]="visible" backdrop="static" size="lg">
+@if (form) {
+  <c-modal alignment="center" [visible]="visible" backdrop="static" size="lg">
   <c-modal-body class="modal-body">
     <c-row class="mb-2">
       <c-col [sm]="6" class="space-between">
@@ -15,14 +16,14 @@
                 @case ('select') {
                   <select
                     class="form-control form-select"
-                    name=""
-                    id=""
+                    [name]="item.label"
+                    [id]="item.formControlName + 'id'"
                     [formControlName]="item.formControlName"
                   >
                     <option [ngValue]="null">Seleccione</option>
-                    @for (dataItem of getDataSource(item); track $index) {
-                      <option [ngValue]="getIdField(item, dataItem)">
-                        {{ getDisplayField(item, dataItem) }}
+                    @for (dataItem of item.options; track $index) {
+                      <option [ngValue]="dataItem.value">
+                        {{ dataItem.label }}
                       </option>
                     }
                   </select>
@@ -35,7 +36,7 @@
                     >
                       <svg cIcon name="cilCloudUpload" class="me-1"></svg>
                       @if (isCompressing()) {
-                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                        <c-spinner size="sm" class="me-2"></c-spinner>
                         Comprimiendo...
                       } @else {
                         {{ selectedFile ? 'Cambiar Imagen' : 'Seleccionar Imagen' }}
@@ -53,7 +54,7 @@
                       <div class="position-relative mt-2">
                         <img
                           [src]="imagePreview()"
-                          alt="Imagen Preview"
+                          alt="Preview"
                           class="img-thumbnail shadow-sm"
                           style="
                             width: 100px;
@@ -127,3 +128,4 @@
     </button>
   </c-modal-footer>
 </c-modal>
+}

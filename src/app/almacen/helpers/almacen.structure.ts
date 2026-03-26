@@ -1,7 +1,7 @@
 import { GetSucursalModel } from 'src/app/sucursal/core/models';
 
 export const AlmacenStructure = (sucursales?: GetSucursalModel[]) => {
-  let sucursalOptions = null;
+  let sucursalOptions: { label: string; value: number }[] = [];
   if (sucursales) {
     sucursalOptions = sucursales.map((s) => ({ label: s.suc_nom, value: s.suc_id }));
   }
