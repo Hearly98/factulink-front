@@ -44,7 +44,9 @@ export class MenuOptionsNavService {
 
     if (menuItemsJson && !updateMenuConfig) {
       const items: INavData[] = JSON.parse(menuItemsJson);
-      return of(items);
+      // Limpiar iconos también para el menú cacheado
+      const cleanedItems = this.cleanMenuIcons(items);
+      return of(cleanedItems);
     }
 
     sessionStorage.setItem("updateMenuConfig", "false");
@@ -95,6 +97,37 @@ export class MenuOptionsNavService {
   }
 
   /**
+   * Limpia los iconos del menú para evitar warnings de CoreUI
+   * Elimina iconos inválidos o 'nav-icon-bullet' de menús cacheados
+   */
+  private cleanMenuIcons(items: INavData[]): INavData[] {
+    return items.map((item) => {
+      // Limpiar icono del item actual
+      const iconValue = (item as any).icon;
+      const iconComponentName = item.iconComponent?.name;
+      
+      // Eliminar propiedad 'icon' si existe (causa el warning)
+      delete (item as any).icon;
+      
+      // Verificar si el iconComponent es válido
+      const isValidIcon = iconComponentName && 
+        iconComponentName !== 'nav-icon-bullet' && 
+        iconComponentName.trim().length > 0;
+      
+      if (!isValidIcon) {
+        item.iconComponent = undefined;
+      }
+
+      // Procesar hijos recursivamente
+      if (item.children && item.children.length > 0) {
+        item.children = this.cleanMenuIcons(item.children);
+      }
+
+      return item;
+    });
+  }
+
+  /**
    * Mapea las opciones de menú a INavData de forma recursiva
    */
   private mapMenuOptions(options: MenuOptionDto[]): INavData[] {
@@ -104,10 +137,15 @@ export class MenuOptionsNavService {
           ? this.mapMenuOptions(o.children) 
           : undefined;
 
+        // Limpiar el icono - si no hay icono válido, no enviar nada
+        // Los submódulos sin icono no deben tener propiedad icon ni iconComponent
+        const menuIcon = o.menuIcon?.trim() || '';
+        const hasValidIcon = menuIcon.length > 0 && menuIcon !== 'nav-icon-bullet';
+
         return {
           name: o.name,
           url: o.menuUri,
-          iconComponent: o.menuIcon ? { name: o.menuIcon } : undefined,
+          ...(hasValidIcon ? { iconComponent: { name: menuIcon } } : {}),
           children: children,
         } as INavData;
       })

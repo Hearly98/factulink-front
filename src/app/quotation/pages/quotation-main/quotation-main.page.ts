@@ -22,29 +22,29 @@ import { MODULES } from '../../../core/config/permissions/modules';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 import { ValidationMessagesComponent } from '@shared/components/error-messages/validation-messages.component';
 import { SearchSelectComponent } from '@shared/components/search-select.component';
+import { DateRangePickerComponent } from '@shared/components/date-range-picker/date-range-picker.component';
 import { QuotationService } from '../../core/services/quotation.service';
 import { QuotationModel } from '../../core/models/quotation.model';
-import { BaseSearchComponent } from '@shared/base/search-base.component';
 import { PageParamsModel } from '@shared/models/query/page-params.model';
 import { PaginatorComponent } from 'src/app/paginator/paginator.component';
 import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
-import { buildFilterForm, filterSort, mapParams } from '../../helpers';
-import { QuotationFilterForm } from '../../core/types';
+import { buildFilterForm, filterSort, mapParams, messages } from '../../helpers';
 import { quotationStructure } from '../../helpers/quotation-structure';
 import { buildQuotationForm } from '../../helpers/build-quotation-form';
 import { buildQuotationDetailForm } from '../../helpers/build-quotation-detail-form';
 import { QuotationDetailTableComponent } from '../../components/quotation-detail-table.component';
 import { QuotationCreateDto, QuotationDetailCreateDto, QuotationForm } from '../../core/types';
-import { messages } from '../../helpers';
 import { TypedFormGroup } from '@shared/types/types-form';
 import { CustomerService } from 'src/app/customer/core/services/customer.service';
 import { ProductService } from 'src/app/products/core/services/product.service';
 import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service';
 import { CurrencyService } from 'src/app/currency/core/services/currency.service';
 import { PaymentMethodService } from 'src/app/payment-method/core/services/payment-method.service';
-import { SelectOption } from '@shared/types';
 import { GetSucursalModel } from 'src/app/sucursal/core/models';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { forkJoin } from 'rxjs';
+import { UserService } from 'src/app/user/core/services/user.service';
+import { AuthService } from 'src/app/core/auth/services/auth.service';
 
 @Component({
   selector: 'app-quotation-main',
@@ -60,6 +60,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     ButtonDirective,
     ReactiveFormsModule,
     SearchSelectComponent,
+    DateRangePickerComponent,
     QuotationDetailTableComponent,
     ValidationMessagesComponent,
     SpinnerComponent,
@@ -77,12 +78,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class QuotationMainPage extends BaseComponent implements OnInit {
   public activeTab = signal<'create' | 'history'>('create');
-  
+
   public isLoadingList = signal(false);
   public quotations: QuotationModel[] = [];
   public totalList = 0;
   public pageList = new PageParamsModel(1, 10);
-  
+
   public isLoadingForm = signal(false);
   public form!: TypedFormGroup<QuotationForm>;
   public selectedProduct: any = null;
@@ -90,26 +91,27 @@ export class QuotationMainPage extends BaseComponent implements OnInit {
   public searchSelectLabels: Record<string, string> = {};
   public errorMessages = messages;
   public structure = signal(quotationStructure());
-  
+
   public sucursales: GetSucursalModel[] = [];
-  
+
   availableStates = [
     { codigo: '01', nombre: 'Pendientes', color: 'warning' },
     { codigo: '02', nombre: 'Aprobados', color: 'success' },
     { codigo: '03', nombre: 'Anulados', color: 'danger' },
   ];
-  
-  #formBuilder = inject(FormBuilder);
-  #paymentMethodService = inject(PaymentMethodService);
-  #quotationService = inject(QuotationService);
-  #customerService = inject(CustomerService);
-  #productService = inject(ProductService);
-  #sucursalService = inject(SucursalService);
-  #currencyService = inject(CurrencyService);
-  #globalNotification = inject(GlobalNotification);
-  #route = inject(ActivatedRoute);
-  #router = inject(Router);
-  #confirmService = inject(ConfirmService);
+
+  readonly #formBuilder = inject(FormBuilder);
+  readonly #paymentMethodService = inject(PaymentMethodService);
+  readonly #quotationService = inject(QuotationService);
+  readonly #userService = inject(UserService);
+  readonly #customerService = inject(CustomerService);
+  readonly #productService = inject(ProductService);
+  readonly #sucursalService = inject(SucursalService);
+  readonly #currencyService = inject(CurrencyService);
+  readonly #globalNotification = inject(GlobalNotification);
+  readonly #route = inject(ActivatedRoute);
+  readonly #confirmService = inject(ConfirmService);
+  readonly #authService = inject(AuthService);
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.SALES, viewContainerRef);
@@ -117,13 +119,13 @@ export class QuotationMainPage extends BaseComponent implements OnInit {
 
   ngOnInit(): void {
     this.formList = this.#formBuilder.group(buildFilterForm());
-    
+
     const id = this.#route.snapshot.params['id'];
     if (id) {
       this.quotaId.set(Number(id));
       this.activeTab.set('create');
     }
-    
+
     this.loadForm();
     this.loadListData();
     this.loadSelectCombos();
@@ -131,7 +133,11 @@ export class QuotationMainPage extends BaseComponent implements OnInit {
 
   loadForm() {
     this.form = this.#formBuilder.group(buildQuotationForm());
-    
+    const currentUserId = this.#authService.user()?.id;
+    if (currentUserId) {
+      this.form.patchValue({ usu_id: currentUserId });
+    }
+
     if (this.quotaId()) {
       this.loadQuotation(this.quotaId()!);
     }
@@ -159,24 +165,24 @@ export class QuotationMainPage extends BaseComponent implements OnInit {
         this.isLoadingForm.set(false);
         if (response.isValid && response.data) {
           const data = response.data;
-          
+
           const fechaEmision = data.fecha_emision ? data.fecha_emision.substring(0, 10) : '';
           const fechaValido = data.fecha_valido_hasta ? data.fecha_valido_hasta.substring(0, 10) : '';
-          
+
           const { detalles, ...rest } = data;
-          
+
           this.form.patchValue({
             ...rest,
             fecha_emision: fechaEmision,
             fecha_valido_hasta: fechaValido,
           });
-          
+
           if (data.cliente) {
             this.searchSelectLabels['cli_id'] = data.cliente.cli_nom;
           }
-          
+
           this.patchCustomer(data.cliente);
-          
+
           this.detailsArray.clear();
           data.detalles.forEach((det: any) => {
             this.detailsArray.push(this.#formBuilder.group(buildQuotationDetailForm({
@@ -278,34 +284,14 @@ export class QuotationMainPage extends BaseComponent implements OnInit {
   }
 
   loadSelectCombos() {
-    const currencies: SelectOption[] = [];
-    const sucursalOptions: SelectOption[] = [];
-    const paymentMethods: SelectOption[] = [];
-
-    this.#currencyService.getAll().subscribe({
-      next: (response) =>
-        response.data.forEach((item) => {
-          currencies.push({ value: item.mon_id, label: item.mon_nom });
-        }),
-    });
-
-    this.#sucursalService.getAll().subscribe({
-      next: (response) => {
-        response.data.forEach((item) => {
-          sucursalOptions.push({ value: item.suc_id, label: item.suc_nom });
-        });
-      },
-    });
-
-    this.#paymentMethodService.getAll().subscribe({
-      next: (response) => {
-        response.data.forEach((item) => {
-          paymentMethods.push({ value: item.mp_id, label: item.mp_nom });
-        });
-      },
-    });
-
-    this.structure.set(quotationStructure(currencies, sucursalOptions, paymentMethods));
+    forkJoin({
+      currencies: this.#currencyService.getAll(),
+      sucursal: this.#sucursalService.getAll(),
+      paymentMethods: this.#paymentMethodService.getAll(),
+      vendedores: this.#userService.getAll()
+    }).subscribe(({ currencies, sucursal, paymentMethods, vendedores }) => {
+      this.structure.set(quotationStructure(currencies.data, sucursal.data, paymentMethods.data, vendedores.data));
+    })
   }
 
   save() {
@@ -316,7 +302,7 @@ export class QuotationMainPage extends BaseComponent implements OnInit {
     }
 
     this.isLoadingForm.set(true);
-    
+
     const quotationData: QuotationCreateDto = {
       ...(this.form.getRawValue() as any),
       detalles: this.detailsArray.getRawValue().map((v) => {
@@ -383,9 +369,9 @@ export class QuotationMainPage extends BaseComponent implements OnInit {
     if (!this.formList) {
       this.formList = this.#formBuilder.group(buildFilterForm());
     }
-    
+
     const sort = filterSort(this.formList.value) as { property: string; direction: string }[];
-    const filterToUse = filter || mapParams(this.formList.value);
+    const filterToUse = filter ?? mapParams(this.formList.value);
     const pageSize = 10;
     const pageParams = new PageParamsModel(page, pageSize);
 
@@ -456,27 +442,12 @@ export class QuotationMainPage extends BaseComponent implements OnInit {
       });
   }
 
-  onPrint(id: number, number_serie: string) {
+  onPrint(id: number) {
     this.#quotationService.print(id).subscribe({
       next: (response) => {
         const blob = response.body as Blob;
-        const contentDisposition = response.headers.get('content-disposition');
-        let filename = `${number_serie}.pdf`;
-
-        if (contentDisposition) {
-          const match = contentDisposition.match(/filename="?([^";\\n]*)"?/);
-          if (match && match[1]) {
-            filename = match[1];
-          }
-        }
-
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        window.open(url, '_blank');
         window.URL.revokeObjectURL(url);
       },
       error: (error) => {
@@ -489,5 +460,20 @@ export class QuotationMainPage extends BaseComponent implements OnInit {
     this.activeTab.set('create');
     this.quotaId.set(id);
     this.loadQuotation(id);
+  }
+
+  onDateRangeChange(range: { start: Date | null; end: Date | null }) {
+    const formatDateForApi = (date: Date | null): string => {
+      if (!date) return '';
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    this.formList.patchValue({
+      fecha_desde: range.start ? formatDateForApi(range.start) : null,
+      fecha_hasta: range.end ? formatDateForApi(range.end) : null,
+    });
   }
 }

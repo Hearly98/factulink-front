@@ -1,0 +1,63 @@
+<div class="date-range-picker" #container>
+  @if (label) {
+  <label class="form-label">{{ label }}</label>
+  }
+
+  <div class="input-group" (click)="toggle()">
+    <span class="input-group-text">
+      <svg cIcon name="cil-calendar"></svg>
+    </span>
+
+    <!-- Input Desde -->
+    <input type="text" class="form-control" [placeholder]="placeholderStart" [value]="displayStart" readonly />
+    <!-- Input Hasta -->
+    <input type="text" class="form-control" [placeholder]="placeholderEnd" [value]="displayEnd" readonly />
+  </div>
+
+  <!-- Dropdown con calendario -->
+  @if (isOpen()) {
+  <div class="date-range-dropdown" (click)="onDropdownClick($event)">
+    <!-- Navegación de meses -->
+    <div class="calendar-header">
+      <button type="button" class="btn btn-sm btn-link" (click)="prevMonth()">
+        <svg cIcon name="cil-chevron-left"></svg>
+      </button>
+      <span class="month-year" (click)="goToToday()">
+        {{ getMonthName(currentMonth()) }} {{ currentYear() }}
+      </span>
+      <button type="button" class="btn btn-sm btn-link" (click)="nextMonth()">
+        <svg cIcon name="cil-chevron-right"></svg>
+      </button>
+    </div>
+
+    <!-- Días de la semana -->
+    <div class="calendar-weekdays">
+      @for (day of weekDays; track day) {
+      <span class="weekday">{{ day }}</span>
+      }
+    </div>
+
+    <!-- Días del calendario -->
+    <div class="calendar-grid">
+      @for (day of calendarDays; track $index) {
+      <button type="button" class="calendar-day" [class.other-month]="!day.isCurrentMonth" [class.today]="day.isToday"
+        [class.disabled]="day.isDisabled" [class.selected]="day.isSelected" [class.in-range]="day.isInRange"
+        [class.range-start]="day.isRangeStart" [class.range-end]="day.isRangeEnd" [class.same-day]="day.isSameDay"
+        [disabled]="day.isDisabled || !day.isCurrentMonth" (click)="onDayClick(day)">
+        {{ day.day }}
+      </button>
+      }
+    </div>
+
+    <!-- Acciones -->
+    <div class="calendar-actions">
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearRange()">
+        Limpiar
+      </button>
+      <button type="button" class="btn btn-sm btn-primary" (click)="applyRange()">
+        Aplicar
+      </button>
+    </div>
+  </div>
+  }
+</div>

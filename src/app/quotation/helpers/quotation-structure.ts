@@ -1,4 +1,9 @@
+import { mapToSelectOption } from '@shared/functions';
 import { SelectOption } from '@shared/types';
+import { GetCurrencyModel } from 'src/app/currency/core/models/get-currency.model';
+import { GetPaymentMethodModel } from 'src/app/payment-method/core/models';
+import { GetSucursalModel } from 'src/app/sucursal/core/models';
+import { GetUserModel } from 'src/app/user/core/models';
 
 export interface QuotationStructureControl {
   label: string;
@@ -20,10 +25,15 @@ export interface QuotationStructureSection {
 }
 
 export function quotationStructure(
-  currencies: SelectOption[] = [],
-  sucursales: SelectOption[] = [],
-  tipoPagos: SelectOption[] = []
+  currenciesOptions: GetCurrencyModel[] = [],
+  sucursalesOptions: GetSucursalModel[] = [],
+  tipoPagosOptions: GetPaymentMethodModel[] = [],
+  vendedoresOptions: GetUserModel[] = []
 ): QuotationStructureSection[] {
+  const currencies = mapToSelectOption(currenciesOptions, 'mon_id', 'mon_nom');
+  const sucursales = mapToSelectOption(sucursalesOptions, 'suc_id', 'suc_nom');
+  const tipoPagos = mapToSelectOption(tipoPagosOptions, 'mp_id', 'mp_nom');
+  const vendedores = mapToSelectOption(vendedoresOptions, 'usu_id', 'usu_nom');
   return [
     {
       title: 'Información de la Cotización',
@@ -32,22 +42,29 @@ export function quotationStructure(
           label: 'Fecha de Emisión',
           formControlName: 'fecha_emision',
           type: 'date',
-          col: 4,
+          col: 3,
         },
         {
           label: 'Sucursal',
           formControlName: 'suc_id',
           type: 'select',
-          col: 4,
+          col: 3,
           options: sucursales,
         },
         {
           label: 'Moneda',
           formControlName: 'mon_id',
           type: 'select',
-          col: 4,
+          col: 3,
           options: currencies,
           showControlName: 'mostrar_moneda',
+        },
+        {
+          label: 'Vendedor',
+          formControlName: 'usu_id',
+          type: 'select',
+          col: 3,
+          options: vendedores,
         },
       ],
     },
@@ -112,13 +129,6 @@ export function quotationStructure(
       title: 'Agregar Producto',
       controls: [
         {
-          label: 'Almacén',
-          formControlName: 'alm_id',
-          type: 'select',
-          col: 4,
-          options: [],
-        },
-        {
           label: 'Producto',
           formControlName: 'prod_id',
           type: 'search-select',
@@ -128,22 +138,22 @@ export function quotationStructure(
           serviceFnName: 'productSearch',
         },
         {
-          label: '¿Incluye I.G.V?',
+          label: 'Incluye IGV',
           formControlName: 'igv_requerido',
           type: 'select',
           col: 4,
           options: [
-            { label: 'Sí', value: true },
+            { label: 'Si', value: true },
             { label: 'No', value: false },
           ],
         },
         {
-          label: '¿Mostrar Total?',
+          label: 'Mostrar Total',
           formControlName: 'mostrar_total',
           type: 'select',
           col: 4,
           options: [
-            { label: 'Sí', value: true },
+            { label: 'Si', value: true },
             { label: 'No', value: false },
           ],
         },

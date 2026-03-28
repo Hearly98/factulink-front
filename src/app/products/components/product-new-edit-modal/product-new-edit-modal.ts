@@ -135,7 +135,6 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
   }
 
   onSubmit() {
-    debugger
     if (this.form.valid) {
       this.isLoading.set(true);
       if (this.form.value.prod_id) {
@@ -200,8 +199,6 @@ export class ProductNewEditModal extends BaseComponent implements OnInit {
 
   update() {
     const body = this.buildFormData();
-    body.append('_method', 'PUT');
-
     const subscription = this.#productService.update(body).subscribe({
       next: (response) => {
         if (response.isValid) {

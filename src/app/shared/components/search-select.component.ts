@@ -125,10 +125,16 @@ export class SearchSelectComponent implements OnInit, OnChanges {
         }),
         switchMap((term) => this.serviceFn(term || ''))
       )
-      .subscribe((resp: any) => {
-        const parsed = resp.data || resp;
-        this.data.set(parsed);
-        this.loading.set(false);
+      .subscribe({
+        next: (resp: any) => {
+          const parsed = resp.data || resp;
+          this.data.set(parsed);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.data.set([]);
+          this.loading.set(false);
+        }
       });
   }
 

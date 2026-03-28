@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BaseService } from '../../../shared/services/base.service';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
-import { ProductModel } from '../models/product.model';
+import { Observable } from 'rxjs';
 import { ResponseDto } from '../../../shared/models/api/response.dto';
 import { QueryParamsModel } from '../../../shared/models/query/query-params.model';
 import { QueryResultsModel } from '../../../shared/models/query/query-results.model';
@@ -36,9 +35,9 @@ export class ProductService extends BaseService {
 
   update(body: UpdateProductModel | FormData): Observable<ResponseDto<GetProductModel>> {
     if (body instanceof FormData) {
-      return this.putRequestForm<ResponseDto<GetProductModel>>('/', body);
+      return this.postRequestForm<ResponseDto<GetProductModel>>('/update', body);
     }
-    return this.putRequest<UpdateProductModel, ResponseDto<GetProductModel>>('/', body);
+    return this.postRequest<UpdateProductModel, ResponseDto<GetProductModel>>('/update', body);
   }
 
   getById(id: number): Observable<ResponseDto<GetProductModel>> {
@@ -62,5 +61,13 @@ export class ProductService extends BaseService {
     alm_id?: number;
   }): Observable<ResponseDto<GetProductModel[]>> {
     return this.postRequest(`/search-quick`, body);
+  }
+
+  /**
+   * Search all products without warehouse requirement
+   * Used for Cotizaciones where stock is not affected
+   */
+  searchAll(term: string): Observable<ResponseDto<GetProductModel[]>> {
+    return this.postRequest('/search-all', { term });
   }
 }

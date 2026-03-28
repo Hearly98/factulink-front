@@ -58,7 +58,7 @@
                       class="form-control form-select" 
                       [class.is-invalid]="control.formControlName === 'alm_id' && almacenError()"
                       [formControlName]="control.formControlName"
-                      (change)="onAlmacenChange($event)"
+                      (change)="onSelectChange(control.formControlName, $event)"
                     >
                       <option [ngValue]="null">Seleccione</option>
                       @for (option of control.options; track $index) {

@@ -180,6 +180,49 @@ export class PurchaseMainPage extends BaseSearchComponent implements OnInit {
     });
   }
 
+  onSelectChange(controlName: string, event: Event) {
+    const value = (event.target as HTMLSelectElement).value;
+    
+    if (controlName === 'suc_id' && value) {
+      this.form.patchValue({ suc_id: parseInt(value), alm_id: null });
+      this.loadAlmacenesBySucursal(parseInt(value));
+      this.selectedProductStock.set(null);
+      this.selectedProduct = null;
+    } else if (controlName === 'alm_id' && value) {
+      this.almacenError.set(false);
+      this.form.patchValue({ alm_id: parseInt(value) });
+      this.selectedProductStock.set(null);
+      if (this.selectedProduct) {
+        this.loadProductStock(this.selectedProduct.prod_id);
+      }
+    }
+  }
+
+  loadAlmacenesBySucursal(sucId: number) {
+    this.#almacenService.getAll().subscribe({
+      next: (response) => {
+        const filteredAlmacenes = response.data
+          .filter((a: any) => a.suc_id === sucId)
+          .map((item: any) => ({ value: item.almacen_id, label: item.nombre }));
+        this.almacenOptions = filteredAlmacenes;
+        
+        const currentStructure = this.structure();
+        const updatedControls = currentStructure[2].controls.map(control => {
+          if (control.formControlName === 'alm_id') {
+            return { ...control, options: filteredAlmacenes };
+          }
+          return control;
+        });
+        
+        this.structure.set([
+          currentStructure[0],
+          currentStructure[1],
+          { ...currentStructure[2], controls: updatedControls }
+        ]);
+      },
+    });
+  }
+
   onAlmacenChange(event: Event) {
     const value = (event.target as HTMLSelectElement).value;
     if (value) {
