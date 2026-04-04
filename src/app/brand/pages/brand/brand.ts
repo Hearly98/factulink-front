@@ -78,7 +78,7 @@ export class BrandComponent extends BaseSearchComponent implements OnInit {
       next: (response) => {
         if (response.isValid) {
           this.marcas = response.data.items || [];
-          this.total = this.marcas.length;
+          this.total = response.data.total;
         }
       },
       error: (response) => {

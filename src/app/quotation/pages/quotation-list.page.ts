@@ -24,8 +24,6 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
 import { QuotationService } from '../core/services/quotation.service';
 import { QuotationModel } from '../core/models/quotation.model';
 import { Router } from '@angular/router';
-import { TypedFormGroup } from '@shared/types/types-form';
-import { QuotationFilterForm } from '../core/types';
 import { buildFilterForm, filterSort, mapParams } from '../helpers';
 import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service';
 import { GetSucursalModel } from 'src/app/sucursal/core/models';
@@ -52,148 +50,7 @@ import { GetSucursalModel } from 'src/app/sucursal/core/models';
     DatePipe,
     CurrencyPipe,
   ],
-  template: `
-    <c-row>
-      <c-col>
-        <h4>{{ title }}</h4>
-      </c-col>
-    </c-row>
-
-    <c-card class="mt-3">
-      <c-card-body>
-        <c-row class="g-3 align-items-end" [formGroup]="form">
-          <c-col sm="12" md="6" lg="2">
-            <label for="fecha_desde" class="form-label">Desde</label>
-            <input
-              formControlName="fecha_desde"
-              type="date"
-              class="form-control"
-              id="fecha_desde"
-            />
-          </c-col>
-          <c-col sm="12" md="6" lg="2">
-            <label for="fecha_hasta" class="form-label">Hasta</label>
-            <input formControlName="fecha_hasta" type="date" class="form-control" id="fecha_hasta" />
-          </c-col>
-          <c-col sm="12" md="6" lg="2">
-            <label for="suc_id" class="form-label">Sucursal</label>
-            <select cSelect formControlName="suc_id" id="suc_id">
-              <option [value]="null">Todas</option>
-              @for (sucursal of sucursales; track sucursal.suc_id) {
-                <option [value]="sucursal.suc_id">{{ sucursal.suc_nom }}</option>
-              }
-            </select>
-          </c-col>
-          <c-col sm="12" md="6" lg="2">
-            <label for="nombre" class="form-label">Filtro General</label>
-            <input
-              formControlName="nombre"
-              type="text"
-              class="form-control"
-              id="nombre"
-              placeholder="Número o cliente..."
-            />
-          </c-col>
-          <c-col sm="12" md="6" lg="4">
-            <label class="form-label">Filtro de Estados</label>
-            <div class="form-control fs-7">
-              <div class="d-flex gap-3 align-items-center">
-                @for (state of availableStates; track state.codigo) {
-                  <c-form-check>
-                    <input
-                      cFormCheckInput
-                      type="checkbox"
-                      [checked]="isEstadoChecked(state.codigo)"
-                      (change)="toggleEstado(state.codigo)"
-                      [id]="'state_' + state.codigo"
-                    />
-                    <label cFormCheckLabel [for]="'state_' + state.codigo" [cTextColor]="state.color">
-                      {{ state.nombre }}
-                    </label>
-                  </c-form-check>
-                }
-              </div>
-            </div>
-          </c-col>
-          <c-col sm="12" md="6" lg="3">
-            <button cButton color="primary" (click)="onSearch()" class="me-2">
-              <svg cIcon name="cilSearch"></svg>
-              Buscar
-            </button>
-            <button cButton color="danger" (click)="onClean()">
-              <svg cIcon name="cilTrash"></svg>
-              Limpiar
-            </button>
-          </c-col>
-        </c-row>
-      </c-card-body>
-    </c-card>
-
-    <c-card class="mt-3">
-      <c-card-body>
-        <c-row>
-          <c-col sm="12">
-            <table cTable [responsive]="true" striped="true">
-              <thead>
-                <tr>
-                  <th>Acciones</th>
-                  <th>Nro.</th>
-                  <th>Fecha Emisión</th>
-                  <th>Cliente</th>
-                  <th>Precio Total</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                @if(quotations.length > 0){
-                  @for (quotation of quotations; track quotation.cot_id) {
-                    <tr>
-                      <td>
-                        @if(quotation.estado_cotizacion?.codigo !== '03'){
-                          <button size="sm" class="me-2" cButton color="secondary" (click)="onPrint(quotation.cot_id, quotation.numero_completo)">
-                            <svg cIcon name="cilPrint"></svg>
-                          </button>
-                        }
-                        @if(quotation.estado_cotizacion?.codigo !== '03'){
-                          <button size="sm" class="me-2" cButton color="info" (click)="onEdit(quotation.cot_id)">
-                            <svg cIcon name="cilPencil"></svg>
-                          </button>
-                        }
-                        @if(quotation.estado_cotizacion?.codigo !== '03'){
-                          <button (click)="onDelete(quotation.cot_id)" size="sm" cButton color="danger">
-                            <svg cIcon name="cilTrash"></svg>
-                          </button>
-                        }
-                      </td>
-                      <td>{{ quotation.numero_completo }}</td>
-                      <td>{{ quotation.fecha_emision | date: 'dd/MM/yyyy' }}</td>
-                      <td>{{ quotation.cliente?.cli_nom }}</td>
-                      <td>{{ quotation.cot_total | currency: 'S/. ' }}</td>
-                      <td>
-                        <span class="badge" [class.bg-warning]="quotation.estado_cotizacion?.color === 'warning'" [class.bg-success]="quotation.estado_cotizacion?.color === 'success'" [class.bg-danger]="quotation.estado_cotizacion?.color === 'danger'">
-                          {{ quotation.estado_cotizacion?.nombre }}
-                        </span>
-                      </td>
-                    </tr>
-                  }
-                } @else {
-                  <tr>
-                    <td colspan="6">No hay datos</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-            <app-paginator
-              [(page)]="page.page"
-              [pageSize]="page.pageSize"
-              [total]="total"
-              (pageChange)="onPageChange($event)"
-            ></app-paginator>
-          </c-col>
-        </c-row>
-      </c-card-body>
-    </c-card>
-  `,
+  templateUrl: './quotation-list.page.html',
 })
 export class QuotationListPage extends BaseSearchComponent implements OnInit {
   title = 'Cotizaciones';
@@ -207,12 +64,12 @@ export class QuotationListPage extends BaseSearchComponent implements OnInit {
     { codigo: '03', nombre: 'Anulados', color: 'danger' },
   ];
 
-  #router = inject(Router);
-  #formBuilder = inject(FormBuilder);
-  #quotationService = inject(QuotationService);
-  #sucursalService = inject(SucursalService);
-  #confirmService = inject(ConfirmService);
-  #globalNotification = inject(GlobalNotification);
+  readonly #router = inject(Router);
+  readonly #formBuilder = inject(FormBuilder);
+  readonly #quotationService = inject(QuotationService);
+  readonly #sucursalService = inject(SucursalService);
+  readonly #confirmService = inject(ConfirmService);
+  readonly #globalNotification = inject(GlobalNotification);
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.SALES, viewContainerRef);
@@ -269,7 +126,7 @@ export class QuotationListPage extends BaseSearchComponent implements OnInit {
         }
       },
       error: (error) => {
-        this.#globalNotification.openToastAlert('Error', error.messages, 'danger');
+        this.#globalNotification.openAlert(error.error);
       },
     });
   }
@@ -309,43 +166,24 @@ export class QuotationListPage extends BaseSearchComponent implements OnInit {
               }
             },
             error: (error) => {
-              this.#globalNotification.openToastAlert('Error', error.messages, 'danger');
+              this.#globalNotification.openAlert(error.error);
             },
           });
         }
       });
   }
 
-  onPrint(id: number, number_serie: string) {
+  onPrint(id: number) {
     this.#quotationService.print(id).subscribe({
       next: (response) => {
         const blob = response.body as Blob;
-        const contentDisposition = response.headers.get('content-disposition');
-        let filename = `${number_serie}.pdf`;
-
-        if (contentDisposition) {
-          const match = contentDisposition.match(/filename="?([^";\\n]*)"?/);
-          if (match && match[1]) {
-            filename = match[1];
-          }
-        }
-
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        window.open(url, '_blank');
         window.URL.revokeObjectURL(url);
       },
       error: (error) => {
-        this.#globalNotification.openToastAlert(
-          'Error',
-          error.message,
-          'danger'
-        );
-      }
+        this.#globalNotification.openAlert(error.error);
+      },
     });
   }
 

@@ -28,171 +28,157 @@
         </ul>
 
         @if (activeTab() === 'create') {
-          <c-container fluid class="p-0 mt-3">
-            <c-card>
-              <c-card-body [formGroup]="form">
-                @if (isLoadingCombos()) {
-                  <div class="text-center py-5">
-                    <c-spinner></c-spinner>
-                  </div>
-                } @else {
-                  <c-row class="g-3">
-                    @for (field of filteredFields(); track field.formControlName) {
-                      <c-col [md]="field.col">
-                        <label class="form-label">{{ field.label }}</label>
+          <c-container fluid class="p-0 mt-3" [formGroup]="form">
+            <c-card class="mb-3">
+              <c-card-body>
+                <c-row class="g-3">
+                  @for (field of fields(); track field.formControlName) {
+                    <c-col [md]="field.col">
+                      <label [for]="field.formControlName" class="form-label">{{
+                        getWarehouseLabel(field)
+                      }}</label>
 
-                        @switch (field.type) {
-                          @case ('select') {
-                            <select
-                              class="form-control form-select"
-                              [formControlName]="field.formControlName"
-                              [class.is-invalid]="
-                                form.get(field.formControlName)?.invalid &&
-                                form.get(field.formControlName)?.touched
-                              "
-                            >
-                              <option [value]="null">Seleccione...</option>
-                              @if (
-                                field.formControlName === 'alm_id_ori' ||
-                                field.formControlName === 'alm_id_des'
-                              ) {
-                                @for (alm of almacenes; track alm.almacen_id) {
-                                  <option [value]="alm.almacen_id">{{ alm.nombre }}</option>
-                                }
+                      @switch (field.type) {
+                        @case ('select') {
+                          <select
+                            class="form-control form-select"
+                            [formControlName]="field.formControlName"
+                            [class.is-invalid]="
+                              form.get(field.formControlName)?.invalid &&
+                              form.get(field.formControlName)?.touched
+                            "
+                          >
+                            <option [ngValue]="null">Seleccione...</option>
+                            @if (
+                              field.formControlName === 'almacen_origen_id' ||
+                              field.formControlName === 'almacen_destino_id'
+                            ) {
+                              @for (alm of almacenes; track $index) {
+                                <option [ngValue]="alm.almacen_id">{{ alm.nombre }}</option>
                               }
-                              @if (field.formControlName === 'mov_tip') {
-                                <option value="TRANSFERENCIA">Transferencia</option>
-                                <option value="INGRESO">Ingreso</option>
-                                <option value="SALIDA">Salida</option>
-                                <option value="AJUSTE">Ajuste</option>
-                              }
-                            </select>
-                          }
-                          @case ('checkbox') {
-                            <div class="d-flex align-items-center">
-                              <input
-                                type="checkbox"
-                                [formControlName]="field.formControlName"
-                                class="me-2"
-                                [id]="field.formControlName"
-                              />
-                              <label class="form-label" [for]="field.formControlName"
-                                >Guía de Remisión</label
-                              >
-                            </div>
-                          }
-                          @default {
-                            <input
-                              class="form-control"
-                              [type]="field.type"
-                              [formControlName]="field.formControlName"
-                              [class.is-invalid]="
-                                form.get(field.formControlName)?.invalid &&
-                                form.get(field.formControlName)?.touched
-                              "
-                            />
-                          }
-                        }
-
-                        @if (field.type !== 'checkbox') {
-                          <app-validation-messages
-                            [form]="form"
-                            [controlName]="field.formControlName"
-                            [messages]="messages"
-                          ></app-validation-messages>
-                        }
-                      </c-col>
-                    }
-                  </c-row>
-
-                  @if (form.get('con_gui_rem')?.value) {
-                    <c-row class="mt-3">
-                      <c-col md="4">
-                        <label class="form-label">N° Guía</label>
-                        <input class="form-control" type="text" formControlName="gui_rem_num" />
-                      </c-col>
-                      <c-col md="4">
-                        <label class="form-label">Fecha Guía</label>
-                        <input class="form-control" type="date" formControlName="gui_rem_fec" />
-                      </c-col>
-                      <c-col md="4">
-                        <label class="form-label">Transportista</label>
-                        <input class="form-control" type="text" formControlName="gui_rem_tra" />
-                      </c-col>
-                    </c-row>
-                  }
-
-                  <c-row class="mt-4">
-                    <c-col md="5">
-                      <label class="form-label">Producto</label>
-                      <select class="form-control form-select" formControlName="temp_prod_id">
-                        <option [value]="null">Seleccione...</option>
-                        @for (prod of productos; track prod.prod_id) {
-                          <option [value]="prod.prod_id">
-                            {{ prod.prod_cod_interno }} - {{ prod.prod_nom }}
-                          </option>
-                        }
-                      </select>
-                    </c-col>
-                    <c-col md="2">
-                      <label class="form-label">Cantidad</label>
-                      <input class="form-control" type="number" formControlName="temp_cant" min="1" />
-                    </c-col>
-                    <c-col md="3" class="d-flex align-items-end">
-                      <button cButton color="primary" (click)="addProduct()" class="w-100">
-                        <svg cIcon name="cilPlus" class="me-1"></svg>
-                        Agregar
-                      </button>
-                    </c-col>
-                  </c-row>
-
-                  @if (detailsArray.length > 0) {
-                    <c-row class="mt-3">
-                      <c-col md="12">
-                        <table cTable striped>
-                          <thead>
-                            <tr>
-                              <th>Código</th>
-                              <th>Producto</th>
-                              <th>Cantidad</th>
-                              <th class="text-end">Acciones</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            @for (detail of detailsArray.controls; track $index; let i = $index) {
-                              <tr>
-                                <td>{{ detail.get('prod_cod_interno')?.value }}</td>
-                                <td>{{ detail.get('prod_nom')?.value }}</td>
-                                <td>{{ detail.get('cant')?.value }}</td>
-                                <td class="text-end">
-                                  <button cButton color="danger" size="sm" (click)="removeDetail(i)">
-                                    <svg cIcon name="cilTrash"></svg>
-                                  </button>
-                                </td>
-                              </tr>
                             }
-                          </tbody>
-                        </table>
-                      </c-col>
-                    </c-row>
-                  }
-
-                  <c-row class="mt-4">
-                    <c-col class="text-end">
-                      <button cButton color="success" (click)="onSubmit()" [disabled]="isLoading()">
-                        @if (isLoading()) {
-                          <c-spinner size="sm" class="me-2"></c-spinner>
-                          Guardando...
-                        } @else {
-                          <svg cIcon name="cilSave" class="me-2"></svg>
-                          Guardar Movimiento
+                            @if (field.formControlName === 'tipoMovimiento') {
+                              <option value="TRANSFERENCIA">Transferencia</option>
+                              <option value="INGRESO">Ingreso</option>
+                              <option value="SALIDA">Salida</option>
+                              <option value="AJUSTE">Ajuste</option>
+                            }
+                          </select>
                         }
-                      </button>
+                        @case ('checkbox') {
+                          <div class="d-flex align-items-center">
+                            <input
+                              type="checkbox"
+                              [formControlName]="field.formControlName"
+                              class="me-2"
+                              [id]="field.formControlName"
+                            />
+                            <label class="form-label" [for]="field.formControlName">Sí</label>
+                          </div>
+                        }
+                        @default {
+                          <input
+                            class="form-control"
+                            [type]="field.type"
+                            [formControlName]="field.formControlName"
+                            [class.is-invalid]="
+                              form.get(field.formControlName)?.invalid &&
+                              form.get(field.formControlName)?.touched
+                            "
+                          />
+                        }
+                      }
+
+                      @if (field.type !== 'checkbox') {
+                        <app-validation-messages
+                          [form]="form"
+                          [controlName]="field.formControlName"
+                          [messages]="messages"
+                        ></app-validation-messages>
+                      }
+                    </c-col>
+                  }
+                </c-row>
+              </c-card-body>
+            </c-card>
+
+            <!-- Product Search Section -->
+            <c-card class="mb-3">
+              <c-card-body>
+                <c-row>
+                  <c-col md="5">
+                    <label for="temp_prod_id" class="form-label">Producto</label>
+                    <app-search-select
+                      placeholder="Buscar producto..."
+                      bindLabel="prod_nom"
+                      bindValue="prod_id"
+                      [serviceFn]="getProductSearchFn()"
+                      [showError]="almacenError()"
+                      [errorMessage]="almacenError() ? 'Seleccione un almacén primero' : ''"
+                      (onFocus)="onProductSearchFocus()"
+                      (itemSelected)="onProductSelected($event)"
+                    ></app-search-select>
+                  </c-col>
+                  <c-col md="3" class="d-flex align-items-end">
+                    <button
+                      cButton
+                      color="primary"
+                      (click)="addProduct()"
+                      [disabled]="!selectedProduct"
+                      class="w-100"
+                    >
+                      <svg cIcon name="cilPlus" class="me-1"></svg>
+                      Agregar
+                    </button>
+                  </c-col>
+                </c-row>
+
+                @if (detailsArray.length > 0) {
+                  <c-row class="mt-3">
+                    <c-col md="12">
+                      <table cTable striped>
+                        <thead>
+                          <tr>
+                            <th>Código</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th class="text-end">Acciones</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (detail of detailsArray.controls; track $index; let i = $index) {
+                            <tr>
+                              <td>{{ detail.get('prod_cod_interno')?.value }}</td>
+                              <td>{{ detail.get('prod_nom')?.value }}</td>
+                              <td>{{ detail.get('cant')?.value }}</td>
+                              <td class="text-end">
+                                <button cButton color="danger" size="sm" (click)="removeDetail(i)">
+                                  <svg cIcon name="cilTrash"></svg>
+                                </button>
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
                     </c-col>
                   </c-row>
                 }
               </c-card-body>
             </c-card>
+
+            <c-row class="mt-4">
+              <c-col class="text-end">
+                <button cButton color="success" (click)="onSubmit()" [disabled]="isLoading()">
+                  @if (isLoading()) {
+                    <c-spinner size="sm" class="me-2"></c-spinner>
+                    Guardando...
+                  } @else {
+                    <svg cIcon name="cilSave" class="me-2"></svg>
+                    Guardar Movimiento
+                  }
+                </button>
+              </c-col>
+            </c-row>
           </c-container>
         }
 
@@ -206,7 +192,7 @@
 
             <c-card class="mt-3">
               <c-card-body>
-                <c-row class="g-3 align-items-end" [formGroup]="formList">
+                <c-row class="g-3 align-items-end" [formGroup]="formFilter">
                   <c-col sm="12" md="6" lg="2">
                     <label for="fecha_desde" class="form-label">Desde</label>
                     <input
@@ -218,25 +204,25 @@
                   </c-col>
                   <c-col sm="12" md="6" lg="2">
                     <label for="fecha_hasta" class="form-label">Hasta</label>
-                    <input formControlName="fecha_hasta" type="date" class="form-control" id="fecha_hasta" />
+                    <input
+                      formControlName="fecha_hasta"
+                      type="date"
+                      class="form-control"
+                      id="fecha_hasta"
+                    />
                   </c-col>
                   <c-col sm="12" md="6" lg="2">
                     <label for="mov_tip" class="form-label">Tipo</label>
-                    <select class="form-control form-select" formControlName="mov_tip" id="mov_tip">
+                    <select
+                      class="form-control form-select"
+                      formControlName="tipo_movimiento"
+                      id="mov_tip"
+                    >
                       <option [value]="null">Todos</option>
                       <option value="TRANSFERENCIA">Transferencia</option>
                       <option value="INGRESO">Ingreso</option>
                       <option value="SALIDA">Salida</option>
                       <option value="AJUSTE">Ajuste</option>
-                    </select>
-                  </c-col>
-                  <c-col sm="12" md="6" lg="3">
-                    <label for="alm_id" class="form-label">Almacén</label>
-                    <select class="form-control form-select" formControlName="alm_id" id="alm_id">
-                      <option [value]="null">Todos</option>
-                      @for (alm of almacenes; track alm.almacen_id) {
-                        <option [value]="alm.almacen_id">{{ alm.nombre }}</option>
-                      }
                     </select>
                   </c-col>
                   <c-col sm="12" md="6" lg="3">
@@ -249,12 +235,12 @@
                       placeholder="Número o responsable..."
                     />
                   </c-col>
-                  <c-col sm="12" md="6" lg="12">
-                    <button cButton color="primary" (click)="onSearchList()" class="me-2">
+                  <c-col sm="12" md="6" lg="3">
+                    <button cButton color="primary" (click)="onSearch()" class="me-2">
                       <svg cIcon name="cilSearch"></svg>
                       Buscar
                     </button>
-                    <button cButton color="danger" (click)="onCleanList()">
+                    <button cButton color="danger" (click)="onClean()">
                       <svg cIcon name="cilTrash"></svg>
                       Limpiar
                     </button>
@@ -265,7 +251,7 @@
 
             <c-card class="mt-3">
               <c-card-body>
-                @if(isLoadingList()) {
+                @if (isLoadingList()) {
                   <div class="text-center py-3">
                     <c-spinner></c-spinner>
                   </div>
@@ -276,50 +262,44 @@
                         <thead>
                           <tr>
                             <th>Acciones</th>
-                            <th># Mov</th>
+                            <th>Número</th>
+                            <th>Almacén</th>
                             <th>Fecha</th>
                             <th>Tipo</th>
-                            <th>Origen</th>
-                            <th>Destino</th>
                             <th>Responsable</th>
-                            <th>Estado</th>
                           </tr>
                         </thead>
                         <tbody>
-                          @if(movimientos.length > 0){
-                            @for (item of movimientos; track item.mov_id) {
+                          @if (movimientos.length > 0) {
+                            @for (item of movimientos; track item.doc_id) {
                               <tr>
                                 <td>
-                                  <button size="sm" class="me-2" cButton color="secondary" (click)="onPrint(item.mov_id)">
+                                  <button
+                                    size="sm"
+                                    class="me-2"
+                                    cButton
+                                    color="secondary"
+                                    (click)="onPrint(item.doc_id, item.doc_numero_completo)"
+                                  >
                                     <svg cIcon name="cilPrint"></svg>
                                   </button>
-                                  <button size="sm" cButton color="info" (click)="onEdit(item.mov_id)">
-                                    <svg cIcon name="cilPencil"></svg>
-                                  </button>
                                 </td>
-                                <td>{{ item.mov_id }}</td>
-                                <td>{{ item.mov_fecha | date: 'dd/MM/yyyy' }}</td>
+                                <td>{{ item.doc_numero_completo }}</td>
+                                <td>{{ item.almacen_origen?.nombre || '-' }}</td>
+                                <td>{{ item.doc_fecha_emision | date: 'dd/MM/yyyy HH:mm' }}</td>
                                 <td>
                                   <span
                                     class="badge"
                                     [ngClass]="{
-                                      'bg-info': item.mov_tip === 'TRANSFERENCIA',
-                                      'bg-success': item.mov_tip === 'INGRESO',
-                                      'bg-danger': item.mov_tip === 'SALIDA',
-                                      'bg-warning': item.mov_tip === 'AJUSTE',
+                                      'bg-info': item.doc_tipo_movimiento === 'Transferencia Salida' || item.doc_tipo_movimiento === 'Transferencia Ingreso',
+                                      'bg-success': item.doc_tipo_movimiento === 'Ingreso',
+                                      'bg-danger': item.doc_tipo_movimiento === 'Salida',
                                     }"
                                   >
-                                    {{ item.mov_tip }}
+                                    {{ item.doc_tipo_movimiento }}
                                   </span>
                                 </td>
-                                <td>{{ item.alm_ori_nom || '-' }}</td>
-                                <td>{{ item.alm_des_nom || '-' }}</td>
-                                <td>{{ item.usu_nom }}</td>
-                                <td>
-                                  <span class="badge" [class.bg-success]="item.est" [class.bg-danger]="!item.est">
-                                    {{ item.est ? 'Activo' : 'Anulado' }}
-                                  </span>
-                                </td>
+                                <td>{{ item.usuario_nombre }}</td>
                               </tr>
                             }
                           } @else {
@@ -332,7 +312,7 @@
                       <app-paginator
                         [page]="pageList.page"
                         [pageSize]="pageList.pageSize"
-                        [total]="totalList"
+                        [total]="total"
                         (pageChange)="onPageChange($event)"
                       ></app-paginator>
                     </c-col>

@@ -1,6 +1,7 @@
 export interface MovimientoFilterForm {
-  mov_tip: string | null;
-  alm_id: number | null;
-  fec_ini: string | null;
-  fec_fin: string | null;
+  tipo_movimiento: string | null;
+  almacen_id: number | null;
+  fecha_desde: string | null;
+  fecha_hasta: string | null;
+  search: string | null;
 }

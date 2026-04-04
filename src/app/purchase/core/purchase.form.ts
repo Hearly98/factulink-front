@@ -2,13 +2,13 @@ import { PurchaseDetailForm } from 'src/app/purchase-detail/core/types';
 
 export interface PurchaseForm {
   suc_id: number | null;
-  alm_id: number | null;
+  almacen_id: number | null;
   doc_id: number | null;
   usu_id: number | null;
   prov_id: number | null;
   numero: string | null;
   fechaEmision: Date | null;
-  mp_id: number | null;
+  mp_cod: string | null;
   mon_id: number | null;
   prov_documento: string | null;
   afecta_stock: boolean | null;

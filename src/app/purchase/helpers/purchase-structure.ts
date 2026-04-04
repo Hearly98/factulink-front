@@ -1,6 +1,11 @@
+import { mapToSelectOption } from '@shared/functions';
 import { SelectOption } from '@shared/types';
 import { NewPurchaseComponent } from '../pages/new-purchase/new-purchase.component';
 import { PurchaseForm } from '../core/purchase.form';
+import { GetCurrencyModel } from 'src/app/currency/core/models/get-currency.model';
+import { GetPaymentMethodModel } from 'src/app/payment-method/core/models';
+import { GetDocumentModel } from 'src/app/document/core/models/get-document.model';
+import { GetDocumentTypeModel } from 'src/app/document-type/core/models';
 
 export type Control<SM extends Record<string, any>> =
   | SelectControl
@@ -24,7 +29,7 @@ export interface SearchSelectControl<SM extends Record<string, any>> extends Con
   type: 'search-select';
   bindLabel: string;
   bindValue: string;
-  serviceFnName: keyof SM;
+  serviceFnName?: string;
 }
 
 interface TextControl extends ControlBase {
@@ -41,12 +46,9 @@ export interface PurchaseStructure<SM extends Record<string, any>> {
   controls: Control<SM>[];
 }
 export const purchaseStructure = (
-  CurrencySelectOptions: SelectOption[] = [],
-  PaymentTypeOptions: SelectOption[] = [],
-  DocumentsOptions: SelectOption[] = [],
-  DocumentTypesOptions: SelectOption[] = [],
-  SucursalOptions: SelectOption[] = [],
-  AlmacenOptions: SelectOption[] = []
+  CurrencySelectOptions: GetCurrencyModel[] = [],
+  PaymentTypeOptions: GetPaymentMethodModel[] = [],
+  DocumentTypesOptions: GetDocumentTypeModel[] = [],
 ): PurchaseStructure<NewPurchaseComponent['serviceMap']>[] => {
   return [
     {
@@ -57,35 +59,41 @@ export const purchaseStructure = (
           type: 'select',
           col: '4',
           formControlName: 'doc_id',
-          options: DocumentsOptions,
+          options: [
+            { label: 'FACTURA ELECTRÓNICA', value: 1 },
+            {
+              label: 'BOLETA ELECTRÓNICA',
+              value: 2,
+            },
+          ],
         },
         {
           label: 'Tipo de Pago',
           type: 'select',
           col: '4',
-          formControlName: 'mp_id',
-          options: PaymentTypeOptions,
+          formControlName: 'mp_cod',
+          options: mapToSelectOption(PaymentTypeOptions, 'mp_cod', 'mp_nom'),
         },
         {
           label: 'Moneda',
           type: 'select',
           col: '4',
           formControlName: 'mon_id',
-          options: CurrencySelectOptions,
+          options: mapToSelectOption(CurrencySelectOptions, 'mon_id', 'mon_nom'),
         },
         {
           label: 'Fecha Emisión',
           type: 'date',
           col: '6',
           formControlName: 'fechaEmision',
-          placeholder: ""
+          placeholder: '',
         },
         {
           label: 'Documento',
           type: 'text',
           col: '6',
           formControlName: 'numero',
-          placeholder: "Número de Documento"
+          placeholder: 'Número de Documento',
         },
       ],
     },
@@ -106,7 +114,7 @@ export const purchaseStructure = (
           col: '4',
           type: 'select',
           formControlName: 'tip_id',
-          options: DocumentTypesOptions,
+          options: mapToSelectOption(DocumentTypesOptions, 'tip_id', 'tip_nom'),
         },
         {
           label: 'Documento',
@@ -135,40 +143,6 @@ export const purchaseStructure = (
           type: 'text',
           placeholder: 'Teléfono',
           formControlName: 'prov_telf',
-        },
-      ],
-    },
-    {
-      title: 'Agregar Producto',
-      controls: [
-        {
-          label: 'Sucursal',
-          col: '4',
-          type: 'select',
-          formControlName: 'suc_id',
-          options: SucursalOptions,
-        },
-        {
-          label: 'Almacén',
-          col: '4',
-          type: 'select',
-          formControlName: 'alm_id',
-          options: AlmacenOptions,
-        },
-        {
-          label: 'Producto',
-          col: '4',
-          type: 'search-select',
-          formControlName: 'prod_id',
-          bindLabel: 'label',
-          bindValue: 'prod_id',
-          serviceFnName: 'productSearch',
-        },
-        {
-          label: 'Afecta Stock',
-          col: '12',
-          type: 'checkbox',
-          formControlName: 'afecta_stock',
         },
       ],
     },

@@ -1,77 +1,76 @@
+import { MovimientoTipo } from './movimiento-validator-strategy';
+
 export interface MovimientoField {
   label: string;
   formControlName: string;
   type: 'text' | 'number' | 'date' | 'select' | 'checkbox';
   col: string;
   options?: { value: any; label: string }[];
-  visibleWhen?: string;
+  visibleWhen?: MovimientoTipo[];
+  getLabel?: (tipo: MovimientoTipo) => string;
 }
 
 export const movimientoStructure: MovimientoField[] = [
   {
+    label: 'Fecha',
+    formControlName: 'fechaEmision',
+    type: 'date',
+    col: '3',
+  },
+  {
     label: 'Tipo de Movimiento',
-    formControlName: 'mov_tip',
+    formControlName: 'tipoMovimiento',
     type: 'select',
-    col: '12',
+    col: '3',
     options: [
       { value: 'TRANSFERENCIA', label: 'Transferencia' },
       { value: 'INGRESO', label: 'Ingreso' },
       { value: 'SALIDA', label: 'Salida' },
-      { value: 'AJUSTE', label: 'Ajuste' },
     ],
   },
   {
-    label: 'Fecha',
-    formControlName: 'mov_fec',
-    type: 'date',
-    col: '6',
-  },
-  {
-    label: 'Almacén Origen',
-    formControlName: 'alm_id_ori',
+    label: 'Almacén',
+    formControlName: 'almacen_origen_id',
     type: 'select',
-    col: '6',
-    visibleWhen: 'TRANSFERENCIA',
+    col: '3',
+    visibleWhen: ['TRANSFERENCIA', 'SALIDA', 'INGRESO'],
+    getLabel: (tipo: MovimientoTipo) => {
+      switch (tipo) {
+        case 'TRANSFERENCIA':
+          return 'Almacén Origen';
+        case 'SALIDA':
+          return 'Almacén';
+        case 'INGRESO':
+          return 'Almacén';
+        default:
+          return 'Almacén';
+      }
+    },
   },
   {
     label: 'Almacén Destino',
-    formControlName: 'alm_id_des',
+    formControlName: 'almacen_destino_id',
     type: 'select',
-    col: '6',
+    col: '3',
+    visibleWhen: ['TRANSFERENCIA'],
+    getLabel: (tipo: MovimientoTipo) => {
+      switch (tipo) {
+        case 'TRANSFERENCIA':
+          return 'Almacén Destino';
+        default:
+          return 'Almacén Destino';
+      }
+    },
   },
   {
     label: 'Motivo',
-    formControlName: 'mov_mot',
+    formControlName: 'motivo',
     type: 'text',
-    col: '12',
+    col: '4',
   },
   {
     label: 'Referencia',
-    formControlName: 'mov_rec',
-    type: 'text',
-    col: '6',
-  },
-  {
-    label: 'Guía de Remisión',
-    formControlName: 'con_gui_rem',
-    type: 'checkbox',
-    col: '12',
-  },
-  {
-    label: 'N° Guía',
-    formControlName: 'gui_rem_num',
-    type: 'text',
-    col: '4',
-  },
-  {
-    label: 'Fecha Guía',
-    formControlName: 'gui_rem_fec',
-    type: 'date',
-    col: '4',
-  },
-  {
-    label: 'Transportista',
-    formControlName: 'gui_rem_tra',
+    formControlName: 'referencia',
     type: 'text',
     col: '4',
   },

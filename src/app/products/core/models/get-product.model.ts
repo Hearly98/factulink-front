@@ -1,4 +1,4 @@
-import { CategoryModel, GetCategoryModel } from "src/app/category/core/models";
+import { GetCategoryModel } from "src/app/category/core/models";
 import { ProductModel } from "./product.model";
 
 export class GetProductModel extends ProductModel {

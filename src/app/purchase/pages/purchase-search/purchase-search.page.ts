@@ -1,19 +1,29 @@
-import { Component, Inject, inject, signal, ViewChild, ViewContainerRef } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Component, Inject, inject, OnInit, signal, ViewContainerRef } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { ButtonDirective, CardBodyComponent, CardComponent, ColComponent, FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective, RowComponent, TableDirective, TextColorDirective } from '@coreui/angular';
+import {
+  ButtonDirective,
+  CardBodyComponent,
+  CardComponent,
+  ColComponent,
+  FormCheckComponent,
+  FormCheckInputDirective,
+  FormCheckLabelDirective,
+  RowComponent,
+  TableDirective,
+  TextColorDirective,
+} from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { PaginatorComponent } from 'src/app/paginator/paginator.component';
-import { TypedFormGroup } from '@shared/types/types-form';
 import { PurchaseService } from '../../core/services/purchase.service';
 import { MODULES } from 'src/app/core/config/permissions/modules';
 import { BaseSearchComponent } from '@shared/base/search-base.component';
 import { PageParamsModel } from '@shared/models/query/page-params.model';
-import { PurchaseFilterForm } from '../../core/types/purchase-filter.form';
 import { buildFilterForm, filterSort, mapParams } from '../../helpers';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
 import { CurrencyPipe, DatePipe } from '@angular/common';
+import { DateRangePickerComponent } from '@shared/components/date-range-picker/date-range-picker.component';
 
 @Component({
   selector: 'app-purchase-search',
@@ -33,163 +43,19 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
     DatePipe,
     CurrencyPipe,
     TextColorDirective,
-    RouterLink
+    RouterLink,
+    DateRangePickerComponent,
   ],
-  template: `<c-row>
-      <c-col>
-        <h4>{{ title() }}</h4>
-      </c-col>
-    </c-row>
-
-    <c-card class="mt-3">
-      <c-card-body>
-        <c-row class="g-3 align-items-end" [formGroup]="form">
-          <c-col sm="12" md="6" lg="2">
-            <label for="fecha_inicio" class="form-label">Rango de Fechas</label>
-            <input
-              formControlName="fecha_inicio"
-              type="date"
-              class="form-control"
-              id="fecha_inicio"
-            />
-          </c-col>
-          <c-col sm="12" md="6" lg="2">
-            <label for="fecha_fin" class="form-label">&nbsp;</label>
-            <input formControlName="fecha_fin" type="date" class="form-control" id="fecha_fin" />
-          </c-col>
-          <c-col sm="12" md="6" lg="3">
-            <label for="search" class="form-label">Filtro General</label>
-            <input
-              formControlName="search"
-              type="text"
-              class="form-control"
-              id="search"
-              placeholder="Buscar..."
-            />
-          </c-col>
-          <c-col sm="12" md="6" lg="4">
-            <label class="form-label">Filtro de Estados</label>
-            <div class="form-control fs-7">
-              <div class="d-flex gap-3 align-items-center">
-                @for (state of availableStates; track state.id) {
-                  <c-form-check>
-                    <input
-                      cFormCheckInput
-                      type="checkbox"
-                      [checked]="isEstadoChecked(state.id)"
-                      (change)="toggleEstado(state.id)"
-                      [id]="'state_' + state.id"
-                    />
-                    <label cFormCheckLabel [for]="'state_' + state.id" [cTextColor]="state.color">
-                      {{ state.nombre }}
-                    </label>
-                  </c-form-check>
-                }
-              </div>
-            </div>
-          </c-col>
-          <c-col sm="12" md="6" lg="3">
-            <button cButton color="primary" (click)="onSearch()" class="me-2">
-              <svg cIcon name="cilSearch"></svg>
-              Buscar
-            </button>
-            <button cButton color="danger" (click)="onClean()">
-              <svg cIcon name="cilTrash"></svg>
-              Limpiar
-            </button>
-          </c-col>
-        </c-row>
-      </c-card-body>
-    </c-card>
-
-    <c-card class="mt-3">
-      <c-card-body>
-        <c-row>
-          <c-col sm="12" md="12" lg="12">
-            <table cTable [responsive]="true" striped="true">
-              <thead>
-                <tr>
-                  <th>Acciones</th>
-                  <th>Nro.</th>
-                  <th>Tipo</th>
-                  <th>Fecha Emisión</th>
-                  <th>Proveedor</th>
-                  <th>Precio Total</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                @if (purchases.length > 0) {
-                @for (purchase of purchases; track $index) {
-                <tr>
-                  <td>
-                      <button
-                      size="sm"
-                      class="me-2"
-                      cButton
-                      color="secondary"
-                      (click)="onPrint(purchase.compr_id, purchase.numero)"
-                    >
-                      <svg cIcon name="cilPrint"></svg>
-                    </button>
-                    <button
-                      [routerLink]="'/ver-compra/'+ purchase.compr_id"
-                      size="sm"
-                      class="me-2"
-                      cButton
-                      color="info"
-                    >
-                      <svg cIcon name="cilPencil"></svg>
-                    </button>
-                    <button (click)="onDelete(purchase.compr_id)" size="sm" cButton color="danger">
-                      <svg cIcon name="cilTrash"></svg>
-                    </button>
-                  </td>
-                  <td>{{purchase.numero}}</td>
-                  <td>{{purchase.documento.doc_nom}}</td>
-                  <td>{{ purchase.fechaEmision | date: 'dd/MM/yyyy' }}</td>
-                  <td>{{ purchase.proveedor.prov_nom }}</td>
-                  <td>{{ purchase.compr_total | currency: 'S/. ' }}</td>
-                  <td>
-                    <span
-                      class="badge"
-                      [class.bg-warning]="purchase.estado.estado_cod === 'PEND'"
-                      [class.bg-success]="purchase.estado.estado_cod === 'COMP'"
-                      [class.bg-danger]="purchase.estado.estado_cod === 'eliminado'"
-                    >
-                      {{ purchase.estado.estado_nom }}
-                    </span>
-                  </td>
-                </tr>
-                }}
-                @else {
-                  <tr>
-                    <td colspan="7">
-                      No se encontraron resultados
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-            <app-paginator
-              [(page)]="page.page"
-              [pageSize]="page.pageSize"
-              [total]="total"
-              (pageChange)="onPageChange($event)"
-            ></app-paginator>
-          </c-col>
-        </c-row>
-      </c-card-body>
-    </c-card>`,
+  templateUrl: './purchase-search.page.html',
   styles: ``,
 })
-export class PurchaseSearchPage extends BaseSearchComponent {
+export class PurchaseSearchPage extends BaseSearchComponent implements OnInit {
   public form!: FormGroup;
-  #formBuilder = inject(FormBuilder);
   title = signal<string>('Historial de Compras');
-  #purchaseService = inject(PurchaseService);
-  #confirmService = inject(ConfirmService);
-  #globalNotification = inject(GlobalNotification);
+  readonly #formBuilder = inject(FormBuilder);
+  readonly #purchaseService = inject(PurchaseService);
+  readonly #confirmService = inject(ConfirmService);
+  readonly #globalNotification = inject(GlobalNotification);
   public purchases: any[] = [];
 
   availableStates = [
@@ -228,7 +94,7 @@ export class PurchaseSearchPage extends BaseSearchComponent {
 
   onSearch(filter = null, page = 1) {
     const sort = filterSort(this.form.value);
-    const filterToUse = filter || mapParams(this.form.value);
+    const filterToUse = filter ?? mapParams(this.form.value);
     const pageSize = 10;
     const pageParams = new PageParamsModel(page, pageSize);
     this.updateFilter(filterToUse);
@@ -292,36 +158,32 @@ export class PurchaseSearchPage extends BaseSearchComponent {
       });
   }
 
-  onPrint(id: number, number_serie: string) {
+  onPrint(id: number) {
     this.#purchaseService.print(id).subscribe({
       next: (response) => {
         const blob = response.body as Blob;
-        const contentDisposition = response.headers.get('content-disposition');
-        let filename = `${number_serie}.pdf`;
-
-        if (contentDisposition) {
-          const match = contentDisposition.match(/filename="?([^";\\n]*)"?/);
-          if (match && match[1]) {
-            filename = match[1];
-          }
-        }
-
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        window.open(url, '_blank');
         window.URL.revokeObjectURL(url);
       },
       error: (error) => {
-        this.#globalNotification.openToastAlert(
-          'Error',
-          error.message,
-          'danger'
-        );
-      }
+        this.#globalNotification.openAlert(error.error);
+      },
+    });
+  }
+
+  onDateRangeChange(range: { start: Date | null; end: Date | null }) {
+    const formatDateForApi = (date: Date | null): string => {
+      if (!date) return '';
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    this.form.patchValue({
+      fecha_inicio: range.start ? formatDateForApi(range.start) : null,
+      fecha_fin: range.end ? formatDateForApi(range.end) : null,
     });
   }
 }

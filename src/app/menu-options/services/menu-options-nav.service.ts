@@ -1,37 +1,37 @@
-import { Injectable } from "@angular/core";
-import { MenuOptionsService } from "./menu-options.service";
-import { INavData } from "@coreui/angular";
-import { Observable, map, of, forkJoin } from "rxjs";
-import { NgxPermissionsService } from "ngx-permissions";
-import { MenuOptionDto } from "../models/menu-option.dto";
+import { inject, Injectable } from '@angular/core';
+import { MenuOptionsService } from './menu-options.service';
+import { INavData } from '@coreui/angular';
+import { Observable, map, of, forkJoin } from 'rxjs';
+import { NgxPermissionsService } from 'ngx-permissions';
+import { MenuOptionDto } from '../models/menu-option.dto';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MenuOptionsNavService {
-  private enableTitle = false;
-
-  constructor(
-    private menuOptionsService: MenuOptionsService,
-    private ngxPermissionsService: NgxPermissionsService
-  ) {}
+  private readonly enableTitle = false;
+  readonly #menuOption = inject(MenuOptionsService);
+  readonly #ngxPermissions = inject(NgxPermissionsService);
 
   /**
    * Cargar permisos del usuario en ngx-permissions
    */
   loadUserPermissions(): Observable<void> {
-    return this.menuOptionsService.getUserPermissions().pipe(
+    return this.#menuOption.getUserPermissions().pipe(
       map((response) => {
         if (response.isValid && response.data) {
           // Cargar permisos en ngx-permissions
-          const permissions = response.data.reduce((acc: Record<string, any>, code: string) => {
-            acc[code] = {};
-            return acc;
-          }, {} as Record<string, any>);
-          
-          this.ngxPermissionsService.loadPermissions(Object.keys(permissions));
+          const permissions = response.data.reduce(
+            (acc: Record<string, any>, code: string) => {
+              acc[code] = {};
+              return acc;
+            },
+            {} as Record<string, any>,
+          );
+
+          this.#ngxPermissions.loadPermissions(Object.keys(permissions));
         }
-      })
+      }),
     );
   }
 
@@ -39,119 +39,102 @@ export class MenuOptionsNavService {
    * Obtener menú del usuario
    */
   listMenu(): Observable<INavData[]> {
-    const menuItemsJson = sessionStorage.getItem("menuConfig");
-    const updateMenuConfig = sessionStorage.getItem("updateMenuConfig") === "true";
+    const menuItemsJson = sessionStorage.getItem('menuConfig');
+    const updateMenuConfig = sessionStorage.getItem('updateMenuConfig') === 'true';
 
     if (menuItemsJson && !updateMenuConfig) {
       const items: INavData[] = JSON.parse(menuItemsJson);
-      // Limpiar iconos también para el menú cacheado
-      const cleanedItems = this.cleanMenuIcons(items);
-      return of(cleanedItems);
+      return of(items);
     }
 
-    sessionStorage.setItem("updateMenuConfig", "false");
+    sessionStorage.setItem('updateMenuConfig', 'false');
 
     // Cargar permisos y menú en paralelo
     return forkJoin({
-      permissions: this.menuOptionsService.getUserPermissions(),
-      menu: this.menuOptionsService.listTree()
+      permissions: this.#menuOption.getUserPermissions(),
+      menu: this.#menuOption.listTree(),
     }).pipe(
       map(({ permissions, menu }) => {
         const items: INavData[] = [];
 
         // Home siempre presente
         items.push({
-          name: "Inicio",
-          url: "/home",
-          iconComponent: { name: "cil-home" },
+          name: 'Inicio',
+          url: '/home',
+          iconComponent: { name: 'cil-home' },
         });
 
         if (this.enableTitle) {
           items.push({
             title: true,
-            name: "Opciones",
+            name: 'Opciones',
           });
         }
 
         // Cargar permisos en ngx-permissions
         if (permissions.isValid && permissions.data) {
           const permissionsCodes = permissions.data;
-          const permissionsObj = permissionsCodes.reduce((acc: Record<string, any>, code: string) => {
-            acc[code] = {};
-            return acc;
-          }, {} as Record<string, any>);
-          
-          this.ngxPermissionsService.loadPermissions(Object.keys(permissionsObj));
+          const permissionsObj = permissionsCodes.reduce(
+            (acc: Record<string, any>, code: string) => {
+              acc[code] = {};
+              return acc;
+            },
+            {} as Record<string, any>,
+          );
+
+          this.#ngxPermissions.loadPermissions(Object.keys(permissionsObj));
         }
 
         // Construir menú desde el backend
         if (menu.isValid && menu.data) {
           const tree = this.mapMenuOptions(menu.data);
           items.push(...tree);
-          sessionStorage.setItem("menuConfig", JSON.stringify(items));
+          sessionStorage.setItem('menuConfig', JSON.stringify(items));
         }
 
         return items;
-      })
+      }),
     );
   }
 
   /**
-   * Limpia los iconos del menú para evitar warnings de CoreUI
-   * Elimina iconos inválidos o 'nav-icon-bullet' de menús cacheados
-   */
-  private cleanMenuIcons(items: INavData[]): INavData[] {
-    return items.map((item) => {
-      // Limpiar icono del item actual
-      const iconValue = (item as any).icon;
-      const iconComponentName = item.iconComponent?.name;
-      
-      // Eliminar propiedad 'icon' si existe (causa el warning)
-      delete (item as any).icon;
-      
-      // Verificar si el iconComponent es válido
-      const isValidIcon = iconComponentName && 
-        iconComponentName !== 'nav-icon-bullet' && 
-        iconComponentName.trim().length > 0;
-      
-      if (!isValidIcon) {
-        item.iconComponent = undefined;
-      }
-
-      // Procesar hijos recursivamente
-      if (item.children && item.children.length > 0) {
-        item.children = this.cleanMenuIcons(item.children);
-      }
-
-      return item;
-    });
-  }
-
-  /**
    * Mapea las opciones de menú a INavData de forma recursiva
+   * @param isChild - indica si estos elementos son children (usan 'icon' en lugar de 'iconComponent')
    */
-  private mapMenuOptions(options: MenuOptionDto[]): INavData[] {
+  private mapMenuOptions(options: MenuOptionDto[], isChild: boolean = false): INavData[] {
     return options
       .map((o) => {
-        const children = o.children && o.children.length > 0 
-          ? this.mapMenuOptions(o.children) 
-          : undefined;
+        const hasChildren = o.children && o.children.length > 0;
+        const children = hasChildren ? this.mapMenuOptions(o.children, true) : undefined;
 
-        // Limpiar el icono - si no hay icono válido, no enviar nada
-        // Los submódulos sin icono no deben tener propiedad icon ni iconComponent
         const menuIcon = o.menuIcon?.trim() || '';
-        const hasValidIcon = menuIcon.length > 0 && menuIcon !== 'nav-icon-bullet';
+
+        // Padres: usan iconComponent si tienen icono válido
+        // Hijos: usan icon (COREUI usa 'nav-icon-bullet' para bullets)
+        let iconData: { iconComponent?: { name: string } } | { icon?: string } = {};
+
+        if (!isChild) {
+          // Es padre - usar iconComponent si tiene icono válido
+          const hasValidIcon = menuIcon.length > 0 && menuIcon !== 'nav-icon-bullet';
+          if (hasValidIcon) {
+            iconData = { iconComponent: { name: menuIcon } };
+          }
+        } else {
+          // Es hijo - siempre usar 'icon' con 'nav-icon-bullet'
+          // (así funciona COREUI para los bullets de los submenús)
+          iconData = { icon: menuIcon || 'nav-icon-bullet' };
+        }
 
         return {
           name: o.name,
           url: o.menuUri,
-          ...(hasValidIcon ? { iconComponent: { name: menuIcon } } : {}),
+          ...iconData,
           children: children,
         } as INavData;
       })
       .sort((a, b) => {
-        const sortA = options.find(opt => opt.name === a.name)?.sortOrder ?? 0;
-        const sortB = options.find(opt => opt.name === b.name)?.sortOrder ?? 0;
+        const sortA = options.find((opt) => opt.name === a.name)?.sortOrder ?? 0;
+        const sortB = options.find((opt) => opt.name === b.name)?.sortOrder ?? 0;
         return sortA - sortB;
       });
   }

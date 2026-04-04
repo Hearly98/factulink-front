@@ -1,7 +1,7 @@
 export interface PurchaseFilterForm {
   order: string | null;
-  search: string | null;
+  nombre: string | null;
   estados: number[] | null;
-  fecha_inicio: string | null;
-  fecha_fin: string | null;
+  fecha_desde: string | null;
+  fecha_hasta: string | null;
 }

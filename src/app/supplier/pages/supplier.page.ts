@@ -78,6 +78,7 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
                 <tr>
                   <th>Acciones</th>
                   <th>Nombre</th>
+                  <th>Documento</th>
                 </tr>
               </thead>
               <tbody>

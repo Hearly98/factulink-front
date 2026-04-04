@@ -2,9 +2,9 @@ import { PurchaseFilterForm } from '../core/types';
 
 export function mapParams(form: Partial<PurchaseFilterForm>): Partial<PurchaseFilterForm> {
   return {
-    search: form.search?.trim() ?? null,
+    nombre: form.nombre?.trim() ?? null,
     estados: form.estados ?? [],
-    fecha_inicio: form.fecha_inicio ?? null,
-    fecha_fin: form.fecha_fin ?? null,
+    fecha_desde: form.fecha_desde ?? null,
+    fecha_hasta: form.fecha_hasta ?? null,
   };
 }

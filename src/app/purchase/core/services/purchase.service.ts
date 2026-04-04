@@ -25,7 +25,7 @@ export class PurchaseService extends BaseService {
   }
 
   delete(id: number): Observable<ResponseDto<any>> {
-    return this.deleteRequest(`${id}`)
+    return this.deleteRequest(`${id}`);
   }
 
   update(body: any): Observable<ResponseDto<any>> {
@@ -37,16 +37,13 @@ export class PurchaseService extends BaseService {
   }
 
   search(body: QueryParamsModel): Observable<ResponseDto<QueryResultsModel<any>>> {
-    return this.postRequest<QueryParamsModel, ResponseDto<QueryResultsModel<any>>>(
-      `/search`,
-      body
-    );
+    return this.postRequest<QueryParamsModel, ResponseDto<QueryResultsModel<any>>>(`/search`, body);
   }
 
   print(id: number) {
     return this.http.get(`${environment.apiUrl}/compras/${id}/pdf`, {
       responseType: 'blob',
-      observe: 'response'
+      observe: 'response',
     });
   }
 }

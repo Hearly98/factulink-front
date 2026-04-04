@@ -36,6 +36,7 @@ import { ProductoAlmacenService } from 'src/app/almacen/core/services/producto-a
 import { PurchaseCreateDto } from '../../core/purchase-create-dto';
 import { PurchaseService } from '../../core/services/purchase.service';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-new-purchase',
@@ -59,69 +60,141 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
   template: `
     <c-container [formGroup]="form">
       @for (item of structure(); track $index) {
+        <c-card class="mb-4">
+          <c-card-body>
+            <c-row>
+              <c-col [md]="12">
+                <h5>{{ item.title }}</h5>
+              </c-col>
+            </c-row>
+            <c-row>
+              @for (control of item.controls; track $index) {
+                <c-col [md]="control.col">
+                  <label [for]="control.formControlName">{{ control.label }}</label>
+                  @switch (control.type) {
+                    @case ('search-select') {
+                      <app-search-select
+                        [placeholder]="control.label"
+                        [bindLabel]="control.bindLabel"
+                        [bindValue]="control.bindValue"
+                        [serviceFn]="getProductSearchFn()"
+                        [disabled]="false"
+                        [showError]="control.formControlName === 'prod_id' && almacenError()"
+                        [errorMessage]="almacenError() ? 'Seleccione un almacén primero' : ''"
+                        (onFocus)="onProductSearchFocus()"
+                        (itemSelected)="onSelectItem(control.formControlName, $event)"
+                      ></app-search-select>
+                    }
+                    @case ('select') {
+                      <select
+                        class="form-control form-select"
+                        [class.is-invalid]="control.formControlName !== 'suc_id' && almacenError()"
+                        [formControlName]="control.formControlName"
+                        (change)="onSelectChange(control.formControlName, $event)"
+                      >
+                        <option [ngValue]="null">Seleccione</option>
+                        @for (option of control.options; track $index) {
+                          <option [ngValue]="option.value">{{ option.label }}</option>
+                        }
+                      </select>
+                      @if (control.formControlName === 'prod_id' && almacenError()) {
+                        <div class="invalid-feedback d-block">Seleccione una sucursal primero</div>
+                      }
+                    }
+                    @case ('checkbox') {
+                      <c-form-check class="mt-2">
+                        <input
+                          cFormCheckInput
+                          type="checkbox"
+                          [formControlName]="control.formControlName"
+                          [id]="control.formControlName"
+                        />
+                        <label cFormCheckLabel [for]="control.formControlName">{{
+                          control.label
+                        }}</label>
+                      </c-form-check>
+                    }
+                    @default {
+                      <input
+                        [formControlName]="control.formControlName"
+                        [placeholder]="control.placeholder"
+                        [type]="control.type"
+                        class="form-control"
+                      />
+                    }
+                  }
+                </c-col>
+              }
+            </c-row>
+          </c-card-body>
+        </c-card>
+      }
+
+      <!-- Agregar Producto - Sección directa -->
       <c-card class="mb-4">
         <c-card-body>
           <c-row>
             <c-col [md]="12">
-              <h5>{{ item.title }}</h5>
+              <h5>Agregar Producto</h5>
             </c-col>
           </c-row>
           <c-row>
-            @for (control of item.controls; track $index) {
-            <c-col [md]="control.col">
-              <label [for]="control.formControlName">{{ control.label }}</label>
-              @switch (control.type) { @case('search-select') {
-              <app-search-select
-                [placeholder]="control.label"
-                [bindLabel]="control.bindLabel"
-                [bindValue]="control.bindValue"
-                [serviceFn]="getProductSearchFn()"
-                [disabled]="false"
-                [showError]="control.formControlName === 'prod_id' && almacenError()"
-                [errorMessage]="almacenError() ? 'Seleccione un almacén primero' : ''"
-                (onFocus)="onProductSearchFocus()"
-                (itemSelected)="onSelectItem(control.formControlName, $event)"
-              ></app-search-select>
-              } @case('select'){
-              <select 
-                class="form-control form-select" 
-                [class.is-invalid]="control.formControlName !== 'suc_id' && almacenError()"
-                [formControlName]="control.formControlName"
-                (change)="onSelectChange(control.formControlName, $event)"
+            <c-col [md]="4">
+              <label for="suc_id">Sucursal</label>
+              <select
+                class="form-control form-select"
+                formControlName="suc_id"
+                (change)="onSucursalChange($event)"
               >
                 <option [ngValue]="null">Seleccione</option>
-                @for (option of control.options; track $index) {
-                <option [ngValue]="option.value">{{ option.label }}</option>
+                @for (option of sucursalOptions(); track $index) {
+                  <option [ngValue]="option.value">{{ option.label }}</option>
                 }
               </select>
-              @if (control.formControlName === 'prod_id' && almacenError()) {
-                <div class="invalid-feedback d-block">Seleccione una sucursal primero</div>
-              }
-              } 
-              @case('checkbox') {
+            </c-col>
+            <c-col [md]="4">
+              <label for="almacen_id">Almacén</label>
+              <select
+                class="form-control form-select"
+                [class.is-invalid]="almacenError()"
+                formControlName="almacen_id"
+              >
+                <option [ngValue]="null">Seleccione</option>
+                @for (option of almacenOptions(); track $index) {
+                  <option [ngValue]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </c-col>
+            <c-col [md]="4">
+              <label for="prod_id">Producto</label>
+              <app-search-select
+                placeholder="Producto"
+                bindLabel="label"
+                bindValue="prod_id"
+                [serviceFn]="getProductSearchFn()"
+                [disabled]="false"
+                [showError]="almacenError()"
+                [errorMessage]="almacenError() ? 'Seleccione un almacén primero' : ''"
+                (onFocus)="onProductSearchFocus()"
+                (itemSelected)="onSelectItem('prod_id', $event)"
+              ></app-search-select>
+            </c-col>
+          </c-row>
+          <c-row class="mt-2">
+            <c-col [md]="12">
               <c-form-check class="mt-2">
                 <input
                   cFormCheckInput
                   type="checkbox"
-                  [formControlName]="control.formControlName"
-                  [id]="control.formControlName"
+                  formControlName="afecta_stock"
+                  id="afecta_stock"
                 />
-                <label cFormCheckLabel [for]="control.formControlName">{{ control.label }}</label>
+                <label cFormCheckLabel for="afecta_stock">Afecta Stock</label>
               </c-form-check>
-              } @default {
-              <input
-                [formControlName]="control.formControlName"
-                [placeholder]="control.placeholder"
-                [type]="control.type"
-                class="form-control"
-              />
-              } }
             </c-col>
-            }
-            <!-- Botón para agregar producto después del search-select de producto -->
-            @if (item.title === 'Agregar Producto') {
-            <c-col [md]="4" class="mt-4">
-              <label for="" class="d-none"></label>
+          </c-row>
+          <c-row class="mt-3">
+            <c-col [md]="4">
               <button
                 type="button"
                 cButton
@@ -134,17 +207,16 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
               </button>
             </c-col>
             @if (selectedProduct && selectedProductStock() !== null) {
-            <c-col [md]="12" class="mt-2">
-              <div class="alert alert-info mb-0 py-2">
-                <strong>Stock actual:</strong> {{ selectedProductStock() }} unidades en el almacén seleccionado
-              </div>
-            </c-col>
-            }
+              <c-col [md]="8">
+                <div class="alert alert-info mb-0 py-2">
+                  <strong>Stock actual:</strong> {{ selectedProductStock() }} unidades en el almacén
+                  seleccionado
+                </div>
+              </c-col>
             }
           </c-row>
         </c-card-body>
       </c-card>
-      }
 
       <!-- Tabla de detalles -->
       <app-purchase-detail-table
@@ -191,7 +263,8 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
   categories = signal<SelectOption[]>([]);
   form!: FormGroup;
   selectedProduct: any = null;
-  almacenOptions: SelectOption[] = [];
+  sucursalOptions = signal<SelectOption[]>([]);
+  almacenOptions = signal<SelectOption[]>([]);
   almacenError = signal(false);
   selectedProductStock = signal<number | null>(null);
 
@@ -226,7 +299,7 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
       this.#productService.searchQuick({
         term,
         suc_id: this.form.get('suc_id')?.value,
-        alm_id: this.form.get('alm_id')?.value,
+        almacen_id: this.form.get('almacen_id')?.value,
       }),
   };
 
@@ -239,7 +312,6 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
       prov_telf: item.prov_telf,
     });
   }
-
 
   isControlDisabled(formControlName: string): boolean {
     if (formControlName === 'prod_id') {
@@ -256,7 +328,7 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
     const value = (event.target as HTMLSelectElement).value;
     if (value) {
       this.almacenError.set(false);
-      this.form.patchValue({ alm_id: parseInt(value) });
+      this.form.patchValue({ almacen_id: parseInt(value) });
       this.selectedProductStock.set(null);
       if (this.selectedProduct) {
         this.loadProductStock(this.selectedProduct.prod_id);
@@ -266,19 +338,30 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
 
   onSelectChange(controlName: string, event: Event) {
     const value = (event.target as HTMLSelectElement).value;
-    
+
     if (controlName === 'suc_id' && value) {
-      this.form.patchValue({ suc_id: parseInt(value), alm_id: null });
+      this.form.patchValue({ suc_id: parseInt(value), almacen_id: null });
       this.loadAlmacenesBySucursal(parseInt(value));
       this.selectedProductStock.set(null);
       this.selectedProduct = null;
-    } else if (controlName === 'alm_id' && value) {
+    } else if (controlName === 'almacen_id' && value) {
       this.almacenError.set(false);
-      this.form.patchValue({ alm_id: parseInt(value) });
+      this.form.patchValue({ almacen_id: parseInt(value) });
       this.selectedProductStock.set(null);
       if (this.selectedProduct) {
         this.loadProductStock(this.selectedProduct.prod_id);
       }
+    }
+  }
+
+  onSucursalChange(event: Event) {
+    const value = (event.target as HTMLSelectElement).value;
+    if (value) {
+      this.form.patchValue({ suc_id: parseInt(value), almacen_id: null });
+      this.almacenOptions.set([]);
+      this.loadAlmacenesBySucursal(parseInt(value));
+      this.selectedProductStock.set(null);
+      this.selectedProduct = null;
     }
   }
 
@@ -288,21 +371,7 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
         const filteredAlmacenes = response.data
           .filter((a: any) => a.suc_id === sucId)
           .map((item: any) => ({ value: item.almacen_id, label: item.nombre }));
-        this.almacenOptions = filteredAlmacenes;
-        
-        const currentStructure = this.structure();
-        const updatedControls = currentStructure[2].controls.map(control => {
-          if (control.formControlName === 'alm_id') {
-            return { ...control, options: filteredAlmacenes };
-          }
-          return control;
-        });
-        
-        this.structure.set([
-          currentStructure[0],
-          currentStructure[1],
-          { ...currentStructure[2], controls: updatedControls }
-        ]);
+        this.almacenOptions.set(filteredAlmacenes);
       },
     });
   }
@@ -323,7 +392,7 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
       return this.#productService.searchQuick({
         term,
         suc_id: this.form.get('suc_id')?.value,
-        alm_id: this.form.get('alm_id')?.value,
+        almacen_id: this.form.get('almacen_id')?.value,
       });
     };
   }
@@ -351,14 +420,14 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
   }
 
   loadProductStock(productId: number) {
-    const almId = this.form.get('alm_id')?.value;
-    if (!almId) {
+    const almacen_id = this.form.get('almacen_id')?.value;
+    if (!almacen_id) {
       this.selectedProductStock.set(null);
       return;
     }
     this.#productoAlmacenService.getByProducto(productId).subscribe({
       next: (response) => {
-        const stockInfo = response.data.find((s: any) => s.almacen_id === almId);
+        const stockInfo = response.data.find((s: any) => s.almacen_id === almacen_id);
         this.selectedProductStock.set(stockInfo?.stock_actual ?? 0);
       },
       error: () => {
@@ -372,7 +441,7 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
 
     // Verificar si el producto ya existe en el detalle
     const exists = this.detailsArray.controls.some(
-      (control) => control.value.prod_id === this.selectedProduct.prod_id
+      (control) => control.value.prod_id === this.selectedProduct.prod_id,
     );
 
     if (exists) {
@@ -405,55 +474,20 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
   }
 
   loadSelectCombos() {
-    const currencies: SelectOption[] = [];
-    const documents: SelectOption[] = [];
-    const paymentType: SelectOption[] = [];
-    const documentTypes: SelectOption[] = [];
-    const sucursalOptions: SelectOption[] = [];
-    const almacenOptions: SelectOption[] = [];
-    this.#currencyService.getAll().subscribe({
-      next: (response) =>
-        response.data.map((item) => {
-          currencies.push({ value: item.mon_id, label: item.mon_nom });
-        }),
+    forkJoin({
+      currencies: this.#currencyService.getAll(),
+      documents: this.#documentService.getAll(),
+      paymentMethods: this.#paymentMethodService.getAll(),
+      documentTypes: this.#documentTypeService.getAll(),
+      sucursales: this.#sucursalService.getAll(),
+    }).subscribe(({ currencies, paymentMethods, documentTypes, sucursales }) => {
+      this.sucursalOptions.set(
+        sucursales.data.map((item: any) => ({ value: item.suc_id, label: item.suc_nom })),
+      );
+      this.structure.set(
+        purchaseStructure(currencies.data, paymentMethods.data, documentTypes.data),
+      );
     });
-
-    this.#documentService.getAll().subscribe({
-      next: (response) => {
-        response.data.map((item) => {
-          documents.push({ value: item.doc_id, label: item.doc_nom });
-        });
-      },
-    });
-
-    this.#documentTypeService.getAll().subscribe({
-      next: (response) => {
-        response.data.map((item) => {
-          documentTypes.push({ value: item.tip_id, label: item.tip_nom });
-        });
-      },
-    });
-    this.#sucursalService.getAll().subscribe({
-      next: (response) => {
-        response.data.map((item) => {
-          sucursalOptions.push({ value: item.suc_id, label: item.suc_nom });
-        });
-        this.structure.set(
-          purchaseStructure(currencies, paymentType, documents, documentTypes, sucursalOptions, [])
-        );
-      },
-    });
-
-    this.#paymentMethodService.getAll().subscribe({
-      next: (response) => {
-        response.data.map((item) => {
-          paymentType.push({ value: item.mp_id, label: item.mp_nom });
-        });
-      },
-    });
-    this.structure.set(
-      purchaseStructure(currencies, paymentType, documents, documentTypes, sucursalOptions, almacenOptions)
-    );
   }
 
   save() {
@@ -466,17 +500,18 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
       numero: this.form.value.numero,
       compr_coment: this.form.value.compr_coment,
       suc_id: this.form.value.suc_id,
-      alm_id: this.form.value.alm_id,
+      almacen_id: this.form.value.almacen_id,
       prov_id: this.form.value.prov_id,
       doc_id: this.form.value.doc_id,
       mon_id: this.form.value.mon_id,
-      mp_id: this.form.value.mp_id,
+      mp_cod: this.form.value.mp_cod,
       afecta_stock: this.form.value.afecta_stock,
       detalles: this.detailsArray.getRawValue().map((v) => {
         return {
-          prod_id: v.prod_id,
-          detc_cant: v.cantidad,
-          prod_pcompra: v.precio_compra,
+          idProducto: v.prod_id,
+          cantidad: v.cantidad,
+          costoUnitario: v.precio_compra,
+          nombreProducto: v.prod_nom,
         } as PurchaseDetailCreteDTOForm;
       }),
     };

@@ -150,24 +150,12 @@ export const routes: Routes = [
         },
       },
       {
-        path: 'ver-compra/:id',
-        redirectTo: 'compras',
-      },
-      {
-        path: 'listado-compras',
-        redirectTo: 'compras',
-      },
-      {
         path: 'ventas',
         loadComponent: () =>
           import('./sales/pages/sales-main/sales-main.page').then((m) => m.SalesMainPage),
         data: {
           title: 'Ventas',
         },
-      },
-      {
-        path: 'listado-ventas',
-        redirectTo: 'ventas',
       },
       {
         path: 'ver-venta/:id',
@@ -180,10 +168,6 @@ export const routes: Routes = [
         data: {
           title: 'Cotizaciones',
         },
-      },
-      {
-        path: 'historial-cotizaciones',
-        redirectTo: 'cotizaciones',
       },
       {
         path: 'editar-cotizacion/:id',

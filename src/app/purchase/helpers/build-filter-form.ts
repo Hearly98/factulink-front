@@ -6,9 +6,9 @@ export const buildFilterForm = (): {
 } => {
   return {
     order: new FormControl('desc'),
-    search: new FormControl(null),
+    nombre: new FormControl(null),
     estados: new FormControl([2, 1]),
-    fecha_inicio: new FormControl(null),
-    fecha_fin: new FormControl(null),
+    fecha_desde: new FormControl(null),
+    fecha_hasta: new FormControl(null),
   };
 };

@@ -1,6 +1,6 @@
 import { AbstractControl, ValidatorFn } from '@angular/forms';
 
-export type MovimientoTipo = 'TRANSFERENCIA' | 'INGRESO' | 'SALIDA' | 'AJUSTE';
+export type MovimientoTipo = 'TRANSFERENCIA' | 'INGRESO' | 'SALIDA';
 
 export interface ValidatorStrategy {
   getValidators(tipo: MovimientoTipo): ValidatorFn[];
@@ -10,17 +10,14 @@ export class MovimientoValidatorStrategy implements ValidatorStrategy {
   getValidators(tipo: MovimientoTipo): ValidatorFn[] {
     const validators: { [key: string]: () => ValidatorFn[] } = {
       TRANSFERENCIA: () => [
-        this.requiredValidator('alm_id_ori'),
-        this.requiredValidator('alm_id_des'),
+        this.requiredValidator('almacen_origen_id'),
+        this.requiredValidator('almacen_destino_id'),
       ],
       SALIDA: () => [
-        this.requiredValidator('alm_id_ori'),
+        this.requiredValidator('almacen_origen_id'),
       ],
       INGRESO: () => [
-        this.requiredValidator('alm_id_des'),
-      ],
-      AJUSTE: () => [
-        this.requiredValidator('alm_id_des'),
+        this.requiredValidator('almacen_origen_id'),
       ],
     };
 

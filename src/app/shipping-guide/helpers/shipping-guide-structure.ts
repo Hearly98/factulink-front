@@ -227,7 +227,7 @@ export function shippingGuideStructure(
         },
         {
           label: 'Cantidad',
-          formControlName: 'temp_cantidad',
+          formControlName: 'cantidad',
           type: 'number',
           col: 3,
           placeholder: 'Cantidad',

@@ -132,7 +132,7 @@ export function quotationStructure(
           label: 'Producto',
           formControlName: 'prod_id',
           type: 'search-select',
-          col: 8,
+          col: 6,
           bindLabel: 'label',
           bindValue: 'prod_id',
           serviceFnName: 'productSearch',
@@ -141,7 +141,7 @@ export function quotationStructure(
           label: 'Incluye IGV',
           formControlName: 'igv_requerido',
           type: 'select',
-          col: 4,
+          col: 2,
           options: [
             { label: 'Si', value: true },
             { label: 'No', value: false },
@@ -151,7 +151,7 @@ export function quotationStructure(
           label: 'Mostrar Total',
           formControlName: 'mostrar_total',
           type: 'select',
-          col: 4,
+          col: 2,
           options: [
             { label: 'Si', value: true },
             { label: 'No', value: false },

@@ -128,7 +128,7 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
       nro_oc: [''],
       nro_factura: [''],
       prod_id: [null],
-      temp_cantidad: [1],
+      cantidad: [1],
       observaciones: [''],
       detalles: this.#formBuilder.array([]),
     });

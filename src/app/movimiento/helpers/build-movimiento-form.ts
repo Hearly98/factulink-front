@@ -1,18 +1,30 @@
-import { FormControl, FormArray, Validators } from '@angular/forms';
+import { FormControl, FormArray, FormGroup, Validators } from '@angular/forms';
+import { MovementType } from '../core/types/movement-type.enum';
+import { MovimientoDetailForm } from '../core/types/movement-detail-form';
+import { MovimientoForm } from '../core/types/movimiento-form';
+export const buildMovimientoForm = () => {
+  return new FormGroup<MovimientoForm>({
+    doc_id: new FormControl<number | null>(null),
+    fechaEmision: new FormControl<string | null>({
+      value: new Date().toISOString().split('T')[0],
+      disabled: true,
+    }),
+    tipoMovimiento: new FormControl<MovementType | null>(null, Validators.required),
+    almacen_origen_id: new FormControl<number | null>(null),
+    almacen_destino_id: new FormControl<number | null>(null),
+    motivo: new FormControl<string | null>(null),
+    referencia: new FormControl<string | null>(null),
+    detalle: new FormArray<FormGroup<any>>([]),
+  });
+};
 
-export const buildMovimientoForm = () => ({
-  mov_id: new FormControl<number | null>(null),
-  mov_fec: new FormControl(new Date().toISOString().substring(0, 10), Validators.required),
-  mov_tip: new FormControl<string | null>('TRANSFERENCIA', Validators.required),
-  alm_id_ori: new FormControl<number | null>(null, Validators.required),
-  alm_id_des: new FormControl<number | null>(null, Validators.required),
-  mov_mot: new FormControl('', Validators.required),
-  mov_rec: new FormControl(''),
-  con_gui_rem: new FormControl(false),
-  gui_rem_num: new FormControl(''),
-  gui_rem_fec: new FormControl<string | null>(null),
-  gui_rem_tra: new FormControl(''),
-  details: new FormArray([]),
-  temp_prod_id: new FormControl<number | null>(null),
-  temp_cant: new FormControl(1),
-});
+export const buildMovimientoDetailForm = () =>
+  new FormGroup<{
+    [K in keyof MovimientoDetailForm]: FormControl<MovimientoDetailForm[K]>;
+  }>({
+    idProducto: new FormControl<number | null>(null, Validators.required),
+    cantidad: new FormControl<number | null>(null, [Validators.required, Validators.min(0.0001)]),
+    nombreProducto: new FormControl<string | null>(null),
+    codigoProducto: new FormControl<string | null>(null),
+    costoUnitario: new FormControl<number | null>(null),
+  });
