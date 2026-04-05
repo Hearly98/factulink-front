@@ -410,7 +410,7 @@ export class SaleViewComponent extends BaseComponent implements OnInit {
     })
 
     this.structure.set(
-      saleStructure(currencies, paymentType, documents, documentTypes, sucursalOptions, companies, this.showFechaVencimiento())
+      saleStructure(currencies, paymentType, documents, documentTypes, sucursalOptions, companies, [], this.showFechaVencimiento())
     );
   }
 
@@ -451,7 +451,7 @@ export class SaleViewComponent extends BaseComponent implements OnInit {
     });
 
     this.structure.set(
-      saleStructure(currencies, paymentType, documents, documentTypes, sucursalOptions, companies, this.showFechaVencimiento())
+      saleStructure(currencies, paymentType, documents, documentTypes, sucursalOptions, companies, [], this.showFechaVencimiento())
     );
   }
 

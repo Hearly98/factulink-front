@@ -1,5 +1,6 @@
 export interface ShippingGuideModel {
   guia_id: number;
+  cot_id: number;
   serie_id: number;
   numero_completo: string;
   fecha_emision: string;

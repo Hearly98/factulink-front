@@ -48,6 +48,7 @@ export const saleStructure = (
   DocumentTypesOptions: SelectOption[] = [],
   SucursalOptions: SelectOption[] = [],
   CompanyOptions: SelectOption[] = [],
+  AlmacenOptions: SelectOption[] = [],
   showFechaVencimiento: boolean = false
 ): SaleStructure<NewSalePage['serviceMap']>[] => {
   const baseStructure: SaleStructure<NewSalePage['serviceMap']>[] = [
@@ -74,6 +75,13 @@ export const saleStructure = (
           col: '3',
           formControlName: 'suc_id',
           options: SucursalOptions,
+        },
+        {
+          label: 'Almacén',
+          type: 'select',
+          col: '3',
+          formControlName: 'almacen_id',
+          options: AlmacenOptions,
         },
         {
           label: 'Fecha Emisión',
@@ -108,6 +116,29 @@ export const saleStructure = (
           col: '3',
           type: 'checkbox',
           formControlName: 'afecta_stock',
+        },
+      ],
+    },
+    {
+      title: 'Documento Origen',
+      controls: [
+        {
+          label: 'Cotización',
+          col: '6',
+          type: 'search-select',
+          formControlName: 'cot_id',
+          bindLabel: 'numero_completo',
+          bindValue: 'cot_id',
+          serviceFnName: 'cotizacionSearch',
+        },
+        {
+          label: 'Guía de Remisión',
+          col: '6',
+          type: 'search-select',
+          formControlName: 'guia_id',
+          bindLabel: 'numero_completo',
+          bindValue: 'guia_id',
+          serviceFnName: 'guiaSearch',
         },
       ],
     },

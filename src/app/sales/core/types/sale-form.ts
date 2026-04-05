@@ -8,6 +8,7 @@ export interface SaleForm {
     fecha_vencimiento: string | null;
     emp_id: number | null;
     suc_id: number | null;
+    almacen_id: number | null;
     cli_id: number | null;
     vendedor_id: number | null;
     doc_id: number | null;
@@ -25,12 +26,10 @@ export interface SaleForm {
     venta_coment: string | null;
     afecta_stock: boolean | null;
     detalles: SaleDetailModel[] | null;
-    // Campos adicionales para cliente
     cli_documento: string | null;
     cli_direcc: string | null;
     cli_correo: string | null;
     cli_telf: string | null;
     tip_id: number | null;
-    // Campo adicional para producto
     prod_id: number | null;
 }

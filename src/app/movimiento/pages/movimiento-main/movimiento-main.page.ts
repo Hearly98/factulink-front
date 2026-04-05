@@ -41,6 +41,10 @@ import { SearchSelectComponent } from '@shared/components/search-select.componen
 import { forkJoin } from 'rxjs';
 import { MovementType } from '../../core/types/movement-type.enum';
 import { GetMovimientoModel } from '../../core/models/get-movimiento.model';
+import { MovimientoDetailTableComponent } from '../../components/movimiento-detail-table.component';
+import { MovimientoDetailForm } from '../../core/types/movement-detail-form';
+import { TypedFormGroup } from '@shared/types/types-form';
+import { DateRangePickerComponent } from '@shared/components/date-range-picker/date-range-picker.component';
 
 @Component({
   selector: 'app-movimiento-main',
@@ -61,6 +65,8 @@ import { GetMovimientoModel } from '../../core/models/get-movimiento.model';
     SpinnerComponent,
     PaginatorComponent,
     SearchSelectComponent,
+    MovimientoDetailTableComponent,
+    DateRangePickerComponent,
   ],
   templateUrl: './movimiento-main.page.html',
 })
@@ -237,8 +243,27 @@ export class MovimientoMainPage extends BaseSearchComponent implements OnInit {
     this.onSearch(this.filter, page);
   }
 
-  get detailsArray(): FormArray {
-    return (this.form.get('detalle') as FormArray) ?? [];
+  get detailsArray(): FormArray<TypedFormGroup<MovimientoDetailForm>> {
+    return (this.form.get('detalle') as FormArray<TypedFormGroup<MovimientoDetailForm>>) ?? [];
+  }
+
+  onDetailRemoved(index: number) {
+    console.log('Producto eliminado en índice:', index);
+  }
+
+  onDateRangeChange(range: { start: Date | null; end: Date | null }) {
+    const formatDateForApi = (date: Date | null): string => {
+      if (!date) return '';
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    this.formFilter.patchValue({
+      fecha_desde: formatDateForApi(range.start) ?? null,
+      fecha_hasta: formatDateForApi(range.end) ?? null,
+    });
   }
 
   addProduct() {

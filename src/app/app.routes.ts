@@ -174,7 +174,7 @@ export const routes: Routes = [
         redirectTo: 'cotizaciones',
       },
       {
-        path: 'guia-remision',
+        path: 'guias-remision',
         loadComponent: () =>
           import('./shipping-guide/pages/shipping-guide-main.page').then(
             (m) => m.ShippingGuideMainPage,

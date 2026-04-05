@@ -4,6 +4,7 @@ import { SaleDetailModel } from 'src/app/sale-detail/core/models';
 export function mapSaleCreateDto(formValue: SaleForm) {
   return {
     suc_id: formValue.suc_id!,
+    almacen_id: formValue.almacen_id ?? null,
     doc_id: formValue.doc_id!,
     emp_id: formValue.emp_id!,
     cli_id: formValue.cli_id!,

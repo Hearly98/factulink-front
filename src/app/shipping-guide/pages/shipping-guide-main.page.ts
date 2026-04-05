@@ -1,20 +1,7 @@
 import { Component, inject, Inject, OnInit, signal, ViewContainerRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import {
-  ButtonDirective,
-  CardBodyComponent,
-  CardComponent,
-  ColComponent,
-  ContainerComponent,
-  RowComponent,
-  TableDirective,
-  TextColorDirective,
-  FormCheckComponent,
-  FormCheckInputDirective,
-  FormCheckLabelDirective,
-  SpinnerComponent,
-} from '@coreui/angular';
+import { ButtonDirective, CardBodyComponent, CardComponent, ColComponent, ContainerComponent, RowComponent, TableDirective, TextColorDirective, FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective, SpinnerComponent, ColDirective } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { BaseSearchComponent } from '@shared/base/search-base.component';
 import { MODULES } from 'src/app/core/config/permissions/modules';
@@ -26,11 +13,17 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
 import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
 import { ShippingGuideService } from '../core/services/shipping-guide.service';
 import { ShippingGuideModel } from '../core/models/shipping-guide.model';
-import { shippingGuideStructure, ShippingGuideStructureSection } from '../helpers/shipping-guide-structure';
+import {
+  shippingGuideStructure,
+  ShippingGuideStructureSection,
+} from '../helpers/shipping-guide-structure';
 import { PageParamsModel } from '@shared/models/query/page-params.model';
 import { CustomerService } from 'src/app/customer/core/services/customer.service';
 import { ProductService } from 'src/app/products/core/services/product.service';
 import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service';
+import { QuotationService } from 'src/app/quotation/core/services/quotation.service';
+import { Observable } from 'rxjs';
+import { ResponseDto } from '@shared/models/api/response.dto';
 
 interface ShippingGuideDetailForm {
   prod_id: number;
@@ -59,7 +52,8 @@ interface ShippingGuideDetailForm {
     SpinnerComponent,
     PaginatorComponent,
     DatePipe,
-  ],
+    ColDirective
+],
   templateUrl: './shipping-guide-main.page.html',
 })
 export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit {
@@ -88,6 +82,11 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
   readonly #sucursalService = inject(SucursalService);
   readonly #globalNotification = inject(GlobalNotification);
   readonly #confirmService = inject(ConfirmService);
+  readonly #quotationService = inject(QuotationService);
+
+  // State for cotización attachment
+  selectedCotizacion = signal<any>(null);
+  isCotizacionAttached = signal(false);
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.SALES, viewContainerRef);
@@ -107,8 +106,7 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
 
   loadForm() {
     this.form = this.#formBuilder.group({
-      serie_id: [null],
-      fecha_emision: [new Date().toISOString().split('T')[0]],
+      fecha_emision: [{ value: new Date().toISOString().split('T')[0], disabled: true }],
       fecha_inicio_traslado: [new Date().toISOString().split('T')[0]],
       partida_ubigeo: [''],
       partida_direccion: [''],
@@ -125,6 +123,7 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
       empresa_transporte_nro_doc: [''],
       empresa_transporte_razon_social: [''],
       nro_cotizacion: [''],
+      cot_id: [null],
       nro_oc: [''],
       nro_factura: [''],
       prod_id: [null],
@@ -146,6 +145,12 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
   serviceMap: Record<string, (term: string) => any> = {
     customerSearch: (term: string) => this.#customerService.searchQuick(term),
     productSearch: (term: string) => this.#productService.searchQuick({ term }),
+    cotizacionSearch: (term: string): Observable<ResponseDto<any>> =>
+      this.#quotationService.search({
+        filter: { nombre: term, estados: ['01'] },
+        sort: [{ property: 'fecha_emision', direction: 'desc' }],
+        page: { page: 1, pageSize: 20 },
+      }),
   };
 
   getServiceFn(serviceFnName?: string): (term: string) => any {
@@ -155,6 +160,35 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
 
   onSelectItem(formControlName: string, item: any) {
     if (!item) return;
+
+    // Handle cotización selection
+    if (formControlName === 'cot_id') {
+      this.selectedCotizacion.set(item);
+      this.isCotizacionAttached.set(true);
+
+      // Auto-fill cliente
+      if (item.cliente) {
+        this.form.patchValue({
+          cli_id: item.cliente.cli_id,
+        });
+      }
+
+      // Populate details from cotización
+      if (item.detalles && item.detalles.length > 0) {
+        this.detailsArray.clear();
+        item.detalles.forEach((detalle: any) => {
+          const detailForm = this.#formBuilder.group({
+            prod_id: [detalle.prod_id],
+            prod_nom: [detalle.producto?.prod_nom ?? ''],
+            cantidad: [detalle.cantidad],
+            peso_unitario: [detalle.producto?.prod_peso ?? 0],
+            descripcion: [detalle.descripcion ?? ''],
+          });
+          this.detailsArray.push(detailForm);
+        });
+      }
+      return;
+    }
 
     if (formControlName === 'prod_id') {
       this.form.patchValue({
@@ -176,11 +210,15 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
     const cantidad = this.form.get('temp_cantidad')?.value || 1;
 
     const exists = this.detailsArray.controls.some(
-      (control) => control.value.prod_id === this.selectedProduct.prod_id
+      (control) => control.value.prod_id === this.selectedProduct.prod_id,
     );
 
     if (exists) {
-      this.#globalNotification.openToastAlert('Aviso', 'Este producto ya ha sido agregado', 'warning');
+      this.#globalNotification.openToastAlert(
+        'Aviso',
+        'Este producto ya ha sido agregado',
+        'warning',
+      );
       return;
     }
 
@@ -226,14 +264,15 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
   }
 
   updateStructure() {
-    this.structure.set(
-      shippingGuideStructure(this.series, this.sucursales)
-    );
+    this.structure.set(shippingGuideStructure(this.series, this.sucursales));
   }
 
   save() {
     if (this.form.invalid || this.detailsArray.length === 0) {
-      this.#globalNotification.openToastAlert('Validación', 'Complete todos los campos requeridos y agregue al menos un producto');
+      this.#globalNotification.openToastAlert(
+        'Validación',
+        'Complete todos los campos requeridos y agregue al menos un producto',
+      );
       this.form.markAllAsTouched();
       return;
     }
@@ -259,6 +298,7 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
       empresa_transporte_nro_doc: this.form.value.empresa_transporte_nro_doc,
       empresa_transporte_razon_social: this.form.value.empresa_transporte_razon_social,
       nro_cotizacion: this.form.value.nro_cotizacion,
+      cot_id: this.form.value.cot_id,
       nro_oc: this.form.value.nro_oc,
       nro_factura: this.form.value.nro_factura,
       observaciones: this.form.value.observaciones,
@@ -290,7 +330,11 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
       },
       error: (error) => {
         this.isLoadingForm.set(false);
-        this.#globalNotification.openToastAlert('Error', error.messages || 'Error al guardar', 'danger');
+        this.#globalNotification.openToastAlert(
+          'Error',
+          error.messages || 'Error al guardar',
+          'danger',
+        );
       },
     });
   }
@@ -300,6 +344,8 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
     this.detailsArray.clear();
     this.guideId.set(null);
     this.selectedProduct = null;
+    this.selectedCotizacion.set(null);
+    this.isCotizacionAttached.set(false);
     this.form.patchValue({
       fecha_emision: new Date().toISOString().split('T')[0],
       fecha_inicio_traslado: new Date().toISOString().split('T')[0],
@@ -380,7 +426,11 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
               }
             },
             error: (response) => {
-              this.#globalNotification.openToastAlert('Error al eliminar', response.messages || 'Error', 'danger');
+              this.#globalNotification.openToastAlert(
+                'Error al eliminar',
+                response.messages || 'Error',
+                'danger',
+              );
             },
           });
         }
@@ -442,6 +492,7 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
             empresa_transporte_nro_doc: guia.empresa_transporte_nro_doc,
             empresa_transporte_razon_social: guia.empresa_transporte_razon_social,
             nro_cotizacion: guia.nro_cotizacion,
+            cot_id: guia.cot_id ?? null,
             nro_oc: guia.nro_oc,
             nro_factura: guia.nro_factura,
             observaciones: guia.observaciones,

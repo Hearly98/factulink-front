@@ -42,6 +42,9 @@ import { ProductService } from 'src/app/products/core/services/product.service';
 import { PaymentMethodService } from 'src/app/payment-method/core/services/payment-method.service';
 import { DocumentTypeService } from 'src/app/document-type/core/services/document-type.service';
 import { OrganizationService } from 'src/app/organization/core/services/organization.service';
+import { DateRangePickerComponent } from '@shared/components/date-range-picker/date-range-picker.component';
+import { AlmacenService } from 'src/app/almacen/core/services/almacen.service';
+import { mapToSelectOption } from '@shared/functions';
 import { mapSaleCreateDto } from '../../helpers/map-sale-create-dto';
 
 @Component({
@@ -67,6 +70,7 @@ import { mapSaleCreateDto } from '../../helpers/map-sale-create-dto';
     PaginatorComponent,
     DatePipe,
     CurrencyPipe,
+    DateRangePickerComponent,
   ],
   templateUrl: './sales-main.page.html',
 })
@@ -86,6 +90,9 @@ export class SalesMainPage extends BaseSearchComponent implements OnInit {
 
   public structure = signal(saleStructure());
   public title = signal<string>('Historial de Ventas');
+  public sucursalOptions = signal<SelectOption[]>([]);
+  public almacenOptions = signal<SelectOption[]>([]);
+  public almacenError = signal(false);
 
   availableStates = [
     { id: 2, nombre: 'Pagados', color: 'success' },
@@ -103,6 +110,7 @@ export class SalesMainPage extends BaseSearchComponent implements OnInit {
   #paymentMethod = inject(PaymentMethodService);
   #documentTypeService = inject(DocumentTypeService);
   #organizationService = inject(OrganizationService);
+  #almacenService = inject(AlmacenService);
   #globalNotification = inject(GlobalNotification);
   #confirmService = inject(ConfirmService);
   #route = inject(ActivatedRoute);
@@ -130,6 +138,12 @@ export class SalesMainPage extends BaseSearchComponent implements OnInit {
     this.loadSelectCombos();
     this.setupPaymentMethodListener();
 
+    this.form.get('suc_id')?.valueChanges.subscribe((value) => {
+      if (value) {
+        this.loadAlmacenesBySucursal(value);
+      }
+    });
+
     if (this.saleId()) {
       // TODO: Load existing sale for edit
     }
@@ -143,12 +157,12 @@ export class SalesMainPage extends BaseSearchComponent implements OnInit {
     return this.form.get('detalles') as FormArray<TypedFormGroup<SaleDetailForm>>;
   }
 
-  serviceMap = {
+  serviceMap: Record<string, (term: string) => any> = {
     customerSearch: (term: string) => this.#customerService.getAll(),
     productSearch: (term: string) =>
       this.#productService.searchQuick({
         term,
-        suc_id: this.form.get('suc_id')?.value ?? 0,
+        almacen_id: this.form.get('almacen_id')?.value ?? 0,
       }),
   };
 
@@ -194,11 +208,15 @@ export class SalesMainPage extends BaseSearchComponent implements OnInit {
     if (!this.selectedProduct) return;
 
     const exists = this.detailsArray.controls.some(
-      (control) => control.value.prod_id === this.selectedProduct.prod_id
+      (control) => control.value.prod_id === this.selectedProduct.prod_id,
     );
 
     if (exists) {
-      this.#globalNotification.openToastAlert('Aviso', 'Este producto ya ha sido agregado', 'warning');
+      this.#globalNotification.openToastAlert(
+        'Aviso',
+        'Este producto ya ha sido agregado',
+        'warning',
+      );
       return;
     }
 
@@ -208,7 +226,7 @@ export class SalesMainPage extends BaseSearchComponent implements OnInit {
       prod_nom: [{ value: this.selectedProduct.prod_nom, disabled: true }],
       prod_cod_interno: [this.selectedProduct.prod_cod],
       unidad: [this.selectedProduct.unidad],
-      precio_unitario: [{ value: null }],
+      precio_unitario: [{ value: this.selectedProduct.pventa ?? null }],
       precio_venta: [{ value: null, disabled: true }],
       dscto: [null],
     });
@@ -278,7 +296,15 @@ export class SalesMainPage extends BaseSearchComponent implements OnInit {
       },
     });
 
-    this.updateStructure(currencies, paymentType, documents, documentTypes, sucursalOptions, companyOptions);
+    this.updateStructure(
+      currencies,
+      paymentType,
+      documents,
+      documentTypes,
+      sucursalOptions,
+      companyOptions,
+      this.almacenOptions(),
+    );
   }
 
   setupPaymentMethodListener() {
@@ -294,8 +320,8 @@ export class SalesMainPage extends BaseSearchComponent implements OnInit {
       const companyOptions: SelectOption[] = [];
 
       const currentStructure = this.structure();
-      currentStructure.forEach(section => {
-        section.controls.forEach(control => {
+      currentStructure.forEach((section) => {
+        section.controls.forEach((control) => {
           if (control.type === 'select' && 'options' in control) {
             switch (control.formControlName) {
               case 'mon_id':
@@ -316,12 +342,22 @@ export class SalesMainPage extends BaseSearchComponent implements OnInit {
               case 'emp_id':
                 companyOptions.push(...control.options);
                 break;
+              case 'almacen_id':
+                break;
             }
           }
         });
       });
 
-      this.updateStructure(currencies, paymentType, documents, documentTypes, sucursalOptions, companyOptions);
+      this.updateStructure(
+        currencies,
+        paymentType,
+        documents,
+        documentTypes,
+        sucursalOptions,
+        companyOptions,
+        this.almacenOptions(),
+      );
     });
   }
 
@@ -331,7 +367,8 @@ export class SalesMainPage extends BaseSearchComponent implements OnInit {
     documents: SelectOption[],
     documentTypes: SelectOption[],
     sucursalOptions: SelectOption[],
-    companyOptions: SelectOption[]
+    companyOptions: SelectOption[],
+    almacenOptions: SelectOption[],
   ) {
     this.structure.set(
       saleStructure(
@@ -341,14 +378,42 @@ export class SalesMainPage extends BaseSearchComponent implements OnInit {
         documentTypes,
         sucursalOptions,
         companyOptions,
-        this.showFechaVencimiento()
-      )
+        almacenOptions,
+        this.showFechaVencimiento(),
+      ),
     );
+  }
+
+  loadAlmacenesBySucursal(sucId: number) {
+    this.#almacenService.getBySucursal(sucId).subscribe({
+      next: (response) => {
+        this.almacenOptions.set(mapToSelectOption(response.data, 'almacen_id', 'nombre'));
+        this.form.patchValue({ almacen_id: null });
+      },
+    });
+  }
+
+  onDateRangeChange(range: { start: Date | null; end: Date | null }) {
+    const formatDateForApi = (date: Date | null): string => {
+      if (!date) return '';
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    this.formList.patchValue({
+      fecha_inicio: formatDateForApi(range.start) ?? null,
+      fecha_fin: formatDateForApi(range.end) ?? null,
+    });
   }
 
   save() {
     if (this.form.invalid || this.detailsArray.length === 0) {
-      this.#globalNotification.openToastAlert('Validación', 'Complete todos los campos requeridos y agregue al menos un producto');
+      this.#globalNotification.openToastAlert(
+        'Validación',
+        'Complete todos los campos requeridos y agregue al menos un producto',
+      );
       this.form.markAllAsTouched();
       return;
     }
@@ -404,7 +469,7 @@ export class SalesMainPage extends BaseSearchComponent implements OnInit {
     if (!this.formList) {
       this.formList = this.#formBuilder.group(buildFilterForm());
     }
-    
+
     const sort = filterSort(this.formList.value) as { property: string; direction: string }[];
     const filterToUse = filter || mapParams(this.formList.value);
     const pageSize = 10;

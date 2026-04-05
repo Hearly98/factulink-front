@@ -14,41 +14,60 @@ export interface ShippingGuideStructureControl {
 
 export interface ShippingGuideStructureSection {
   title: string;
+  col: number;
   controls: ShippingGuideStructureControl[];
 }
 
 export function shippingGuideStructure(
-  series: SelectOption[] = [],
   sucursales: SelectOption[] = [],
-  clientes: SelectOption[] = []
+  clientes: SelectOption[] = [],
 ): ShippingGuideStructureSection[] {
   return [
     {
       title: 'Datos de la Guía',
+      col: 12,
       controls: [
-        {
-          label: 'Serie',
-          formControlName: 'serie_id',
-          type: 'select',
-          col: 4,
-          options: series,
-        },
         {
           label: 'Fecha de Emisión',
           formControlName: 'fecha_emision',
           type: 'date',
-          col: 4,
+          col: 3,
         },
         {
-          label: 'Fecha Inicio Traslado',
-          formControlName: 'fecha_inicio_traslado',
-          type: 'date',
-          col: 4,
+          label: 'Cotización',
+          formControlName: 'cot_id',
+          type: 'search-select',
+          col: 3,
+          bindLabel: 'numero_completo',
+          bindValue: 'cot_id',
+          serviceFnName: 'cotizacionSearch',
+        },
+        {
+          label: 'Nro. O.C.',
+          formControlName: 'nro_oc',
+          type: 'text',
+          col: 3,
+          placeholder: 'OC-001',
+        },
+        {
+          label: 'Nro. Factura',
+          formControlName: 'nro_factura',
+          type: 'text',
+          col: 3,
+          placeholder: 'F001-001',
+        },
+        {
+          label: 'Observaciones',
+          formControlName: 'observaciones',
+          type: 'textarea',
+          col: 12,
+          placeholder: 'Observaciones adicionales',
         },
       ],
     },
     {
       title: 'Punto de Partida',
+      col: 6,
       controls: [
         {
           label: 'Ubigeo Partida',
@@ -68,6 +87,7 @@ export function shippingGuideStructure(
     },
     {
       title: 'Punto de Destino',
+      col: 6,
       controls: [
         {
           label: 'Ubigeo Destino',
@@ -87,134 +107,81 @@ export function shippingGuideStructure(
     },
     {
       title: 'Datos del Cliente',
+      col: 12,
       controls: [
         {
           label: 'Cliente',
           formControlName: 'cli_id',
           type: 'search-select',
-          col: 6,
+          col: 4,
           bindLabel: 'cli_nom',
           bindValue: 'cli_id',
           serviceFnName: 'customerSearch',
         },
         {
-          label: 'Tipo Traslado',
-          formControlName: 'tipo_traslado',
-          type: 'select',
-          col: 6,
-          options: [
-            { label: 'Privado', value: 'PRIVADO' },
-            { label: 'Público', value: 'PUBLICO' },
-          ],
+          label: 'Número de documento',
+          formControlName: 'doc_cliente',
+          type: 'text',
+          col: 4,
+          placeholder: 'Ej: 1234556',
+        },
+        {
+          label: 'Dirección',
+          formControlName: 'direccion_cliente',
+          type: 'text',
+          col: 4,
+          placeholder: 'Av. Las Americas 123',
         },
       ],
     },
     {
       title: 'Motivo de Traslado',
+      col: 12,
       controls: [
+        {
+          label: 'Fecha Traslado',
+          formControlName: 'fecha_inicio_traslado',
+          type: 'date',
+          col: 4,
+        },
+        {
+          label: 'Tipo Traslado',
+          formControlName: 'tipo_traslado',
+          type: 'select',
+          col: 4,
+          options: [
+            { label: 'Privado', value: 'PRIVADO' },
+            { label: 'Público', value: 'PUBLICO' },
+          ],
+        },
         {
           label: 'Motivo',
           formControlName: 'motivo_traslado',
-          type: 'text',
-          col: 12,
-          placeholder: 'Venta, Compra, Devolución, etc.',
-        },
-      ],
-    },
-    {
-      title: 'Datos del Transportista',
-      controls: [
-        {
-          label: 'Tipo Documento',
-          formControlName: 'transportista_tipo_doc',
           type: 'select',
-          col: 3,
+          col: 4,
           options: [
-            { label: 'DNI', value: 'DNI' },
-            { label: 'RUC', value: 'RUC' },
-            { label: 'Carnet', value: 'CARNET' },
+            { label: 'Venta', value: 'Venta' },
+            { label: 'Compra', value: 'Compra' },
+            {
+              label: 'Traslado entre establecimientos de la misma empresa',
+              value: 'Traslado entre establecimientos de la misma empresa',
+            },
+            { label: 'Importación', value: 'Importación' },
+            { label: 'Exportación', value: 'Exportación' },
+            {
+              label: 'Venta sujeta a confirmación del comprador',
+              value: 'Venta sujeta a confirmación del comprador',
+            },
+            { label: 'Traslado emisor itinerante CP', value: 'Traslado emisor itinerante CP' },
+            { label: 'Traslado a zona primaria', value: 'Traslado a zona primaria' },
+            { label: 'Otros', value: 'otros' },
           ],
-        },
-        {
-          label: 'Nro. Documento',
-          formControlName: 'transportista_nro_doc',
-          type: 'text',
-          col: 3,
-          placeholder: '12345678',
-        },
-        {
-          label: 'Licencia',
-          formControlName: 'transportista_licencia',
-          type: 'text',
-          col: 3,
-          placeholder: 'Licencia de conducir',
-        },
-        {
-          label: 'Placa',
-          formControlName: 'transportista_placa',
-          type: 'text',
-          col: 3,
-          placeholder: 'ABC-123',
-        },
-      ],
-    },
-    {
-      title: 'Empresa de Transporte',
-      controls: [
-        {
-          label: 'Tipo Documento',
-          formControlName: 'empresa_transporte_tipo_doc',
-          type: 'select',
-          col: 3,
-          options: [
-            { label: 'RUC', value: 'RUC' },
-            { label: 'DNI', value: 'DNI' },
-          ],
-        },
-        {
-          label: 'Nro. Documento',
-          formControlName: 'empresa_transporte_nro_doc',
-          type: 'text',
-          col: 3,
-          placeholder: '20123456789',
-        },
-        {
-          label: 'Razón Social',
-          formControlName: 'empresa_transporte_razon_social',
-          type: 'text',
-          col: 6,
-          placeholder: 'Nombre de la empresa',
-        },
-      ],
-    },
-    {
-      title: 'Referencias',
-      controls: [
-        {
-          label: 'Nro. Cotización',
-          formControlName: 'nro_cotizacion',
-          type: 'text',
-          col: 4,
-          placeholder: 'COT-001',
-        },
-        {
-          label: 'Nro. O.C.',
-          formControlName: 'nro_oc',
-          type: 'text',
-          col: 4,
-          placeholder: 'OC-001',
-        },
-        {
-          label: 'Nro. Factura',
-          formControlName: 'nro_factura',
-          type: 'text',
-          col: 4,
-          placeholder: 'F001-001',
         },
       ],
     },
     {
       title: 'Agregar Producto',
+      col: 12,
       controls: [
         {
           label: 'Producto',
@@ -231,18 +198,6 @@ export function shippingGuideStructure(
           type: 'number',
           col: 3,
           placeholder: 'Cantidad',
-        },
-      ],
-    },
-    {
-      title: 'Observaciones',
-      controls: [
-        {
-          label: 'Observaciones',
-          formControlName: 'observaciones',
-          type: 'textarea',
-          col: 12,
-          placeholder: 'Observaciones adicionales',
         },
       ],
     },
