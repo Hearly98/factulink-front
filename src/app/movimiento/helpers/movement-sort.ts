@@ -1,3 +1,3 @@
 export function movementFilterSort() {
-  return [{ property: 'mov_fecha', direction: 'desc' }];
+  return [{ property: 'doc_fecha_emision', direction: 'desc' }];
 }

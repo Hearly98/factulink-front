@@ -148,9 +148,9 @@
                         <tbody>
                           @for (detail of detailsArray.controls; track $index; let i = $index) {
                             <tr>
-                              <td>{{ detail.get('prod_cod_interno')?.value }}</td>
-                              <td>{{ detail.get('prod_nom')?.value }}</td>
-                              <td>{{ detail.get('cant')?.value }}</td>
+                              <td>{{ detail.get('codigoProducto')?.value }}</td>
+                              <td>{{ detail.get('nombreProducto')?.value }}</td>
+                              <td>{{ detail.get('cantidad')?.value }}</td>
                               <td class="text-end">
                                 <button cButton color="danger" size="sm" (click)="removeDetail(i)">
                                   <svg cIcon name="cilTrash"></svg>
@@ -222,7 +222,6 @@
                       <option value="TRANSFERENCIA">Transferencia</option>
                       <option value="INGRESO">Ingreso</option>
                       <option value="SALIDA">Salida</option>
-                      <option value="AJUSTE">Ajuste</option>
                     </select>
                   </c-col>
                   <c-col sm="12" md="6" lg="3">
@@ -286,12 +285,14 @@
                                 </td>
                                 <td>{{ item.doc_numero_completo }}</td>
                                 <td>{{ item.almacen_origen?.nombre || '-' }}</td>
-                                <td>{{ item.doc_fecha_emision | date: 'dd/MM/yyyy HH:mm' }}</td>
+                                <td>{{ item.doc_fecha_emision | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
                                 <td>
                                   <span
                                     class="badge"
                                     [ngClass]="{
-                                      'bg-info': item.doc_tipo_movimiento === 'Transferencia Salida' || item.doc_tipo_movimiento === 'Transferencia Ingreso',
+                                      'bg-info':
+                                        item.doc_tipo_movimiento === 'Transferencia Salida' ||
+                                        item.doc_tipo_movimiento === 'Transferencia Ingreso',
                                       'bg-success': item.doc_tipo_movimiento === 'Ingreso',
                                       'bg-danger': item.doc_tipo_movimiento === 'Salida',
                                     }"

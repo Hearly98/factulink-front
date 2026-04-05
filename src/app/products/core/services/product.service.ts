@@ -7,6 +7,7 @@ import { QueryParamsModel } from '../../../shared/models/query/query-params.mode
 import { QueryResultsModel } from '../../../shared/models/query/query-results.model';
 import { CreateProductModel, GetProductModel, UpdateProductModel } from '../models';
 import { environment } from '../../../../environments/environment';
+import { ProductoSearchDto } from '../models/product-search-dto';
 @Injectable({
   providedIn: 'root',
 })
@@ -59,7 +60,7 @@ export class ProductService extends BaseService {
     term: string;
     suc_id?: number;
     almacen_id?: number;
-  }): Observable<ResponseDto<GetProductModel[]>> {
+  }): Observable<ResponseDto<ProductoSearchDto[]>> {
     return this.postRequest(`/search-quick`, body);
   }
 

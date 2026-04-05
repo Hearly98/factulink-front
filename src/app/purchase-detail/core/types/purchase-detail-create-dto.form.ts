@@ -1,6 +1,6 @@
 export interface PurchaseDetailCreteDTOForm {
-  idProducto: number | null;
-  cantidad: number | null;
-  nombreProducto: string | null;
-  costoUnitario: number | null;
+  prod_id: number | null;
+  detc_cant: number | null;
+  prod_nom: string | null;
+  prod_pcompra: number | null;
 }

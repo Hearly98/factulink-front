@@ -508,11 +508,11 @@ export class NewPurchaseComponent extends BaseComponent implements OnInit {
       afecta_stock: this.form.value.afecta_stock,
       detalles: this.detailsArray.getRawValue().map((v) => {
         return {
-          idProducto: v.prod_id,
-          cantidad: v.cantidad,
-          costoUnitario: v.precio_compra,
-          nombreProducto: v.prod_nom,
-        } as PurchaseDetailCreteDTOForm;
+          prod_id: v.prod_id,
+          detc_cant: v.cantidad,
+          prod_pcompra: v.precio_compra,
+          prod_nom: v.prod_nom,
+        };
       }),
     };
 

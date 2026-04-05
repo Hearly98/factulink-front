@@ -22,7 +22,7 @@ import { SelectOption } from '@shared/types';
 import { TypedFormGroup } from '@shared/types/types-form';
 import { SearchSelectComponent } from '@shared/components/search-select.component';
 import { PurchaseDetailTableComponent } from 'src/app/purchase-detail/components/purchase-detail-table.component';
-import { PurchaseDetailCreteDTOForm, PurchaseDetailForm } from 'src/app/purchase-detail/core/types';
+import { PurchaseDetailForm } from 'src/app/purchase-detail/core/types';
 import { buildPurchaseDetailForm } from 'src/app/purchase-detail/helpers';
 import { PaginatorComponent } from 'src/app/paginator/paginator.component';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
@@ -34,14 +34,12 @@ import { buildPurchaseForm } from '../../helpers/build-purchase-form';
 import { purchaseStructure, buildFilterForm, filterSort, mapParams } from '../../helpers';
 import { PageParamsModel } from '@shared/models/query/page-params.model';
 import { CurrencyService } from 'src/app/currency/core/services/currency.service';
-import { DocumentService } from 'src/app/document/core/services/document.service';
 import { SupplierService } from 'src/app/supplier/core/services/supplier.service';
 import { ProductService } from 'src/app/products/core/services/product.service';
 import { DocumentTypeService } from 'src/app/document-type/core/services/document-type.service';
 import { PaymentMethodService } from 'src/app/payment-method/core/services/payment-method.service';
 import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service';
 import { AlmacenService } from 'src/app/almacen/core/services/almacen.service';
-import { ProductoAlmacenService } from 'src/app/almacen/core/services/producto-almacen.service';
 import { DateRangePickerComponent } from '@shared/components/date-range-picker/date-range-picker.component';
 import { forkJoin } from 'rxjs';
 
@@ -100,14 +98,12 @@ export class PurchaseMainPage extends BaseSearchComponent implements OnInit {
   readonly #formBuilder = inject(FormBuilder);
   readonly #purchaseService = inject(PurchaseService);
   readonly #currencyService = inject(CurrencyService);
-  readonly #documentService = inject(DocumentService);
   readonly #supplierService = inject(SupplierService);
   readonly #paymentMethodService = inject(PaymentMethodService);
   readonly #productService = inject(ProductService);
   readonly #documentTypeService = inject(DocumentTypeService);
   readonly #sucursalService = inject(SucursalService);
   readonly #almacenService = inject(AlmacenService);
-  readonly #productoAlmacenService = inject(ProductoAlmacenService);
   readonly #globalNotification = inject(GlobalNotification);
   readonly #confirmService = inject(ConfirmService);
   readonly #route = inject(ActivatedRoute);
@@ -195,23 +191,6 @@ export class PurchaseMainPage extends BaseSearchComponent implements OnInit {
     }
   }
 
-  loadProductStock(productId: number) {
-    const almId = this.form.get('almacen_id')?.value;
-    if (!almId) {
-      this.selectedProductStock.set(null);
-      return;
-    }
-    this.#productoAlmacenService.getByProducto(productId).subscribe({
-      next: (response) => {
-        const stockInfo = response.data.find((s: any) => s.almacen_id === almId);
-        this.selectedProductStock.set(stockInfo?.stock_actual ?? 0);
-      },
-      error: () => {
-        this.selectedProductStock.set(null);
-      },
-    });
-  }
-
   onSelectItem(formControlName: string, item: any) {
     if (!item) return;
 
@@ -220,7 +199,7 @@ export class PurchaseMainPage extends BaseSearchComponent implements OnInit {
         prod_id: item.prod_id,
       });
       this.selectedProduct = item;
-      this.loadProductStock(item.prod_id);
+      this.selectedProductStock.set(item.stock);
       return;
     }
 
@@ -312,11 +291,11 @@ export class PurchaseMainPage extends BaseSearchComponent implements OnInit {
       afecta_stock: this.form.value.afecta_stock,
       detalles: this.detailsArray.getRawValue().map((v) => {
         return {
-          idProducto: v.prod_id,
-          cantidad: v.cantidad,
-          costoUnitario: v.precio_compra,
-          nombreProducto: v.prod_nom,
-        } as PurchaseDetailCreteDTOForm;
+          detc_cant: v.cantidad,
+          prod_id: v.prod_id,
+          prod_nom: v.prod_nom,
+          prod_pcompra: v.precio_compra,
+        };
       }),
     };
 
@@ -376,7 +355,7 @@ export class PurchaseMainPage extends BaseSearchComponent implements OnInit {
     }
 
     const sort = filterSort(this.formList.value) as { property: string; direction: string }[];
-    const filterToUse = filter || mapParams(this.formList.value);
+    const filterToUse = filter ?? mapParams(this.formList.value);
     const pageSize = 10;
     const pageParams = new PageParamsModel(page, pageSize);
 
@@ -408,14 +387,8 @@ export class PurchaseMainPage extends BaseSearchComponent implements OnInit {
   }
 
   onClean() {
-    if (this.formList) {
       this.formList.reset();
-      this.formList.patchValue({
-        order: 'desc',
-        estados: ['COMP'],
-      });
-    }
-    this.onSearch();
+      this.onSearch();
   }
 
   onDelete(id: number) {
@@ -489,9 +462,9 @@ export class PurchaseMainPage extends BaseSearchComponent implements OnInit {
       return `${year}-${month}-${day}`;
     };
 
-    this.form.patchValue({
-      fecha_inicio: range.start ? formatDateForApi(range.start) : null,
-      fecha_fin: range.end ? formatDateForApi(range.end) : null,
+    this.formList.patchValue({
+      fecha_desde: formatDateForApi(range.start) ?? null,
+      fecha_hasta: formatDateForApi(range.end) ?? null,
     });
   }
 }
