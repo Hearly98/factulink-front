@@ -29,107 +29,248 @@
 
         @if (activeTab() === 'create') {
           <c-container [formGroup]="form" class="mt-3">
-            @for (item of structure(); track $index) {
-            <c-card class="mb-4">
+
+            <!-- ===== VINCULAR DOCUMENTOS ===== -->
+            <c-card class="mb-4 border-primary-subtle">
               <c-card-body>
-                <c-row>
-                  <c-col [md]="12">
-                    <h5>{{ item.title }}</h5>
+                <div class="d-flex align-items-center gap-2 mb-3">
+                  <svg cIcon name="cilLink" class="text-primary"></svg>
+                  <h6 class="mb-0 fw-semibold">Vincular Documentos</h6>
+                  <span class="text-muted small ms-1">— opcional. Auto-completa los datos del cliente.</span>
+                </div>
+
+                <c-row class="g-3">
+                  <!-- Cotización -->
+                  <c-col sm="12" md="6">
+                    <div class="d-flex align-items-center gap-1 mb-2 small fw-medium text-muted">
+                      <svg cIcon name="cilFile" style="width:14px;height:14px;"></svg>
+                      Cotización
+                    </div>
+                    @if (linkedCotizacion()) {
+                      <div class="d-flex align-items-center gap-2 p-3 rounded border linked-doc-card">
+                        <div class="flex-grow-1">
+                          <div class="d-flex align-items-center gap-2">
+                            <span class="fw-semibold">{{ linkedCotizacion()!.numero_completo }}</span>
+                            <span class="badge bg-primary-subtle text-primary small">
+                              <svg cIcon name="cilLockLocked" style="width:10px;height:10px;" class="me-1"></svg>
+                              Vinculada
+                            </span>
+                          </div>
+                          <div class="text-muted small mt-1">
+                            {{ linkedCotizacion()!.cliente?.cli_nom }}
+                          </div>
+                        </div>
+                        <button
+                          cButton
+                          color="secondary"
+                          variant="ghost"
+                          size="sm"
+                          (click)="unlinkCotizacion()"
+                          title="Desvincular"
+                        >
+                          <svg cIcon name="cilX"></svg>
+                        </button>
+                      </div>
+                    } @else {
+                      <button
+                        cButton
+                        color="primary"
+                        variant="outline"
+                        class="w-100 justify-content-start"
+                        (click)="openDocumentSearch('cotizacion')"
+                      >
+                        <svg cIcon name="cilSearch" class="me-2"></svg>
+                        Buscar cotización
+                      </button>
+                    }
+                  </c-col>
+
+                  <!-- Guía de Remisión -->
+                  <c-col sm="12" md="6">
+                    <div class="d-flex align-items-center gap-1 mb-2 small fw-medium text-muted">
+                      <svg cIcon name="cilTruck" style="width:14px;height:14px;"></svg>
+                      Guía de Remisión
+                    </div>
+                    @if (linkedGuia()) {
+                      <div class="d-flex align-items-center gap-2 p-3 rounded border linked-doc-card">
+                        <div class="flex-grow-1">
+                          <div class="d-flex align-items-center gap-2">
+                            <span class="fw-semibold">{{ linkedGuia()!.numero_completo }}</span>
+                            <span class="badge bg-primary-subtle text-primary small">
+                              <svg cIcon name="cilLockLocked" style="width:10px;height:10px;" class="me-1"></svg>
+                              Vinculada
+                            </span>
+                          </div>
+                          <div class="text-muted small mt-1">
+                            {{ linkedGuia()!.destinatario_nombre || linkedGuia()!.cliente?.cli_nom }}
+                          </div>
+                        </div>
+                        <button
+                          cButton
+                          color="secondary"
+                          variant="ghost"
+                          size="sm"
+                          (click)="unlinkGuia()"
+                          title="Desvincular"
+                        >
+                          <svg cIcon name="cilX"></svg>
+                        </button>
+                      </div>
+                    } @else {
+                      <button
+                        cButton
+                        color="primary"
+                        variant="outline"
+                        class="w-100 justify-content-start"
+                        (click)="openDocumentSearch('guia')"
+                      >
+                        <svg cIcon name="cilSearch" class="me-2"></svg>
+                        Buscar guía de remisión
+                      </button>
+                    }
                   </c-col>
                 </c-row>
-                <c-row>
-                  @for (control of item.controls; track $index) {
-                  <c-col [md]="control.col">
-                    <label [for]="control.formControlName">{{ control.label }}</label>
-                    @switch (control.type) { @case('search-select') {
-                    <app-search-select
-                      [placeholder]="control.label"
-                      [bindLabel]="control.bindLabel"
-                      [bindValue]="control.bindValue"
-                      [serviceFn]="serviceMap[control.serviceFnName]"
-                      [disabled]="isControlDisabled(control.formControlName)"
-                      (itemSelected)="onSelectItem(control.formControlName, $event)"
-                    ></app-search-select>
-                    } @case('select'){
-                    <select class="form-control form-select" [formControlName]="control.formControlName">
-                      <option [ngValue]="null">Seleccione</option>
-                      @for (option of control.options; track $index) {
-                      <option [ngValue]="option.value">{{ option.label }}</option>
+
+                @if (linkedCotizacion() || linkedGuia()) {
+                  <div class="mt-3 d-flex align-items-start gap-2 p-2 rounded bg-info-subtle text-info-emphasis small">
+                    <svg cIcon name="cilInfo" class="flex-shrink-0 mt-0" style="width:14px;height:14px;"></svg>
+                    <span>
+                      @if (linkedCotizacion()) {
+                        Los datos del cliente provienen de la cotización <strong>{{ linkedCotizacion()!.numero_completo }}</strong>. Los campos de cliente son de solo lectura.
+                      } @else {
+                        Los datos del cliente provienen de la guía <strong>{{ linkedGuia()!.numero_completo }}</strong>. Los campos de cliente son de solo lectura.
                       }
-                    </select>
-                    } 
-                    @case('checkbox') {
-                    <c-form-check class="mt-2">
+                    </span>
+                  </div>
+                }
+              </c-card-body>
+            </c-card>
+            <!-- ===== FIN VINCULAR DOCUMENTOS ===== -->
+
+            @if(isLoadingForm()) {
+              <div class="text-center py-5">
+                <c-spinner></c-spinner>
+              </div>
+            } @else {
+              @for (item of structure(); track $index) {
+              @if (item.title !== 'Documento Origen') {
+              <c-card class="mb-4">
+                <c-card-body>
+                  <c-row>
+                    <c-col [md]="12">
+                      <div class="d-flex align-items-center gap-2 mb-3">
+                        <h6 class="mb-0">{{ item.title }}</h6>
+                        @if (item.title === 'Cliente' && isClientReadonly()) {
+                          <span class="badge bg-secondary-subtle text-secondary small">
+                            <svg cIcon name="cilLockLocked" style="width:10px;height:10px;" class="me-1"></svg>
+                            Desde documento
+                          </span>
+                        }
+                      </div>
+                    </c-col>
+                  </c-row>
+                  <c-row>
+                    @for (control of item.controls; track $index) {
+                    <c-col [md]="control.col">
+                      <label [for]="control.formControlName">{{ control.label }}</label>
+                      @switch (control.type) { @case('search-select') {
+                      @if (item.title !== 'Documento Origen') {
+                        <app-search-select
+                          [placeholder]="control.label"
+                          [bindLabel]="control.bindLabel"
+                          [bindValue]="control.bindValue"
+                          [serviceFn]="serviceMap[control.serviceFnName]"
+                          [disabled]="isControlDisabled(control.formControlName) || (item.title === 'Cliente' && isClientReadonly())"
+                          [initialValue]="getClientInitialValue(control.formControlName)"
+                          (itemSelected)="onSelectItem(control.formControlName, $event)"
+                        ></app-search-select>
+                      }
+                      } @case('select'){
+                      <select class="form-control form-select" [formControlName]="control.formControlName"
+                        [attr.disabled]="(item.title === 'Cliente' && isClientReadonly()) ? true : null"
+                      >
+                        <option [ngValue]="null">Seleccione</option>
+                        @for (option of control.options; track $index) {
+                        <option [ngValue]="option.value">{{ option.label }}</option>
+                        }
+                      </select>
+                      }
+                      @case('checkbox') {
+                      <c-form-check class="mt-2">
+                        <input
+                          cFormCheckInput
+                          type="checkbox"
+                          [formControlName]="control.formControlName"
+                          [id]="control.formControlName"
+                        />
+                        <label cFormCheckLabel [for]="control.formControlName">{{ control.label }}</label>
+                      </c-form-check>
+                      } @default {
                       <input
-                        cFormCheckInput
-                        type="checkbox"
                         [formControlName]="control.formControlName"
-                        [id]="control.formControlName"
+                        [placeholder]="control.placeholder"
+                        [type]="control.type"
+                        class="form-control"
+                        [class.bg-light]="item.title === 'Cliente' && isClientReadonly()"
+                        [attr.readonly]="(item.title === 'Cliente' && isClientReadonly()) ? true : null"
                       />
-                      <label cFormCheckLabel [for]="control.formControlName">{{ control.label }}</label>
-                    </c-form-check>
-                    } @default {
-                    <input
-                      [formControlName]="control.formControlName"
-                      [placeholder]="control.placeholder"
-                      [type]="control.type"
-                      class="form-control"
-                    />
-                    } }
-                  </c-col>
-                  }
-                  @if (item.title === 'Agregar Producto') {
-                  <c-col [md]="4" class="mt-4">
-                    <label for="" class="d-none"></label>
-                    <button
-                      type="button"
-                      cButton
-                      color="primary"
-                      (click)="addProductToDetail()"
-                      [disabled]="!form.value.prod_id || !selectedProduct"
-                    >
-                      <svg cIcon name="cilPlus" class="me-2"></svg>
-                      Agregar Producto
-                    </button>
-                  </c-col>
-                  }
-                </c-row>
-              </c-card-body>
-            </c-card>
+                      } }
+                    </c-col>
+                    }
+                    @if (item.title === 'Agregar Producto') {
+                    <c-col [md]="4" class="mt-4">
+                      <label for="" class="d-none"></label>
+                      <button
+                        type="button"
+                        cButton
+                        color="primary"
+                        (click)="addProductToDetail()"
+                        [disabled]="!form.value.prod_id || !selectedProduct"
+                      >
+                        <svg cIcon name="cilPlus" class="me-2"></svg>
+                        Agregar Producto
+                      </button>
+                    </c-col>
+                    }
+                  </c-row>
+                </c-card-body>
+              </c-card>
+              }
+              }
+
+              <!-- Tabla de detalles -->
+              <app-sale-detail-table
+                [detailsArray]="detailsArray"
+                (detailRemoved)="onDetailRemoved($event)"
+              ></app-sale-detail-table>
+
+              <!-- Botones de acción -->
+              <c-card class="mb-4">
+                <c-card-body>
+                  <c-row class="align-items-end">
+                    <c-col md="8" sm="12" class="mb-2">
+                      <label for="">Observaciones</label>
+                      <textarea class="form-control" formControlName="venta_coment" rows="3"></textarea>
+                    </c-col>
+                    <c-col md="4" sm="12" class="gap-2 text-end">
+                      <button class="me-2" type="button" cButton color="secondary" (click)="resetForm()">
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        cButton
+                        color="success"
+                        (click)="save()"
+                        [disabled]="!form.valid || detailsArray.length === 0"
+                      >
+                        <svg cIcon name="cilSave" class="me-2"></svg>
+                        Guardar Venta
+                      </button>
+                    </c-col>
+                  </c-row>
+                </c-card-body>
+              </c-card>
             }
-
-            <!-- Tabla de detalles -->
-            <app-sale-detail-table
-              [detailsArray]="detailsArray"
-              (detailRemoved)="onDetailRemoved($event)"
-            ></app-sale-detail-table>
-
-            <!-- Botones de acción -->
-            <c-card class="mb-4">
-              <c-card-body>
-                <c-row class="align-items-end">
-                  <c-col md="8" sm="12" class="mb-2">
-                    <label for="">Observaciones</label>
-                    <textarea class="form-control" formControlName="venta_coment" rows="3"></textarea>
-                  </c-col>
-                  <c-col md="4" sm="12" class="gap-2 text-end">
-                    <button class="me-2" type="button" cButton color="secondary" (click)="resetForm()">
-                      Cancelar
-                    </button>
-                    <button
-                      type="button"
-                      cButton
-                      color="success"
-                      (click)="save()"
-                      [disabled]="!form.valid || detailsArray.length === 0"
-                    >
-                      <svg cIcon name="cilSave" class="me-2"></svg>
-                      Guardar Venta
-                    </button>
-                  </c-col>
-                </c-row>
-              </c-card-body>
-            </c-card>
           </c-container>
         }
 
@@ -277,3 +418,6 @@
     </c-card>
   </c-col>
 </c-row>
+
+<!-- Modal de búsqueda de documentos -->
+<app-search-document-modal #searchDocumentModal></app-search-document-modal>

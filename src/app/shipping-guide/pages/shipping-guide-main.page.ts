@@ -52,7 +52,6 @@ interface ShippingGuideDetailForm {
     SpinnerComponent,
     PaginatorComponent,
     DatePipe,
-    ColDirective
 ],
   templateUrl: './shipping-guide-main.page.html',
 })

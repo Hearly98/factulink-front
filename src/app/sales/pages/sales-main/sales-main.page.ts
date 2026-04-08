@@ -1,4 +1,4 @@
-import { Component, inject, Inject, OnInit, signal, ViewContainerRef } from '@angular/core';
+import { Component, inject, Inject, OnInit, signal, ViewChild, computed, ViewContainerRef } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -14,9 +14,9 @@ import {
   FormCheckComponent,
   FormCheckInputDirective,
   FormCheckLabelDirective,
+  SpinnerComponent,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
-import { BaseComponent } from '@shared/base/base.component';
 import { BaseSearchComponent } from '@shared/base/search-base.component';
 import { MODULES } from 'src/app/core/config/permissions/modules';
 import { SelectOption } from '@shared/types';
@@ -46,6 +46,9 @@ import { DateRangePickerComponent } from '@shared/components/date-range-picker/d
 import { AlmacenService } from 'src/app/almacen/core/services/almacen.service';
 import { mapToSelectOption } from '@shared/functions';
 import { mapSaleCreateDto } from '../../helpers/map-sale-create-dto';
+import { SearchDocumentModalComponent, SearchDocumentType } from '@shared/components/search-document-modal.component';
+import { QuotationModel } from 'src/app/quotation/core/models/quotation.model';
+import { ShippingGuideModel } from 'src/app/shipping-guide/core/models/shipping-guide.model';
 
 @Component({
   selector: 'app-sales-main',
@@ -70,12 +73,21 @@ import { mapSaleCreateDto } from '../../helpers/map-sale-create-dto';
     PaginatorComponent,
     DatePipe,
     CurrencyPipe,
+    SpinnerComponent,
     DateRangePickerComponent,
+    SearchDocumentModalComponent,
   ],
   templateUrl: './sales-main.page.html',
 })
 export class SalesMainPage extends BaseSearchComponent implements OnInit {
+  @ViewChild('searchDocumentModal') searchDocumentModal!: SearchDocumentModalComponent;
+
   public activeTab = signal<'create' | 'history'>('create');
+
+  // Documentos vinculados
+  public linkedCotizacion = signal<QuotationModel | null>(null);
+  public linkedGuia = signal<ShippingGuideModel | null>(null);
+  public isClientReadonly = computed(() => !!(this.linkedCotizacion() || this.linkedGuia()));
 
   public isLoadingList = signal(false);
   public sales: SaleModel[] = [];
@@ -114,7 +126,6 @@ export class SalesMainPage extends BaseSearchComponent implements OnInit {
   #globalNotification = inject(GlobalNotification);
   #confirmService = inject(ConfirmService);
   #route = inject(ActivatedRoute);
-  #router = inject(Router);
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.SALES, viewContainerRef);
@@ -181,6 +192,70 @@ export class SalesMainPage extends BaseSearchComponent implements OnInit {
       return !this.form.get('suc_id')?.value;
     }
     return false;
+  }
+
+  openDocumentSearch(type: SearchDocumentType) {
+    this.searchDocumentModal.openModal(type, (doc) => {
+      if (type === 'cotizacion') {
+        this.onSelectCotizacion(doc as QuotationModel);
+      } else {
+        this.onSelectGuia(doc as ShippingGuideModel);
+      }
+    });
+  }
+
+  onSelectCotizacion(cotizacion: QuotationModel) {
+    this.linkedCotizacion.set(cotizacion);
+    this.form.patchValue({ cot_id: cotizacion.cot_id });
+    if (cotizacion.cliente) {
+      this.form.patchValue({ cli_id: cotizacion.cli_id });
+      this.patchCustomer(cotizacion.cliente);
+    }
+  }
+
+  onSelectGuia(guia: ShippingGuideModel) {
+    this.linkedGuia.set(guia);
+    this.form.patchValue({ guia_id: guia.guia_id });
+    if (guia.cliente) {
+      this.form.patchValue({ cli_id: guia.cliente.cli_id });
+      this.patchCustomer(guia.cliente);
+    }
+  }
+
+  unlinkCotizacion() {
+    this.linkedCotizacion.set(null);
+    this.form.patchValue({ cot_id: null });
+    if (!this.linkedGuia()) {
+      this.clearClientFields();
+    }
+  }
+
+  unlinkGuia() {
+    this.linkedGuia.set(null);
+    this.form.patchValue({ guia_id: null });
+    if (!this.linkedCotizacion()) {
+      this.clearClientFields();
+    }
+  }
+
+  getClientInitialValue(formControlName: string): string {
+    if (formControlName !== 'cli_id') return '';
+    const cot = this.linkedCotizacion();
+    if (cot?.cliente) return cot.cliente.cli_nom;
+    const guia = this.linkedGuia();
+    if (guia?.cliente) return guia.cliente.cli_nom;
+    return '';
+  }
+
+  private clearClientFields() {
+    this.form.patchValue({
+      cli_id: null,
+      cli_documento: null,
+      tip_id: null,
+      cli_direcc: null,
+      cli_correo: null,
+      cli_telf: null,
+    });
   }
 
   onSelectItem(formControlName: keyof SaleForm, item: any) {
@@ -446,6 +521,8 @@ export class SalesMainPage extends BaseSearchComponent implements OnInit {
     this.detailsArray.clear();
     this.saleId.set(null);
     this.selectedProduct = null;
+    this.linkedCotizacion.set(null);
+    this.linkedGuia.set(null);
   }
 
   toggleEstado(id: number) {
