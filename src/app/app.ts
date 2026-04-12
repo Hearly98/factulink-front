@@ -5,6 +5,7 @@ import { IconSetService } from '@coreui/icons-angular';
 import { ToasterComponent } from '@coreui/angular';
 import { GlobalNotification } from './shared/alerts/global-notification/global-notification';
 import { AppToastComponent } from './shared/alerts/toast/toast.component';
+import { inject as injectAnalytics } from '@vercel/analytics';
 
 @Component({
   selector: 'app-root',
@@ -21,6 +22,7 @@ export class App {
 
   constructor() {
     this.#iconSetService.icons = { ...iconSubset };
+    injectAnalytics();
   }
 
   ngAfterViewInit(): void {
