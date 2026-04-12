@@ -43,6 +43,7 @@
     "@ng-bootstrap/ng-bootstrap": "^19.0.1",
     "@popperjs/core": "~2.11.8",
     "@storybook/addon-docs": "^10.0.7",
+    "@vercel/analytics": "^2.0.1",
     "bootstrap": "^5.3.8",
     "browser-image-compression": "^2.0.2",
     "chart.js": "^4.5.0",
