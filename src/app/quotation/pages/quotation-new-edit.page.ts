@@ -70,7 +70,7 @@ import { PaymentMethodService } from 'src/app/payment-method/core/services/payme
             @for (control of item.controls; track $index) {
             <c-col [md]="control.col" class="mb-2">
               <label>{{ control.label }}</label>
-              @switch (control.type) { 
+              @switch (control.type) {
                 @case('search-select') {
                   <app-search-select
                     [placeholder]="control.label"
@@ -80,7 +80,7 @@ import { PaymentMethodService } from 'src/app/payment-method/core/services/payme
                     (itemSelected)="onSelectItem(control.formControlName, $event)"
                     [initialValue]="control.formControlName ? searchSelectLabels[control.formControlName] : ''"
                   ></app-search-select>
-                } 
+                }
                 @case('select') {
                   <select class="form-control form-select" [formControlName]="control.formControlName"
                    [class.is-invalid]="
@@ -94,7 +94,7 @@ import { PaymentMethodService } from 'src/app/payment-method/core/services/payme
                     }
                   </select>
                   <app-validation-messages [controlName]="control.formControlName" [form]="form" [messages]="errorMessages"></app-validation-messages>
-                } 
+                }
                 @case('textarea') {
                   <textarea
                     [formControlName]="control.formControlName"
@@ -119,7 +119,7 @@ import { PaymentMethodService } from 'src/app/payment-method/core/services/payme
                     "
                   />
                   <app-validation-messages [controlName]="control.formControlName" [form]="form" [messages]="errorMessages"></app-validation-messages>
-                } 
+                }
               }
               @if (control.showControlName) {
                 <div class="mt-1 d-flex gap-2 align-items-center">
@@ -343,7 +343,7 @@ export class QuotationNewEditPage extends BaseComponent implements OnInit {
   }
 
   onDetailRemoved(index: number) {
-    // La eliminación ya se hace en el componente de tabla por simplicidad, 
+    // La eliminación ya se hace en el componente de tabla por simplicidad,
     // pero si quisiéramos hacer algo más aquí lo podríamos hacer.
     console.log('Producto eliminado en índice:', index);
   }

@@ -24,8 +24,6 @@ import { GlobalNotification } from '@shared/alerts/global-notification/global-no
 import { QuotationService } from '../core/services/quotation.service';
 import { QuotationModel } from '../core/models/quotation.model';
 import { Router } from '@angular/router';
-import { TypedFormGroup } from '@shared/types/types-form';
-import { QuotationFilterForm } from '../core/types';
 import { buildFilterForm, filterSort, mapParams } from '../helpers';
 import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service';
 import { GetSucursalModel } from 'src/app/sucursal/core/models';
@@ -73,7 +71,12 @@ import { GetSucursalModel } from 'src/app/sucursal/core/models';
           </c-col>
           <c-col sm="12" md="6" lg="2">
             <label for="fecha_hasta" class="form-label">Hasta</label>
-            <input formControlName="fecha_hasta" type="date" class="form-control" id="fecha_hasta" />
+            <input
+              formControlName="fecha_hasta"
+              type="date"
+              class="form-control"
+              id="fecha_hasta"
+            />
           </c-col>
           <c-col sm="12" md="6" lg="2">
             <label for="suc_id" class="form-label">Sucursal</label>
@@ -107,7 +110,11 @@ import { GetSucursalModel } from 'src/app/sucursal/core/models';
                       (change)="toggleEstado(state.codigo)"
                       [id]="'state_' + state.codigo"
                     />
-                    <label cFormCheckLabel [for]="'state_' + state.codigo" [cTextColor]="state.color">
+                    <label
+                      cFormCheckLabel
+                      [for]="'state_' + state.codigo"
+                      [cTextColor]="state.color"
+                    >
                       {{ state.nombre }}
                     </label>
                   </c-form-check>
@@ -145,22 +152,39 @@ import { GetSucursalModel } from 'src/app/sucursal/core/models';
                 </tr>
               </thead>
               <tbody>
-                @if(quotations.length > 0){
+                @if (quotations.length > 0) {
                   @for (quotation of quotations; track quotation.cot_id) {
                     <tr>
                       <td>
-                        @if(quotation.estado_cotizacion?.codigo !== '03'){
-                          <button size="sm" class="me-2" cButton color="secondary" (click)="onPrint(quotation.cot_id, quotation.numero_completo)">
+                        @if (quotation.estado_cotizacion?.codigo !== '03') {
+                          <button
+                            size="sm"
+                            class="me-2"
+                            cButton
+                            color="secondary"
+                            (click)="onPrint(quotation.cot_id, quotation.numero_completo)"
+                          >
                             <svg cIcon name="cilPrint"></svg>
                           </button>
                         }
-                        @if(quotation.estado_cotizacion?.codigo !== '03'){
-                          <button size="sm" class="me-2" cButton color="info" (click)="onEdit(quotation.cot_id)">
+                        @if (quotation.estado_cotizacion?.codigo !== '03') {
+                          <button
+                            size="sm"
+                            class="me-2"
+                            cButton
+                            color="info"
+                            (click)="onEdit(quotation.cot_id)"
+                          >
                             <svg cIcon name="cilPencil"></svg>
                           </button>
                         }
-                        @if(quotation.estado_cotizacion?.codigo !== '03'){
-                          <button (click)="onDelete(quotation.cot_id)" size="sm" cButton color="danger">
+                        @if (quotation.estado_cotizacion?.codigo !== '03') {
+                          <button
+                            (click)="onDelete(quotation.cot_id)"
+                            size="sm"
+                            cButton
+                            color="danger"
+                          >
                             <svg cIcon name="cilTrash"></svg>
                           </button>
                         }
@@ -170,7 +194,12 @@ import { GetSucursalModel } from 'src/app/sucursal/core/models';
                       <td>{{ quotation.cliente?.cli_nom }}</td>
                       <td>{{ quotation.cot_total | currency: 'S/. ' }}</td>
                       <td>
-                        <span class="badge" [class.bg-warning]="quotation.estado_cotizacion?.color === 'warning'" [class.bg-success]="quotation.estado_cotizacion?.color === 'success'" [class.bg-danger]="quotation.estado_cotizacion?.color === 'danger'">
+                        <span
+                          class="badge"
+                          [class.bg-warning]="quotation.estado_cotizacion?.color === 'warning'"
+                          [class.bg-success]="quotation.estado_cotizacion?.color === 'success'"
+                          [class.bg-danger]="quotation.estado_cotizacion?.color === 'danger'"
+                        >
                           {{ quotation.estado_cotizacion?.nombre }}
                         </span>
                       </td>
@@ -207,12 +236,12 @@ export class QuotationListPage extends BaseSearchComponent implements OnInit {
     { codigo: '03', nombre: 'Anulados', color: 'danger' },
   ];
 
-  #router = inject(Router);
-  #formBuilder = inject(FormBuilder);
-  #quotationService = inject(QuotationService);
-  #sucursalService = inject(SucursalService);
-  #confirmService = inject(ConfirmService);
-  #globalNotification = inject(GlobalNotification);
+  readonly #router = inject(Router);
+  readonly #formBuilder = inject(FormBuilder);
+  readonly #quotationService = inject(QuotationService);
+  readonly #sucursalService = inject(SucursalService);
+  readonly #confirmService = inject(ConfirmService);
+  readonly #globalNotification = inject(GlobalNotification);
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.SALES, viewContainerRef);
@@ -251,7 +280,7 @@ export class QuotationListPage extends BaseSearchComponent implements OnInit {
 
   onSearch(filter = null, page = 1) {
     const sort = filterSort(this.form.value);
-    const filterToUse = filter || mapParams(this.form.value);
+    const filterToUse = filter ?? mapParams(this.form.value);
     const pageSize = 10;
     const pageParams = new PageParamsModel(page, pageSize);
 
@@ -340,12 +369,8 @@ export class QuotationListPage extends BaseSearchComponent implements OnInit {
         window.URL.revokeObjectURL(url);
       },
       error: (error) => {
-        this.#globalNotification.openToastAlert(
-          'Error',
-          error.message,
-          'danger'
-        );
-      }
+        this.#globalNotification.openToastAlert('Error', error.message, 'danger');
+      },
     });
   }
 
