@@ -48,7 +48,7 @@ import { mapToSelectOption } from '@shared/functions';
 import { mapSaleCreateDto } from '../../helpers/map-sale-create-dto';
 import { SearchDocumentModalComponent, SearchDocumentType } from '@shared/components/search-document-modal.component';
 import { QuotationModel } from 'src/app/quotation/core/models/quotation.model';
-import { ShippingGuideModel } from 'src/app/shipping-guide/core/models/shipping-guide.model';
+import { GetShippingGuideModel } from 'src/app/shipping-guide/core/models/get-shipping-guide.model';
 
 @Component({
   selector: 'app-sales-main',
@@ -86,7 +86,7 @@ export class SalesMainPage extends BaseSearchComponent implements OnInit {
 
   // Documentos vinculados
   public linkedCotizacion = signal<QuotationModel | null>(null);
-  public linkedGuia = signal<ShippingGuideModel | null>(null);
+  public linkedGuia = signal<GetShippingGuideModel | null>(null);
   public isClientReadonly = computed(() => !!(this.linkedCotizacion() || this.linkedGuia()));
 
   public isLoadingList = signal(false);
@@ -199,7 +199,7 @@ export class SalesMainPage extends BaseSearchComponent implements OnInit {
       if (type === 'cotizacion') {
         this.onSelectCotizacion(doc as QuotationModel);
       } else {
-        this.onSelectGuia(doc as ShippingGuideModel);
+        this.onSelectGuia(doc as GetShippingGuideModel);
       }
     });
   }
@@ -213,7 +213,7 @@ export class SalesMainPage extends BaseSearchComponent implements OnInit {
     }
   }
 
-  onSelectGuia(guia: ShippingGuideModel) {
+  onSelectGuia(guia: GetShippingGuideModel) {
     this.linkedGuia.set(guia);
     this.form.patchValue({ guia_id: guia.guia_id });
     if (guia.cliente) {

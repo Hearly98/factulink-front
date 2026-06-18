@@ -12,7 +12,6 @@ import { PaginatorComponent } from 'src/app/paginator/paginator.component';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
 import { ShippingGuideService } from '../core/services/shipping-guide.service';
-import { ShippingGuideModel } from '../core/models/shipping-guide.model';
 import {
   shippingGuideStructure,
   ShippingGuideStructureSection,
@@ -24,14 +23,7 @@ import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service
 import { QuotationService } from 'src/app/quotation/core/services/quotation.service';
 import { Observable } from 'rxjs';
 import { ResponseDto } from '@shared/models/api/response.dto';
-
-interface ShippingGuideDetailForm {
-  prod_id: number;
-  prod_nom: string;
-  cantidad: number;
-  peso_unitario: number;
-  descripcion: string;
-}
+import { GetShippingGuideModel } from '../core/models/get-shipping-guide.model';
 
 @Component({
   selector: 'app-shipping-guide-main',
@@ -59,7 +51,7 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
   public activeTab = signal<'create' | 'history'>('create');
 
   public isLoadingList = signal(false);
-  public guides: ShippingGuideModel[] = [];
+  public guides: GetShippingGuideModel[] = [];
   public totalList = 0;
   public pageList = new PageParamsModel(1, 10);
 
@@ -491,7 +483,6 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
             empresa_transporte_nro_doc: guia.empresa_transporte_nro_doc,
             empresa_transporte_razon_social: guia.empresa_transporte_razon_social,
             nro_cotizacion: guia.nro_cotizacion,
-            cot_id: guia.cot_id ?? null,
             nro_oc: guia.nro_oc,
             nro_factura: guia.nro_factura,
             observaciones: guia.observaciones,

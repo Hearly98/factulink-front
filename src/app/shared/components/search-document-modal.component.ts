@@ -22,6 +22,7 @@ import { ShippingGuideModel } from 'src/app/shipping-guide/core/models/shipping-
 import { Observable } from 'rxjs';
 import { ResponseDto } from '@shared/models/api/response.dto';
 import { QueryResultsModel } from '@shared/models/query/query-results.model';
+import { GetShippingGuideModel } from 'src/app/shipping-guide/core/models/get-shipping-guide.model';
 
 export type SearchDocumentType = 'cotizacion' | 'guia';
 
@@ -148,10 +149,6 @@ export type SearchDocumentType = 'cotizacion' | 'guia';
                         </div>
                         <div class="row g-2 small text-muted">
                           <div class="col-6">
-                            <svg cIcon name="cilUser" class="me-1" style="width:12px;height:12px;"></svg>
-                            {{ item.destinatario_nombre || item.cliente?.cli_nom || '—' }}
-                          </div>
-                          <div class="col-6">
                             <svg cIcon name="cilCalendar" class="me-1" style="width:12px;height:12px;"></svg>
                             {{ item.fecha_emision | date: 'dd/MM/yyyy' }}
                           </div>
@@ -257,10 +254,9 @@ export class SearchDocumentModalComponent {
       );
     } else {
       this.filteredItems.set(
-        (this.allItems() as ShippingGuideModel[]).filter(
+        (this.allItems() as GetShippingGuideModel[]).filter(
           (g) =>
             g.numero_completo?.toLowerCase().includes(term) ||
-            g.destinatario_nombre?.toLowerCase().includes(term) ||
             g.cliente?.cli_nom?.toLowerCase().includes(term)
         )
       );
@@ -294,7 +290,7 @@ export class SearchDocumentModalComponent {
     return this.filteredItems() as QuotationModel[];
   }
 
-  asGuias(): ShippingGuideModel[] {
-    return this.filteredItems() as ShippingGuideModel[];
+  asGuias(): GetShippingGuideModel[] {
+    return this.filteredItems() as GetShippingGuideModel[];
   }
 }
