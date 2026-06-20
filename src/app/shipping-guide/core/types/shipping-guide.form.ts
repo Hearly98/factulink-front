@@ -35,5 +35,4 @@ export interface ShippingGuideForm {
   detalles: ShippingGuideDetailModel[] | null;
   prod_id: number | null;
   cot_id: number | null;
-  cantidad: number | null;
 }

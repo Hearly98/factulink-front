@@ -134,7 +134,6 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
       tipo_traslado: 'PRIVADO',
       transportista_tipo_doc: 'DNI',
       empresa_transporte_tipo_doc: 'RUC',
-      cantidad: 1,
     });
 
     this.loadSelectCombos();
@@ -215,8 +214,6 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
   addProductToDetail() {
     if (!this.selectedProduct) return;
 
-    const cantidad = this.form.get('cantidad')?.value || 1;
-
     const exists = this.detailsArray.controls.some(
       (control) => control.value.prod_id === this.selectedProduct.prod_id,
     );
@@ -234,9 +231,9 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
       buildShippingGuideDetail({
         prod_id: this.selectedProduct.prod_id,
         prod_nom: this.selectedProduct.prod_nom,
-        cantidad,
+        cantidad: 1,
         peso_unitario: this.selectedProduct.prod_peso || 0,
-        peso_total: (this.selectedProduct.prod_peso || 0) * cantidad,
+        peso_total: (this.selectedProduct.prod_peso || 0) * 1,
         descripcion: '',
       }),
     );
@@ -244,7 +241,6 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
     this.detailsArray.push(detailForm);
 
     this.form.get('prod_id')?.setValue(null);
-    this.form.get('cantidad')?.setValue(1);
     this.selectedProduct = null;
   }
 
@@ -266,10 +262,6 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
     return this.detailsArray.getRawValue().reduce((sum, detail) => {
       return sum + (detail.peso_total || 0);
     }, 0);
-  }
-
-  onCantidadChange(event: any) {
-    this.form.patchValue({ cantidad: event.target.value });
   }
 
   loadSelectCombos() {

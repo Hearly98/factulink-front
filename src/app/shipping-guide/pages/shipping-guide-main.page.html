@@ -404,8 +404,8 @@
                       </c-row>
 
                       <!-- Búsqueda y agregar producto -->
-                      <c-row class="mb-3 gap-2">
-                        <c-col lg="6" md="12">
+                      <c-row class="mb-3">
+                        <c-col lg="4" md="12">
                           <label class="form-label">Producto</label>
                           <app-search-select
                             [serviceFn]="getServiceFn('productSearch')"
@@ -416,25 +416,13 @@
                           ></app-search-select>
                         </c-col>
 
-                        <c-col lg="3" md="6">
-                          <label for="cantidad-producto" class="form-label">Cantidad</label>
-                          <input
-                            id="cantidad-producto"
-                            type="number"
-                            class="form-control"
-                            min="1"
-                            [value]="form.get('cantidad')?.value || 1"
-                            (change)="onCantidadChange($event)"
-                          />
-                        </c-col>
-
                         <c-col lg="3" md="6" class="d-flex align-items-end">
                           <button
                             type="button"
                             cButton
                             color="primary"
                             (click)="addProductToDetail()"
-                            [disabled]="!selectedProduct || !form.get('cantidad')?.value"
+                            [disabled]="!selectedProduct"
                             class="w-100"
                           >
                             <svg cIcon name="cilPlus" class="me-2"></svg>

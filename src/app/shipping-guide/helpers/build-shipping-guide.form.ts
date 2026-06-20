@@ -37,7 +37,6 @@ export const buildShippingGuideForm = (): TypedFormControls<ShippingGuideForm> =
     detalles: new FormArray<any>([]),
     prod_id: new FormControl<number | null>(null),
     cot_id: new FormControl<number | null>(null),
-    cantidad: new FormControl<number | null>(null),
     peso_bruto: new FormControl<number | null>(null),
   };
 };
