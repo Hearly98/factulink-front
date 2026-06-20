@@ -1,12 +1,21 @@
 import { Component, inject, Inject, OnInit, signal, ViewContainerRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { ButtonDirective, CardBodyComponent, CardComponent, ColComponent, ContainerComponent, RowComponent, TableDirective, TextColorDirective, FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective, SpinnerComponent, ColDirective } from '@coreui/angular';
+import {
+  ButtonDirective,
+  CardBodyComponent,
+  CardComponent,
+  ColComponent,
+  ContainerComponent,
+  RowComponent,
+  TableDirective,
+  TextColorDirective,
+  SpinnerComponent,
+} from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { BaseSearchComponent } from '@shared/base/search-base.component';
 import { MODULES } from 'src/app/core/config/permissions/modules';
 import { SelectOption } from '@shared/types';
-import { TypedFormGroup } from '@shared/types/types-form';
 import { SearchSelectComponent } from '@shared/components/search-select.component';
 import { PaginatorComponent } from 'src/app/paginator/paginator.component';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
@@ -24,6 +33,9 @@ import { QuotationService } from 'src/app/quotation/core/services/quotation.serv
 import { Observable } from 'rxjs';
 import { ResponseDto } from '@shared/models/api/response.dto';
 import { GetShippingGuideModel } from '../core/models/get-shipping-guide.model';
+import { buildShippingGuideForm, buildShippingGuideDetail } from '../helpers';
+import { ShippingGuideForm } from '../core/types/shipping-guide.form';
+import { TypedFormGroup } from '@shared/types/types-form';
 
 @Component({
   selector: 'app-shipping-guide-main',
@@ -44,7 +56,7 @@ import { GetShippingGuideModel } from '../core/models/get-shipping-guide.model';
     SpinnerComponent,
     PaginatorComponent,
     DatePipe,
-],
+  ],
   templateUrl: './shipping-guide-main.page.html',
 })
 export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit {
@@ -56,10 +68,26 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
   public pageList = new PageParamsModel(1, 10);
 
   public isLoadingForm = signal(false);
-  public form!: FormGroup;
+  public form!: TypedFormGroup<ShippingGuideForm>;
   public selectedProduct: any = null;
   public guideId = signal<number | null>(null);
-
+  public motivoOptions = [
+    { label: 'Venta', value: 'Venta' },
+    { label: 'Compra', value: 'Compra' },
+    {
+      label: 'Traslado entre establecimientos de la misma empresa',
+      value: 'Traslado entre establecimientos de la misma empresa',
+    },
+    { label: 'Importación', value: 'Importación' },
+    { label: 'Exportación', value: 'Exportación' },
+    {
+      label: 'Venta sujeta a confirmación del comprador',
+      value: 'Venta sujeta a confirmación del comprador',
+    },
+    { label: 'Traslado emisor itinerante CP', value: 'Traslado emisor itinerante CP' },
+    { label: 'Traslado a zona primaria', value: 'Traslado a zona primaria' },
+    { label: 'Otros', value: 'otros' },
+  ];
   public structure = signal<ShippingGuideStructureSection[]>(shippingGuideStructure());
   public title = signal<string>('Guías de Remisión');
 
@@ -96,32 +124,19 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
   }
 
   loadForm() {
-    this.form = this.#formBuilder.group({
-      fecha_emision: [{ value: new Date().toISOString().split('T')[0], disabled: true }],
-      fecha_inicio_traslado: [new Date().toISOString().split('T')[0]],
-      partida_ubigeo: [''],
-      partida_direccion: [''],
-      destino_ubigeo: [''],
-      destino_direccion: [''],
-      cli_id: [null],
-      tipo_traslado: ['PRIVADO'],
-      motivo_traslado: [''],
-      transportista_tipo_doc: ['DNI'],
-      transportista_nro_doc: [''],
-      transportista_licencia: [''],
-      transportista_placa: [''],
-      empresa_transporte_tipo_doc: ['RUC'],
-      empresa_transporte_nro_doc: [''],
-      empresa_transporte_razon_social: [''],
-      nro_cotizacion: [''],
-      cot_id: [null],
-      nro_oc: [''],
-      nro_factura: [''],
-      prod_id: [null],
-      cantidad: [1],
-      observaciones: [''],
-      detalles: this.#formBuilder.array([]),
+    this.form = this.#formBuilder.group(buildShippingGuideForm());
+
+    const today = new Date().toISOString().split('T')[0];
+    this.form.get('fecha_emision')?.setValue(today);
+
+    this.form.patchValue({
+      fecha_inicio_traslado: today,
+      tipo_traslado: 'PRIVADO',
+      transportista_tipo_doc: 'DNI',
+      empresa_transporte_tipo_doc: 'RUC',
+      cantidad: 1,
     });
+
     this.loadSelectCombos();
   }
 
@@ -168,13 +183,15 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
       if (item.detalles && item.detalles.length > 0) {
         this.detailsArray.clear();
         item.detalles.forEach((detalle: any) => {
-          const detailForm = this.#formBuilder.group({
-            prod_id: [detalle.prod_id],
-            prod_nom: [detalle.producto?.prod_nom ?? ''],
-            cantidad: [detalle.cantidad],
-            peso_unitario: [detalle.producto?.prod_peso ?? 0],
-            descripcion: [detalle.descripcion ?? ''],
-          });
+          const detailForm = this.#formBuilder.group(
+            buildShippingGuideDetail({
+              prod_id: detalle.prod_id,
+              prod_nom: detalle.producto?.prod_nom ?? '',
+              cantidad: detalle.cantidad,
+              peso_unitario: detalle.producto?.prod_peso ?? 0,
+              descripcion: detalle.descripcion ?? '',
+            }),
+          );
           this.detailsArray.push(detailForm);
         });
       }
@@ -198,7 +215,7 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
   addProductToDetail() {
     if (!this.selectedProduct) return;
 
-    const cantidad = this.form.get('temp_cantidad')?.value || 1;
+    const cantidad = this.form.get('cantidad')?.value || 1;
 
     const exists = this.detailsArray.controls.some(
       (control) => control.value.prod_id === this.selectedProduct.prod_id,
@@ -213,23 +230,46 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
       return;
     }
 
-    const detailForm = this.#formBuilder.group({
-      prod_id: [this.selectedProduct.prod_id],
-      prod_nom: [this.selectedProduct.prod_nom],
-      cantidad: [cantidad],
-      peso_unitario: [0],
-      descripcion: [''],
-    });
+    const detailForm = this.#formBuilder.group(
+      buildShippingGuideDetail({
+        prod_id: this.selectedProduct.prod_id,
+        prod_nom: this.selectedProduct.prod_nom,
+        cantidad,
+        peso_unitario: this.selectedProduct.prod_peso || 0,
+        peso_total: (this.selectedProduct.prod_peso || 0) * cantidad,
+        descripcion: '',
+      }),
+    );
 
     this.detailsArray.push(detailForm);
 
     this.form.get('prod_id')?.setValue(null);
-    this.form.get('temp_cantidad')?.setValue(1);
+    this.form.get('cantidad')?.setValue(1);
     this.selectedProduct = null;
   }
 
   onDetailRemoved(index: number) {
     this.detailsArray.removeAt(index);
+  }
+
+  updateDetailTotal(index: number) {
+    const detail = this.detailsArray.at(index);
+    if (detail) {
+      const cantidad = detail.get('cantidad')?.value || 0;
+      const pesoUnitario = detail.get('peso_unitario')?.value || 0;
+      const pesoTotal = cantidad * pesoUnitario;
+      detail.patchValue({ peso_total: pesoTotal });
+    }
+  }
+
+  getTotalWeight(): number {
+    return this.detailsArray.getRawValue().reduce((sum, detail) => {
+      return sum + (detail.peso_total || 0);
+    }, 0);
+  }
+
+  onCantidadChange(event: any) {
+    this.form.patchValue({ cantidad: event.target.value });
   }
 
   loadSelectCombos() {
@@ -343,7 +383,6 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
       tipo_traslado: 'PRIVADO',
       transportista_tipo_doc: 'DNI',
       empresa_transporte_tipo_doc: 'RUC',
-      temp_cantidad: 1,
     });
   }
 
@@ -359,7 +398,7 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
       });
     }
 
-    const filterToUse = filter || {
+    const filterToUse = filter ?? {
       ...this.formList.value,
     };
 
@@ -442,14 +481,14 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
           }
         }
 
-        const url = window.URL.createObjectURL(blob);
+        const url = globalThis.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = filename;
         document.body.appendChild(a);
         a.click();
         a.remove();
-        window.URL.revokeObjectURL(url);
+        globalThis.URL.revokeObjectURL(url);
       },
       error: (error) => {
         this.#globalNotification.openAlert(error.error);

@@ -11,6 +11,9 @@ export class ShippingGuideModel {
   fecha_factura: string = '';
   observaciones: string = '';
   cli_id: number = 0;
+  nombre_cliente: string = '';
+  doc_cliente: string = '';
+  direccion_cliente: string = '';
   partida_ubigeo: string = '';
   partida_direccion: string = '';
   destino_ubigeo: string = '';

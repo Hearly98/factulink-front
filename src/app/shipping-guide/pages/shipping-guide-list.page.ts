@@ -1,5 +1,5 @@
-import { Component, inject, Inject, ViewContainerRef } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { Component, inject, Inject, OnInit, ViewContainerRef } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
 import {
   ButtonDirective,
@@ -17,7 +17,7 @@ import { PaginatorComponent } from 'src/app/paginator/paginator.component';
 import { ConfirmService } from '@shared/confirm-modal/core/services/confirm-modal.service';
 import { GlobalNotification } from '@shared/alerts/global-notification/global-notification';
 import { ShippingGuideService } from '../core/services/shipping-guide.service';
-import { ShippingGuideModel } from '../core/models/shipping-guide.model';
+import { GetShippingGuideModel } from '../core/models/get-shipping-guide.model';
 
 @Component({
   selector: 'app-shipping-guide-list',
@@ -67,25 +67,29 @@ import { ShippingGuideModel } from '../core/models/shipping-guide.model';
               </thead>
               <tbody>
                 @for (guide of guides; track guide.guia_id) {
-                <tr>
-                  <td>
-                    <button size="sm" class="me-2" cButton color="secondary">
-                      <svg cIcon name="cilPrint"></svg>
-                    </button>
-                    <button (click)="onDelete(guide.guia_id)" size="sm" cButton color="danger">
-                      <svg cIcon name="cilTrash"></svg>
-                    </button>
-                  </td>
-                  <td>{{ guide.numero_completo }}</td>
-                  <td>{{ guide.fecha_emision | date: 'dd/MM/yyyy' }}</td>
-                  <td>{{ guide.tipo_traslado }}</td>
-                  <td>{{ guide.destinatario_nombre }}</td>
-                  <td>
-                    <span class="badge" [class.bg-success]="guide.est" [class.bg-danger]="!guide.est">
-                      {{ guide.est ? 'Activo' : 'Anulado' }}
-                    </span>
-                  </td>
-                </tr>
+                  <tr>
+                    <td>
+                      <button size="sm" class="me-2" cButton color="secondary">
+                        <svg cIcon name="cilPrint"></svg>
+                      </button>
+                      <button (click)="onDelete(guide.guia_id)" size="sm" cButton color="danger">
+                        <svg cIcon name="cilTrash"></svg>
+                      </button>
+                    </td>
+                    <td>{{ guide.numero_completo }}</td>
+                    <td>{{ guide.fecha_emision | date: 'dd/MM/yyyy' }}</td>
+                    <td>{{ guide.tipo_traslado }}</td>
+                    <td>{{ guide.nombre_cliente }}</td>
+                    <td>
+                      <span
+                        class="badge"
+                        [class.bg-success]="guide.est"
+                        [class.bg-danger]="!guide.est"
+                      >
+                        {{ guide.est ? 'Activo' : 'Anulado' }}
+                      </span>
+                    </td>
+                  </tr>
                 }
               </tbody>
             </table>
@@ -101,13 +105,13 @@ import { ShippingGuideModel } from '../core/models/shipping-guide.model';
     </c-card>
   `,
 })
-export class ShippingGuideListPage extends BaseSearchComponent {
+export class ShippingGuideListPage extends BaseSearchComponent implements OnInit {
   title = 'Guías de Remisión';
-  guides: ShippingGuideModel[] = [];
+  guides: GetShippingGuideModel[] = [];
 
-  #shippingGuideService = inject(ShippingGuideService);
-  #confirmService = inject(ConfirmService);
-  #globalNotification = inject(GlobalNotification);
+  readonly #shippingGuideService = inject(ShippingGuideService);
+  readonly #confirmService = inject(ConfirmService);
+  readonly #globalNotification = inject(GlobalNotification);
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
     super(MODULES.SALES, viewContainerRef);
