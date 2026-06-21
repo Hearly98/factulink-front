@@ -64,15 +64,37 @@
                           />
                         </c-col>
                         <c-col lg="3" md="6" sm="12">
-                          <label for="nro_cotizacion">Cotizacion</label>
-                          <input
-                            class="form-control"
-                            type="text"
-                            name="nro_cotizacion"
-                            id="nro_cotizacion"
-                            placeholder="Nro Cotizacion"
-                            formControlName="nro_cotizacion"
-                          />
+                          <label>Cotización</label>
+                          @if (selectedCotizacion()) {
+                            <div class="d-flex align-items-center gap-2">
+                              <input
+                                class="form-control bg-light"
+                                [value]="selectedCotizacion()!.numero_completo"
+                                disabled
+                              />
+                              <button
+                                cButton
+                                color="secondary"
+                                variant="ghost"
+                                size="sm"
+                                (click)="clearCotizacion()"
+                                title="Desvincular"
+                              >
+                                <svg cIcon name="cilX"></svg>
+                              </button>
+                            </div>
+                          } @else {
+                            <button
+                              cButton
+                              color="primary"
+                              variant="outline"
+                              class="w-100"
+                              (click)="openCotizacionSearch()"
+                            >
+                              <svg cIcon name="cilSearch" class="me-2"></svg>
+                              Buscar cotización
+                            </button>
+                          }
                         </c-col>
                         <c-col lg="3" md="6" sm="12">
                           <label for="nro_oc">N° OC</label>
@@ -298,7 +320,7 @@
                                 name="empresa_transporte_tipo_doc"
                                 id="empresa_transporte_tipo_doc"
                               >
-                                <option value="RUC">RUC</option>
+                                <option value="ruc">RUC</option>
                               </select>
                             </c-col>
                             <c-col>
@@ -333,6 +355,9 @@
                                 id="transportista_tipo_doc"
                               >
                                 <option [ngValue]="null">Seleccione</option>
+                                @for (tipo of tiposDocumento; track tipo.value) {
+                                  <option [value]="tipo.label">{{ tipo.label }}</option>
+                                }
                               </select>
                             </c-col>
                             <c-col>
@@ -405,29 +430,40 @@
 
                       <!-- Búsqueda y agregar producto -->
                       <c-row class="mb-3">
-                        <c-col lg="4" md="12">
+                        <c-col lg="5" md="12">
                           <label class="form-label">Producto</label>
-                          <app-search-select
-                            [serviceFn]="getServiceFn('productSearch')"
-                            bindLabel="prod_nom"
-                            bindValue="prod_id"
-                            placeholder="Buscar producto..."
-                            (itemSelected)="onSelectItem('prod_id', $event)"
-                          ></app-search-select>
+                          <div class="d-flex gap-2 align-items-center">
+                            <app-search-select
+                              class="flex-grow-1"
+                              [serviceFn]="getServiceFn('productSearch')"
+                              bindLabel="prod_nom"
+                              bindValue="prod_id"
+                              placeholder="Buscar producto..."
+                              (itemSelected)="onSelectItem('prod_id', $event)"
+                            ></app-search-select>
+                            <button
+                              type="button"
+                              cButton
+                              color="primary"
+                              (click)="addProductToDetail()"
+                              [disabled]="!selectedProduct"
+                              class="flex-shrink-0"
+                            >
+                              <svg cIcon name="cilPlus" class="me-2"></svg>
+                              Agregar
+                            </button>
+                          </div>
                         </c-col>
 
-                        <c-col lg="3" md="6" class="d-flex align-items-end">
-                          <button
-                            type="button"
-                            cButton
-                            color="primary"
-                            (click)="addProductToDetail()"
-                            [disabled]="!selectedProduct"
-                            class="w-100"
-                          >
-                            <svg cIcon name="cilPlus" class="me-2"></svg>
-                            Agregar
-                          </button>
+                        <c-col lg="3" md="6" class="d-flex align-items-end"> </c-col>
+                        <c-col lg="2">
+                          <label for="peso_bruto" class="form-label">Peso Bruto Total:</label>
+                          <input
+                            class="form-control"
+                            type="number"
+                            min="0"
+                            formControlName="peso_bruto"
+                          />
                         </c-col>
                       </c-row>
 
@@ -438,11 +474,10 @@
                             <table cTable [responsive]="true" striped="true" class="mb-3">
                               <thead>
                                 <tr>
+                                  <th>Código</th>
                                   <th>Producto</th>
                                   <th>Cantidad</th>
-                                  <th>Peso Unitario (kg)</th>
-                                  <th>Peso Total (kg)</th>
-                                  <th>Descripción</th>
+                                  <th>U.M.</th>
                                   <th>Acción</th>
                                 </tr>
                               </thead>
@@ -453,6 +488,9 @@
                                   let i = $index
                                 ) {
                                   <tr [formGroup]="$any(detail)">
+                                    <td>
+                                      <span>{{ detail.value.prod_cod }}</span>
+                                    </td>
                                     <td>
                                       <span>{{ detail.value.prod_nom }}</span>
                                     </td>
@@ -466,27 +504,15 @@
                                       />
                                     </td>
                                     <td>
-                                      <input
-                                        type="number"
-                                        class="form-control form-control-sm"
-                                        min="0"
-                                        step="0.01"
-                                        formControlName="peso_unitario"
-                                        (change)="updateDetailTotal(i)"
-                                      />
-                                    </td>
-                                    <td>
-                                      <span class="badge bg-info">
-                                        {{ detail.value.peso_total || 0 | number: '1.2-2' }} kg
-                                      </span>
-                                    </td>
-                                    <td>
-                                      <input
-                                        type="text"
-                                        class="form-control form-control-sm"
-                                        placeholder="Descripción"
-                                        formControlName="descripcion"
-                                      />
+                                      <select
+                                        class="form-select form-select-sm"
+                                        formControlName="und_id"
+                                      >
+                                        <option [ngValue]="null">Seleccione</option>
+                                        @for (um of unidadesMedida; track um.value) {
+                                          <option [value]="um.value">{{ um.label }}</option>
+                                        }
+                                      </select>
                                     </td>
                                     <td>
                                       <button
@@ -503,18 +529,6 @@
                                 }
                               </tbody>
                             </table>
-                          </c-col>
-                        </c-row>
-
-                        <!-- Resumen de peso -->
-                        <c-row>
-                          <c-col sm="12" class="text-end">
-                            <p class="mb-0">
-                              <strong>Peso Bruto Total:</strong>
-                              <span class="badge bg-success">
-                                {{ getTotalWeight() | number: '1.2-2' }} kg
-                              </span>
-                            </p>
                           </c-col>
                         </c-row>
                       } @else {
@@ -703,3 +717,11 @@
     </c-card>
   </c-col>
 </c-row>
+
+<!-- Modal de búsqueda de cotizaciones -->
+<app-search-document-modal
+  [isVisible]="isSearchModalVisible()"
+  [documentType]="searchDocumentType()"
+  (itemSelected)="onSelectDocument($event)"
+  (modalClosed)="isSearchModalVisible.set(false)"
+></app-search-document-modal>

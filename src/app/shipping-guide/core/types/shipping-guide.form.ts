@@ -6,6 +6,7 @@ export interface ShippingGuideForm {
   suc_id: number | null;
   fecha_emision: string | null;
   nro_cotizacion: string | null;
+  id_cotizacion: number | null;
   nro_oc: string | null;
   nro_factura: string | null;
   fecha_factura: string | null;

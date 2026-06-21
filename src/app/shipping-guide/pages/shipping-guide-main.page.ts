@@ -11,6 +11,7 @@ import {
   TableDirective,
   TextColorDirective,
   SpinnerComponent,
+  InputGroupComponent,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { BaseSearchComponent } from '@shared/base/search-base.component';
@@ -30,9 +31,16 @@ import { CustomerService } from 'src/app/customer/core/services/customer.service
 import { ProductService } from 'src/app/products/core/services/product.service';
 import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service';
 import { QuotationService } from 'src/app/quotation/core/services/quotation.service';
+import { UnitOfMeasureService } from 'src/app/unit-of-measure/core/services/unit-of-measure.service';
+import { DocumentService } from 'src/app/document/core/services/document.service';
 import { Observable } from 'rxjs';
 import { ResponseDto } from '@shared/models/api/response.dto';
 import { GetShippingGuideModel } from '../core/models/get-shipping-guide.model';
+import {
+  SearchDocumentModalComponent,
+  SearchDocumentType,
+} from '@shared/components/search-document-modal/search-document-modal.component';
+import { QuotationModel } from 'src/app/quotation/core/models/quotation.model';
 import { buildShippingGuideForm, buildShippingGuideDetail } from '../helpers';
 import { ShippingGuideForm } from '../core/types/shipping-guide.form';
 import { TypedFormGroup } from '@shared/types/types-form';
@@ -56,6 +64,8 @@ import { TypedFormGroup } from '@shared/types/types-form';
     SpinnerComponent,
     PaginatorComponent,
     DatePipe,
+    SearchDocumentModalComponent,
+    InputGroupComponent,
   ],
   templateUrl: './shipping-guide-main.page.html',
 })
@@ -93,6 +103,8 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
 
   series: SelectOption[] = [];
   sucursales: SelectOption[] = [];
+  unidadesMedida: SelectOption[] = [];
+  tiposDocumento: SelectOption[] = [];
 
   readonly #formBuilder = inject(FormBuilder);
   readonly #shippingGuideService = inject(ShippingGuideService);
@@ -102,9 +114,15 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
   readonly #globalNotification = inject(GlobalNotification);
   readonly #confirmService = inject(ConfirmService);
   readonly #quotationService = inject(QuotationService);
+  readonly #unitOfMeasureService = inject(UnitOfMeasureService);
+  readonly #documentService = inject(DocumentService);
+
+  // Modal state
+  isSearchModalVisible = signal(false);
+  searchDocumentType = signal<SearchDocumentType>('cotizacion');
 
   // State for cotización attachment
-  selectedCotizacion = signal<any>(null);
+  selectedCotizacion = signal<QuotationModel | null>(null);
   isCotizacionAttached = signal(false);
 
   constructor(@Inject(ViewContainerRef) viewContainerRef: ViewContainerRef) {
@@ -131,9 +149,6 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
 
     this.form.patchValue({
       fecha_inicio_traslado: today,
-      tipo_traslado: 'PRIVADO',
-      transportista_tipo_doc: 'DNI',
-      empresa_transporte_tipo_doc: 'RUC',
     });
 
     this.loadSelectCombos();
@@ -163,39 +178,61 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
     return this.serviceMap[serviceFnName] || (() => []);
   }
 
+  openCotizacionSearch() {
+    this.searchDocumentType.set('cotizacion');
+    this.isSearchModalVisible.set(true);
+  }
+
+  onSelectDocument(doc: QuotationModel | any) {
+    if (this.searchDocumentType() === 'cotizacion') {
+      this.onSelectCotizacion(doc as QuotationModel);
+    }
+  }
+
+  onSelectCotizacion(cotizacion: QuotationModel) {
+    debugger;
+    this.selectedCotizacion.set(cotizacion);
+    this.isCotizacionAttached.set(true);
+    this.form.patchValue({
+      cot_id: cotizacion.cot_id,
+      nro_cotizacion: cotizacion.numero_completo,
+    });
+
+    if (cotizacion.cliente) {
+      this.form.patchValue({
+        cli_id: cotizacion.cliente.cli_id,
+        nombre_cliente: cotizacion.cliente.cli_nom,
+        doc_cliente: cotizacion.cliente.cli_documento,
+        direccion_cliente: cotizacion.cliente.cli_direcc,
+        destino_direccion: cotizacion.cliente.cli_direcc,
+      });
+    }
+
+    if (cotizacion.detalles && cotizacion.detalles.length > 0) {
+      this.detailsArray.clear();
+      cotizacion.detalles.forEach((detalle: any) => {
+        const detailForm = this.#formBuilder.group(
+          buildShippingGuideDetail({
+            prod_id: detalle.prod_id,
+            prod_nom: detalle.producto?.prod_nom ?? '',
+            cantidad: detalle.cantidad,
+            peso_unitario: detalle.producto?.prod_peso ?? 0,
+            descripcion: detalle.descripcion ?? '',
+          }),
+        );
+        this.detailsArray.push(detailForm);
+      });
+    }
+  }
+
+  clearCotizacion() {
+    this.selectedCotizacion.set(null);
+    this.isCotizacionAttached.set(false);
+    this.form.patchValue({ cot_id: null, nro_cotizacion: null });
+  }
+
   onSelectItem(formControlName: string, item: any) {
     if (!item) return;
-
-    // Handle cotización selection
-    if (formControlName === 'cot_id') {
-      this.selectedCotizacion.set(item);
-      this.isCotizacionAttached.set(true);
-
-      // Auto-fill cliente
-      if (item.cliente) {
-        this.form.patchValue({
-          cli_id: item.cliente.cli_id,
-        });
-      }
-
-      // Populate details from cotización
-      if (item.detalles && item.detalles.length > 0) {
-        this.detailsArray.clear();
-        item.detalles.forEach((detalle: any) => {
-          const detailForm = this.#formBuilder.group(
-            buildShippingGuideDetail({
-              prod_id: detalle.prod_id,
-              prod_nom: detalle.producto?.prod_nom ?? '',
-              cantidad: detalle.cantidad,
-              peso_unitario: detalle.producto?.prod_peso ?? 0,
-              descripcion: detalle.descripcion ?? '',
-            }),
-          );
-          this.detailsArray.push(detailForm);
-        });
-      }
-      return;
-    }
 
     if (formControlName === 'prod_id') {
       this.form.patchValue({
@@ -212,25 +249,13 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
   }
 
   addProductToDetail() {
+    debugger;
     if (!this.selectedProduct) return;
-
-    const exists = this.detailsArray.controls.some(
-      (control) => control.value.prod_id === this.selectedProduct.prod_id,
-    );
-
-    if (exists) {
-      this.#globalNotification.openToastAlert(
-        'Aviso',
-        'Este producto ya ha sido agregado',
-        'warning',
-      );
-      return;
-    }
-
     const detailForm = this.#formBuilder.group(
       buildShippingGuideDetail({
         prod_id: this.selectedProduct.prod_id,
         prod_nom: this.selectedProduct.prod_nom,
+        prod_cod: this.selectedProduct.prod_cod,
         cantidad: 1,
         peso_unitario: this.selectedProduct.prod_peso || 0,
         peso_total: (this.selectedProduct.prod_peso || 0) * 1,
@@ -284,6 +309,24 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
         this.updateStructure();
       },
     });
+
+    this.#unitOfMeasureService.getAll().subscribe({
+      next: (response) => {
+        this.unidadesMedida = response.data.map((item) => ({
+          value: item.und_id,
+          label: item.und_nom,
+        }));
+      },
+    });
+
+    this.#documentService.getAll().subscribe({
+      next: (response) => {
+        this.tiposDocumento = response.data.map((item) => ({
+          value: item.doc_id,
+          label: item.doc_nom,
+        }));
+      },
+    });
   }
 
   updateStructure() {
@@ -328,6 +371,7 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
       detalles: this.detailsArray.getRawValue().map((v) => ({
         prod_id: v.prod_id,
         cantidad: v.cantidad,
+        und_id: v.und_id,
         peso_unitario: v.peso_unitario,
         descripcion: v.descripcion,
       })),
@@ -372,9 +416,6 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
     this.form.patchValue({
       fecha_emision: new Date().toISOString().split('T')[0],
       fecha_inicio_traslado: new Date().toISOString().split('T')[0],
-      tipo_traslado: 'PRIVADO',
-      transportista_tipo_doc: 'DNI',
-      empresa_transporte_tipo_doc: 'RUC',
     });
   }
 
@@ -521,13 +562,19 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
 
           this.detailsArray.clear();
           guia.detalles?.forEach((detalle: any) => {
-            const detailForm = this.#formBuilder.group({
-              prod_id: [detalle.prod_id],
-              prod_nom: [detalle.producto?.prod_nom || ''],
-              cantidad: [detalle.cantidad],
-              peso_unitario: [detalle.peso_unitario],
-              descripcion: [detalle.descripcion],
-            });
+            const detailForm = this.#formBuilder.group(
+              buildShippingGuideDetail({
+                guia_det_id: detalle.guia_det_id,
+                prod_id: detalle.prod_id,
+                prod_nom: detalle.producto?.prod_nom || '',
+                prod_cod: detalle.producto?.prod_cod || '',
+                cantidad: detalle.cantidad,
+                und_id: detalle.und_id,
+                peso_unitario: detalle.peso_unitario,
+                peso_total: detalle.peso_total,
+                descripcion: detalle.descripcion,
+              }),
+            );
             this.detailsArray.push(detailForm);
           });
         }
