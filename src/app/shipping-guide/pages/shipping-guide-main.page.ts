@@ -32,7 +32,6 @@ import { ProductService } from 'src/app/products/core/services/product.service';
 import { SucursalService } from 'src/app/sucursal/core/services/sucursal.service';
 import { QuotationService } from 'src/app/quotation/core/services/quotation.service';
 import { UnitOfMeasureService } from 'src/app/unit-of-measure/core/services/unit-of-measure.service';
-import { DocumentService } from 'src/app/document/core/services/document.service';
 import { Observable } from 'rxjs';
 import { ResponseDto } from '@shared/models/api/response.dto';
 import { GetShippingGuideModel } from '../core/models/get-shipping-guide.model';
@@ -44,6 +43,7 @@ import { QuotationModel } from 'src/app/quotation/core/models/quotation.model';
 import { buildShippingGuideForm, buildShippingGuideDetail } from '../helpers';
 import { ShippingGuideForm } from '../core/types/shipping-guide.form';
 import { TypedFormGroup } from '@shared/types/types-form';
+import { DocumentTypeService } from 'src/app/document-type/core/services/document-type.service';
 
 @Component({
   selector: 'app-shipping-guide-main',
@@ -115,7 +115,7 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
   readonly #confirmService = inject(ConfirmService);
   readonly #quotationService = inject(QuotationService);
   readonly #unitOfMeasureService = inject(UnitOfMeasureService);
-  readonly #documentService = inject(DocumentService);
+  readonly #documentTypeService = inject(DocumentTypeService);
 
   // Modal state
   isSearchModalVisible = signal(false);
@@ -319,11 +319,11 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
       },
     });
 
-    this.#documentService.getAll().subscribe({
+    this.#documentTypeService.getAll().subscribe({
       next: (response) => {
         this.tiposDocumento = response.data.map((item) => ({
-          value: item.doc_id,
-          label: item.doc_nom,
+          value: item.tip_id,
+          label: item.tip_nom,
         }));
       },
     });
