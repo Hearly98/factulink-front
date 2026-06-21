@@ -24,10 +24,13 @@ export class ShippingGuideModel {
   transportista_nro_doc: string = '';
   transportista_licencia: string = '';
   transportista_placa: string = '';
+  transportista_direccion: string = '';
+  transportista_vehiculo: string = '';
   empresa_transporte_tipo_doc: string = '';
   empresa_transporte_nro_doc: string = '';
   empresa_transporte_razon_social: string = '';
   motivo_traslado: string = '';
+  peso_bruto: number = 0;
   est: boolean = false;
   detalles?: ShippingGuideDetailModel[];
 }
