@@ -301,7 +301,6 @@
                 </c-col>
               </c-row>
               <!--Datos Transportista-->
-              @let formulario = form.valueChanges | async;
               <c-row class="mb-4">
                 <c-col>
                   <c-card>
@@ -310,7 +309,7 @@
                         <c-col>
                           <h5>Datos del Transportista / Conductor</h5>
                         </c-col>
-                        @if (formulario?.tipo_traslado == 'publico') {
+                        @if (form.value.tipo_traslado == 'publico') {
                           <c-row>
                             <c-col>
                               <label for="empresa_transporte_tipo_doc">Tipo Documento</label>
