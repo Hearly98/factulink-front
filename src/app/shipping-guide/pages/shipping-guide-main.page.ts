@@ -68,7 +68,6 @@ import { DocumentTypeService } from 'src/app/document-type/core/services/documen
     PaginatorComponent,
     DatePipe,
     SearchDocumentModalComponent,
-    InputGroupComponent,
   ],
   templateUrl: './shipping-guide-main.page.html',
 })
@@ -193,7 +192,6 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
   }
 
   onSelectCotizacion(cotizacion: QuotationModel) {
-    debugger;
     this.selectedCotizacion.set(cotizacion);
     this.isCotizacionAttached.set(true);
     this.form.patchValue({
@@ -349,34 +347,9 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
     }
 
     const guideData = {
-      serie_id: this.form.value.serie_id,
+      ...this.form.getRawValue(),
       emp_id: 1,
       suc_id: this.form.value.suc_id || this.sucursales[0]?.value,
-      fecha_emision: this.form.value.fecha_emision,
-      fecha_inicio_traslado: this.form.value.fecha_inicio_traslado,
-      partida_ubigeo: this.form.value.partida_ubigeo,
-      partida_direccion: this.form.value.partida_direccion,
-      destino_ubigeo: this.form.value.destino_ubigeo,
-      destino_direccion: this.form.value.destino_direccion,
-      cli_id: this.form.value.cli_id,
-      tipo_traslado: this.form.value.tipo_traslado,
-      motivo_traslado: this.form.value.motivo_traslado,
-      transportista_tipo_doc: this.form.value.transportista_tipo_doc,
-      transportista_nro_doc: this.form.value.transportista_nro_doc,
-      transportista_licencia: this.form.value.transportista_licencia,
-      transportista_placa: this.form.value.transportista_placa,
-      transportista_direccion: this.form.value.transportista_direccion,
-      transportista_vehiculo: this.form.value.transportista_vehiculo,
-      empresa_transporte_tipo_doc: this.form.value.empresa_transporte_tipo_doc,
-      empresa_transporte_nro_doc: this.form.value.empresa_transporte_nro_doc,
-      empresa_transporte_razon_social: this.form.value.empresa_transporte_razon_social,
-      nro_cotizacion: this.form.value.nro_cotizacion,
-      cot_id: this.form.value.cot_id,
-      nro_oc: this.form.value.nro_oc,
-      nro_factura: this.form.value.nro_factura,
-      fecha_factura: this.form.value.fecha_factura,
-      peso_bruto: this.form.value.peso_bruto,
-      observaciones: this.form.value.observaciones,
       detalles: this.detailsArray.getRawValue().map((v) => ({
         prod_id: v.prod_id,
         cantidad: v.cantidad,

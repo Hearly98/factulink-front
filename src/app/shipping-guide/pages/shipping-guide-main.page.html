@@ -648,8 +648,8 @@
                             <th>Acciones</th>
                             <th>Nro. Guía</th>
                             <th>Fecha Emisión</th>
-                            <th>Tipo Traslado</th>
                             <th>Destinatario</th>
+                            <th>Tipo Traslado</th>
                             <th>Estado</th>
                           </tr>
                         </thead>
@@ -680,6 +680,7 @@
                                 </td>
                                 <td>{{ guide.numero_completo }}</td>
                                 <td>{{ guide.fecha_emision | date: 'dd/MM/yyyy' }}</td>
+                                <td>{{ guide.nombre_cliente }}</td>
                                 <td>{{ guide.tipo_traslado }}</td>
                                 <td>
                                   <span
