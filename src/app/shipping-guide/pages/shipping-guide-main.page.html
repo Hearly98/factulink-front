@@ -276,8 +276,8 @@
                               class="form-select"
                               formControlName="tipo_traslado"
                             >
-                              <option value="publico">Público</option>
-                              <option value="privado">Privado</option>
+                              <option value="PUBLICO">Público</option>
+                              <option value="PRIVADO">Privado</option>
                             </select>
                           </c-col>
                           <c-col>
@@ -309,7 +309,7 @@
                         <c-col>
                           <h5>Datos del Transportista / Conductor</h5>
                         </c-col>
-                        @if (form.value.tipo_traslado == 'publico') {
+                        @if (form.value.tipo_traslado == 'PUBLICO') {
                           <c-row>
                             <c-col>
                               <label for="empresa_transporte_tipo_doc">Tipo Documento</label>
@@ -319,7 +319,7 @@
                                 name="empresa_transporte_tipo_doc"
                                 id="empresa_transporte_tipo_doc"
                               >
-                                <option value="ruc">RUC</option>
+                                <option value="RUC">RUC</option>
                               </select>
                             </c-col>
                             <c-col>

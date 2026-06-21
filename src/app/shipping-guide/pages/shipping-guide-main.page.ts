@@ -39,7 +39,10 @@ import {
   SearchDocumentModalComponent,
   SearchDocumentType,
 } from '@shared/components/search-document-modal/search-document-modal.component';
-import { QuotationModel } from 'src/app/quotation/core/models/quotation.model';
+import {
+  QuotationDetailModel,
+  QuotationModel,
+} from 'src/app/quotation/core/models/quotation.model';
 import { buildShippingGuideForm, buildShippingGuideDetail } from '../helpers';
 import { ShippingGuideForm } from '../core/types/shipping-guide.form';
 import { TypedFormGroup } from '@shared/types/types-form';
@@ -214,10 +217,12 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
         const detailForm = this.#formBuilder.group(
           buildShippingGuideDetail({
             prod_id: detalle.prod_id,
-            prod_nom: detalle.producto?.prod_nom ?? '',
+            prod_cod: detalle.producto?.prod_cod_interno,
+            prod_nom: detalle.descripcion ?? '',
             cantidad: detalle.cantidad,
             peso_unitario: detalle.producto?.prod_peso ?? 0,
             descripcion: detalle.descripcion ?? '',
+            und_id: detalle?.producto?.unidad?.und_id ?? null,
           }),
         );
         this.detailsArray.push(detailForm);
@@ -322,7 +327,7 @@ export class ShippingGuideMainPage extends BaseSearchComponent implements OnInit
     this.#documentTypeService.getAll().subscribe({
       next: (response) => {
         this.tiposDocumento = response.data.map((item) => ({
-          value: item.tip_id,
+          value: item.tip_nom,
           label: item.tip_nom,
         }));
       },
